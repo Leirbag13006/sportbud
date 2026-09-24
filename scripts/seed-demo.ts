@@ -1,5 +1,6 @@
 import { hashSync } from "bcryptjs";
-import { db } from "../src/db";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 import {
   activities,
   applications,
@@ -13,6 +14,15 @@ import {
   users,
 } from "../src/db/schema";
 import type { Audience, SportType } from "../src/db/schema";
+import * as schema from "../src/db/schema";
+
+const db = drizzle({
+  client: createClient({
+    url: process.env.DATABASE_URL ?? "file:local.db",
+    authToken: process.env.DATABASE_AUTH_TOKEN,
+  }),
+  schema,
+});
 
 const DEMO_PASSWORD = "SportMates2026";
 const AIX = { lat: 43.5297, lng: 5.4474 };
@@ -47,7 +57,7 @@ const activitiesSeed = [
   ["padel", "Deux places pour un padel après le travail", 3, 2, 1, 18, "all", 900, false],
   ["volleyball", "Volley entre femmes - niveau intermédiaire", 4, 5, 3, 19, "women", 0, false],
   ["football", "Five du jeudi soir", 1, 8, 2, 20, "all", 800, false],
-  ["yoga", "Yoga doux au parc", 5, 6, 4, 10, "women", 0, true],
+  ["fitness", "Mobilité douce au parc", 5, 6, 4, 10, "women", 0, true],
   ["tennis", "Tennis loisir, court réservé", 2, 2, 1, 18, "all", 600, true],
   ["climbing", "Session bloc à la salle", 4, 3, 2, 19, "all", 1200, true],
   ["basketball", "Basket 3x3 au Val de l'Arc", 3, 6, 2, 18, "men", 0, false],
