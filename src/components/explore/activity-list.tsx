@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchX } from "lucide-react";
+import { SearchX, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
@@ -10,6 +10,8 @@ import type { ExploreItem } from "./filters";
 
 interface ActivityListProps {
   items: ExploreItem[];
+  /** Séances mises en avant (« Pour toi »), affichées avant les autres. */
+  recommended?: ExploreItem[];
   totalCount: number;
   currentUserId: string;
   myApplications: Record<string, MyApplicationSummary>;
@@ -22,6 +24,7 @@ interface ActivityListProps {
 /** Liste des activités filtrées, en cartes (une colonne sur mobile, deux sur grand écran). */
 export function ActivityList({
   items,
+  recommended = [],
   totalCount,
   currentUserId,
   myApplications,
@@ -55,35 +58,67 @@ export function ActivityList({
     );
   }
 
+  const recommendedIds = new Set(recommended.map(({ activity }) => activity.id));
+  const others = items.filter(({ activity }) => !recommendedIds.has(activity.id));
+
+  const renderCards = (list: ExploreItem[], priorityCount: number) => (
+    <ul className="grid gap-3 lg:grid-cols-2">
+      {list.map(({ activity, distanceKm }, index) => (
+        <li key={activity.id}>
+          <ActivityCard
+            activity={activity}
+            distanceKm={distanceKm}
+            isOwn={activity.creatorId === currentUserId}
+            myApplication={myApplications[activity.id] ?? null}
+            pendingCount={
+              receivedApplications.filter(
+                (application) => application.activityId === activity.id && application.status === "pending",
+              ).length
+            }
+            onOpen={() => onOpen(activity.id)}
+            priority={index < priorityCount}
+          />
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 pt-4 pb-24 md:px-6">
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <h2 className="sl-bar text-lg font-extrabold md:text-xl">
-          Activités <span className="text-brand-text">près de toi</span>
-        </h2>
-        <p className="text-sm" aria-live="polite">
-          {pluralize(items.length, "séance", "séances")}
-        </p>
-      </div>
-      <ul className="grid gap-3 lg:grid-cols-2">
-        {items.map(({ activity, distanceKm }, index) => (
-          <li key={activity.id}>
-            <ActivityCard
-              activity={activity}
-              distanceKm={distanceKm}
-              isOwn={activity.creatorId === currentUserId}
-              myApplication={myApplications[activity.id] ?? null}
-              pendingCount={
-                receivedApplications.filter(
-                  (application) => application.activityId === activity.id && application.status === "pending",
-                ).length
-              }
-              onOpen={() => onOpen(activity.id)}
-              priority={index < 4}
-            />
-          </li>
-        ))}
-      </ul>
+    <div className="mx-auto w-full max-w-5xl space-y-10 px-4 pt-4 pb-24 md:px-6">
+      {recommended.length > 0 && (
+        <section aria-labelledby="for-you-title">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <h2 id="for-you-title" className="sl-bar text-lg font-extrabold md:text-xl">
+              <Sparkles className="mr-2 inline size-5 align-[-3px] text-brand-text" aria-hidden />
+              Pour <span className="text-brand-text">toi</span>
+            </h2>
+            <p className="text-sm">Tes sports, à ton niveau</p>
+          </div>
+          {renderCards(recommended, 4)}
+        </section>
+      )}
+
+      {others.length > 0 && (
+        <section aria-labelledby="all-activities-title">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <h2 id="all-activities-title" className="sl-bar text-lg font-extrabold md:text-xl">
+              {recommended.length > 0 ? (
+                <>
+                  Toutes les <span className="text-brand-text">activités</span>
+                </>
+              ) : (
+                <>
+                  Activités <span className="text-brand-text">près de toi</span>
+                </>
+              )}
+            </h2>
+            <p className="text-sm" aria-live="polite">
+              {pluralize(items.length, "séance", "séances")}
+            </p>
+          </div>
+          {renderCards(others, recommended.length > 0 ? 0 : 4)}
+        </section>
+      )}
     </div>
   );
 }

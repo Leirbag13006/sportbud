@@ -10,6 +10,7 @@ import { SportLevelPicker } from "@/components/auth/sport-level-picker";
 import { SportIcon } from "@/components/brand/sport-icon";
 import { FormAlert } from "@/components/forms/form-alert";
 import { FormField } from "@/components/forms/form-field";
+import { AddressSearch } from "@/components/map/address-search";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +21,11 @@ import { updateProfile } from "@/lib/profile/actions";
 import { cn } from "@/lib/utils";
 import { MAX_FAVORITE_SPORTS } from "@/lib/validations/profile";
 
-type EditableUser = Pick<PublicUser, "fullName" | "bio" | "sportLevel" | "avatarUrl" | "favoriteSports">;
+type EditableUser = Pick<
+  PublicUser,
+  "fullName" | "bio" | "sportLevel" | "avatarUrl" | "favoriteSports" | "city" | "homeLat" | "homeLng"
+>;
+type City = { name: string; lat: number; lng: number };
 
 /** Formulaire d'édition du profil : photo, nom, niveau, sports favoris, bio. */
 export function ProfileForm({ user }: { user: EditableUser }) {
@@ -29,6 +34,11 @@ export function ProfileForm({ user }: { user: EditableUser }) {
   const [fullName, setFullName] = useState(user.fullName);
   const [bio, setBio] = useState(user.bio ?? "");
   const [favorites, setFavorites] = useState<SportType[]>(user.favoriteSports);
+  const [city, setCity] = useState<City | null>(
+    user.homeLat !== null && user.homeLng !== null
+      ? { name: user.city ?? "Ma position", lat: user.homeLat, lng: user.homeLng }
+      : null,
+  );
   const [avatar, setAvatar] = useState<"keep" | "remove" | string>("keep");
   const [isResizing, setIsResizing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[] | undefined>>({});
@@ -70,7 +80,7 @@ export function ProfileForm({ user }: { user: EditableUser }) {
     event.preventDefault();
     const sportLevel = String(new FormData(event.currentTarget).get("sportLevel") ?? "") as SportLevel;
     startTransition(async () => {
-      const result = await updateProfile({ fullName, bio, sportLevel, favoriteSports: favorites, avatar });
+      const result = await updateProfile({ fullName, bio, sportLevel, favoriteSports: favorites, city, avatar });
       if (result.ok) {
         toast.success("Profil mis à jour !");
         router.push("/profile");
@@ -170,6 +180,27 @@ export function ProfileForm({ user }: { user: EditableUser }) {
               );
             })}
           </div>
+        </fieldset>
+
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium">Ta ville</legend>
+          <AddressSearch
+            // Remonté quand la ville est effacée ou choisie : le champ reflète la valeur retenue.
+            key={city?.name ?? "none"}
+            citiesOnly
+            defaultValue={city?.name ?? ""}
+            onSelect={(suggestion) =>
+              setCity({ name: suggestion.name, lat: suggestion.position[0], lng: suggestion.position[1] })
+            }
+          />
+          <p className="flex items-center justify-between gap-2 text-xs text-gray-400">
+            {city ? `Point de départ de tes recherches : ${city.name}.` : "Aucune ville : Marseille par défaut."}
+            {city && (
+              <button type="button" onClick={() => setCity(null)} className="font-medium text-brand-text hover:underline">
+                Effacer
+              </button>
+            )}
+          </p>
         </fieldset>
 
         <FormField id="bio" label="Bio" errors={errors.bio} hint={`${bio.length}/500 — ton style de jeu, tes disponibilités, ce que tu recherches…`}>

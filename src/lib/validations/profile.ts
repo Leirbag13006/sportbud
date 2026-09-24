@@ -7,6 +7,15 @@ const MAX_AVATAR_LENGTH = 150_000;
 
 export const MAX_FAVORITE_SPORTS = 5;
 
+/** Ville du membre (centre de l'exploration) : nom et position, ou null pour l'effacer. */
+export const citySchema = z
+  .object({
+    name: z.string().trim().min(1).max(100),
+    lat: z.number().min(-90).max(90),
+    lng: z.number().min(-180).max(180),
+  })
+  .nullable();
+
 export const profileSchema = z.object({
   fullName: z
     .string()
@@ -23,6 +32,7 @@ export const profileSchema = z.object({
     .array(z.enum(SPORT_TYPE_VALUES))
     .max(MAX_FAVORITE_SPORTS, `${MAX_FAVORITE_SPORTS} sports maximum.`)
     .transform((sports) => [...new Set(sports)]),
+  city: citySchema,
   // « keep » : photo inchangée, « remove » : supprimée, sinon nouvelle image (data URL).
   avatar: z.union([
     z.literal("keep"),

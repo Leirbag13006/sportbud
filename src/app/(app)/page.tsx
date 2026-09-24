@@ -18,6 +18,14 @@ export default async function ExplorePage({ searchParams }: PageProps<"/">) {
     <ExploreView
       activities={activities}
       currentUser={{ id: user.id, fullName: user.fullName, avatarUrl: user.avatarUrl }}
+      preferences={{
+        favoriteSports: user.favoriteSports,
+        sportLevel: user.sportLevel,
+        home:
+          user.homeLat !== null && user.homeLng !== null
+            ? { city: user.city, position: [user.homeLat, user.homeLng] }
+            : null,
+      }}
       myApplications={myApplications}
       receivedApplications={receivedApplications}
       // Lien vers une activité précise (« Voir sur la carte ») : ouverture sur la carte.

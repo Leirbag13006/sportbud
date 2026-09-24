@@ -79,6 +79,43 @@ function matchesWhen(date: Date, when: WhenFilter, now: Date) {
   }
 }
 
+/** Préférences du membre (parcours d'accueil / profil) servant à personnaliser l'exploration. */
+export interface ExplorePreferences {
+  favoriteSports: SportType[];
+  sportLevel: SportLevel;
+  /** Ville choisie : position de repli si la géolocalisation n'est pas partagée. */
+  home: { city: string | null; position: [number, number] } | null;
+}
+
+/** Nombre de séances mises en avant dans « Pour toi ». */
+const RECOMMENDED_COUNT = 4;
+/** Au-delà, une séance n'est pas recommandée (si la distance est connue). */
+const RECOMMENDED_MAX_KM = 20;
+
+/**
+ * Séances « Pour toi » : ouvertes, dans un sport favori, accessibles au niveau du membre
+ * et à moins de 20 km, les plus proches dans le temps d'abord. Exclut ses propres activités.
+ */
+export function pickRecommended(items: ExploreItem[], preferences: ExplorePreferences, currentUserId: string) {
+  if (preferences.favoriteSports.length === 0) return [];
+  return items
+    .filter(
+      ({ activity, distanceKm: distance }) =>
+        activity.status === "open" &&
+        activity.creatorId !== currentUserId &&
+        preferences.favoriteSports.includes(activity.sportType) &&
+        (activity.requiredLevel === null || activity.requiredLevel === preferences.sportLevel) &&
+        (distance === null || distance <= RECOMMENDED_MAX_KM),
+    )
+    .sort((a, b) => a.activity.startsAt.getTime() - b.activity.startsAt.getTime())
+    .slice(0, RECOMMENDED_COUNT);
+}
+
+/** Vrai si aucun filtre n'est actif (la section « Pour toi » n'a de sens que sur la liste complète). */
+export function isDefaultFilters(filters: ExploreFilters) {
+  return JSON.stringify(filters) === JSON.stringify(DEFAULT_FILTERS);
+}
+
 export interface ExploreItem {
   activity: ExploreActivity;
   /** Distance depuis l'utilisateur, si sa position est connue. */

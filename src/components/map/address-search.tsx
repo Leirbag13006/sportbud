@@ -5,6 +5,7 @@ import { Loader2, MapPin, Search } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 
 import { searchAddresses, type AddressSuggestion } from "@/lib/geocoding";
+import { cn } from "@/lib/utils";
 
 /** Délai avant de lancer la recherche, pour ne pas interroger l'API à chaque touche. */
 const DEBOUNCE_MS = 250;
@@ -13,11 +14,17 @@ interface AddressSearchProps {
   /** Position de référence pour classer les résultats (centre de la carte). */
   near?: () => [number, number] | undefined;
   onSelect: (suggestion: AddressSuggestion) => void;
+  /** Recherche limitée aux villes (parcours d'accueil). */
+  citiesOnly?: boolean;
+  /** Valeur initiale du champ (ville déjà choisie). */
+  defaultValue?: string;
+  className?: string;
 }
 
-/** Champ de recherche d'adresse avec suggestions (Base Adresse Nationale). */
-export function AddressSearch({ near, onSelect }: AddressSearchProps) {
-  const [query, setQuery] = useState("");
+/** Champ de recherche d'adresse (ou de ville) avec suggestions (Base Adresse Nationale). */
+export function AddressSearch({ near, onSelect, citiesOnly = false, defaultValue = "", className }: AddressSearchProps) {
+  const [query, setQuery] = useState(defaultValue);
+  const noun = citiesOnly ? "ville" : "adresse";
   const [results, setResults] = useState<AddressSuggestion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -39,7 +46,7 @@ export function AddressSearch({ near, onSelect }: AddressSearchProps) {
     timerRef.current = setTimeout(() => {
       startTransition(async () => {
         try {
-          const suggestions = await searchAddresses(value, { near: near?.(), signal: controller.signal });
+          const suggestions = await searchAddresses(value, { near: near?.(), signal: controller.signal, citiesOnly });
           if (!controller.signal.aborted) {
             startTransition(() => {
               setResults(suggestions);
@@ -60,7 +67,7 @@ export function AddressSearch({ near, onSelect }: AddressSearchProps) {
     : error
       ? error
       : query.trim().length >= 3 && results.length === 0
-        ? "Aucune adresse trouvée"
+        ? `Aucune ${noun} trouvée`
         : null;
 
   return (
@@ -68,22 +75,22 @@ export function AddressSearch({ near, onSelect }: AddressSearchProps) {
       items={results}
       value={query}
       filter={null}
-      itemToStringValue={(item: AddressSuggestion) => item.label}
+      itemToStringValue={(item: AddressSuggestion) => (citiesOnly ? item.name : item.label)}
       onValueChange={(value, details) => {
         setQuery(value);
         if (details.reason === "item-press") {
-          const suggestion = results.find((item) => item.label === value);
+          const suggestion = results.find((item) => (citiesOnly ? item.name : item.label) === value);
           if (suggestion) onSelect(suggestion);
           return;
         }
         search(value);
       }}
     >
-      <div className="relative">
+      <div className={cn("relative", className)}>
         <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
         <Autocomplete.Input
-          aria-label="Rechercher une adresse"
-          placeholder="Rechercher une adresse…"
+          aria-label={`Rechercher une ${noun}`}
+          placeholder={citiesOnly ? "Marseille, Lyon, Aix-en-Provence…" : "Rechercher une adresse…"}
           className="h-10 w-full rounded-lg border bg-background pr-9 pl-9 text-base outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
         />
         {isPending && (

@@ -40,6 +40,8 @@ interface MapViewProps {
   activities: ActivityWithCreator[];
   currentUser: MapUser;
   userPosition: [number, number] | null;
+  /** Ville choisie par le membre : centre de départ tant que sa position est inconnue. */
+  homePosition?: [number, number] | null;
   isLocating: boolean;
   /** Demande la position (fenêtre d'autorisation) quand elle est inconnue. */
   onRequestLocation: () => void;
@@ -58,6 +60,7 @@ export function MapView({
   activities,
   currentUser,
   userPosition,
+  homePosition = null,
   isLocating,
   onRequestLocation,
   selectedId,
@@ -93,6 +96,14 @@ export function MapView({
     hasCentered.current = true;
     map.flyTo(userPosition, USER_ZOOM, { duration: 1 });
   }, [map, userPosition]);
+
+  // Position inconnue : on part de la ville du membre (sans bloquer le centrage GPS qui suivra).
+  const centeredOnHome = useRef(false);
+  useEffect(() => {
+    if (!map || userPosition || !homePosition || hasCentered.current || centeredOnHome.current || focusId) return;
+    centeredOnHome.current = true;
+    map.setView(homePosition, USER_ZOOM - 1);
+  }, [map, userPosition, homePosition, focusId]);
 
   const handleRecenter = () => {
     if (!map) return;

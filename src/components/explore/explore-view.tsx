@@ -12,12 +12,21 @@ import type { ExploreActivity } from "@/lib/activities/types";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
 import { ActivityList } from "./activity-list";
 import { ExploreToolbar, type ExploreViewMode } from "./explore-toolbar";
-import { applyFilters, countActiveFilters, DEFAULT_FILTERS, type ExploreFilters } from "./filters";
+import {
+  applyFilters,
+  countActiveFilters,
+  DEFAULT_FILTERS,
+  isDefaultFilters,
+  pickRecommended,
+  type ExploreFilters,
+  type ExplorePreferences,
+} from "./filters";
 import { FiltersSheet } from "./filters-sheet";
 
 interface ExploreViewProps {
   activities: ExploreActivity[];
   currentUser: MapUser & { id: string };
+  preferences: ExplorePreferences;
   myApplications: Record<string, MyApplicationSummary>;
   receivedApplications: ReceivedApplication[];
   initialView: ExploreViewMode;
@@ -34,6 +43,7 @@ interface ExploreViewProps {
 export function ExploreView({
   activities,
   currentUser,
+  preferences,
   myApplications,
   receivedApplications,
   initialView,
@@ -41,7 +51,10 @@ export function ExploreView({
   createToken,
 }: ExploreViewProps) {
   const location = useLocationAccess();
-  const city = useCityName(location.position);
+  const gpsCity = useCityName(location.position);
+  // Position de référence : la géolocalisation si partagée, sinon la ville choisie à l'accueil.
+  const referencePosition = location.position ?? preferences.home?.position ?? null;
+  const city = location.position ? gpsCity : (preferences.home?.city ?? null);
   const [view, setView] = useState<ExploreViewMode>(initialView);
   const [filters, setFilters] = useState<ExploreFilters>(DEFAULT_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -51,8 +64,12 @@ export function ExploreView({
   const [isCreating, setIsCreating] = useState(false);
 
   const items = useMemo(
-    () => applyFilters(activities, filters, location.position),
-    [activities, filters, location.position],
+    () => applyFilters(activities, filters, referencePosition),
+    [activities, filters, referencePosition],
+  );
+  const recommended = useMemo(
+    () => (isDefaultFilters(filters) ? pickRecommended(items, preferences, currentUser.id) : []),
+    [items, filters, preferences, currentUser.id],
   );
   // Le détail s'ouvre même si l'activité est masquée par un filtre (ex. lien depuis le profil).
   const selected = activities.find((activity) => activity.id === selectedId) ?? null;
@@ -102,7 +119,7 @@ export function ExploreView({
           activeFilterCount={countActiveFilters(filters)}
           onOpenFilters={() => setFiltersOpen(true)}
           city={city}
-          hasPosition={location.position !== null}
+          hasPosition={referencePosition !== null}
           isLocating={location.isLocating}
           onRequestLocation={location.ensureLocation}
         />
@@ -112,6 +129,7 @@ export function ExploreView({
         <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
           <ActivityList
             items={items}
+            recommended={recommended}
             totalCount={activities.length}
             currentUserId={currentUser.id}
             myApplications={myApplications}
@@ -126,6 +144,7 @@ export function ExploreView({
           activities={items.map(({ activity }) => activity)}
           currentUser={currentUser}
           userPosition={location.position}
+          homePosition={preferences.home?.position ?? null}
           isLocating={location.isLocating}
           onRequestLocation={location.ensureLocation}
           selectedId={selectedId}
@@ -161,7 +180,7 @@ export function ExploreView({
         filters={filters}
         onChange={setFilters}
         resultCount={items.length}
-        hasPosition={location.position !== null}
+        hasPosition={referencePosition !== null}
         onRequestLocation={() => {
           setFiltersOpen(false);
           location.ensureLocation();

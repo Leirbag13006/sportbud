@@ -27,6 +27,8 @@ interface IgnFeature {
     name: string;
     postcode?: string;
     city?: string;
+    /** « 13, Bouches-du-Rhône, Provence-Alpes-Côte d'Azur ». */
+    context?: string;
     type: "housenumber" | "street" | "locality" | "municipality";
   };
 }
@@ -37,20 +39,25 @@ function toSuggestion({ geometry, properties }: IgnFeature): AddressSuggestion {
     id: properties.id,
     label: properties.type === "municipality" ? properties.label : `${properties.name}, ${properties.postcode ?? ""} ${properties.city ?? ""}`.trim(),
     name: properties.name,
-    context: [properties.postcode, properties.city].filter(Boolean).join(" "),
+    // Ville : code postal + département ; adresse : code postal + ville.
+    context:
+      properties.type === "municipality"
+        ? [properties.postcode, properties.context?.split(", ")[1]].filter(Boolean).join(" · ")
+        : [properties.postcode, properties.city].filter(Boolean).join(" "),
     position: [lat, lng],
   };
 }
 
 /**
- * Suggestions d'adresses pour une saisie partielle.
+ * Suggestions d'adresses (ou de villes seulement, `citiesOnly`) pour une saisie partielle.
  * `near` favorise les résultats proches (position de la carte).
  */
 export async function searchAddresses(
   query: string,
-  { near, signal }: { near?: [number, number]; signal?: AbortSignal } = {},
+  { near, signal, citiesOnly = false }: { near?: [number, number]; signal?: AbortSignal; citiesOnly?: boolean } = {},
 ): Promise<AddressSuggestion[]> {
   const params = new URLSearchParams({ q: query, limit: "6", autocomplete: "1", index: "address" });
+  if (citiesOnly) params.set("type", "municipality");
   if (near) {
     params.set("lat", String(near[0]));
     params.set("lon", String(near[1]));

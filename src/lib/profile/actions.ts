@@ -13,19 +13,22 @@ export type ProfileActionResult =
   | { ok: true }
   | { ok: false; error?: string; fieldErrors?: Record<string, string[] | undefined> };
 
-/** Met à jour le profil de l'utilisateur connecté (nom, bio, niveau, sports favoris, photo). */
+/** Met à jour le profil de l'utilisateur connecté (nom, bio, niveau, sports favoris, ville, photo). */
 export async function updateProfile(input: ProfileInput): Promise<ProfileActionResult> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Ta session a expiré, reconnecte-toi." };
 
   const parsed = profileSchema.safeParse(input);
   if (!parsed.success) return { ok: false, fieldErrors: z.flattenError(parsed.error).fieldErrors };
-  const { avatar, ...fields } = parsed.data;
+  const { avatar, city, ...fields } = parsed.data;
 
   await db
     .update(users)
     .set({
       ...fields,
+      city: city?.name ?? null,
+      homeLat: city?.lat ?? null,
+      homeLng: city?.lng ?? null,
       ...(avatar === "keep" ? {} : { avatarUrl: avatar === "remove" ? null : avatar }),
     })
     .where(eq(users.id, user.id));
