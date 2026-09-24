@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Profil" };
 export default function ProfilePage() {
   return (
     <>
-      <PageHeader title="Profil" />
+      <PageHeader title="Profil" description="Ton niveau, ta bio et tes activités." />
       <EmptyState
         icon={User}
         title="Ton profil"

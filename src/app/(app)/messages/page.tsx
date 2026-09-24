@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Messages" };
 export default function MessagesPage() {
   return (
     <>
-      <PageHeader title="Messages" />
+      <PageHeader title="Messages" description="Tes conversations avec tes partenaires de sport." />
       <EmptyState
         icon={MessageCircle}
         title="Aucune conversation"
