@@ -383,6 +383,44 @@ export function StorySection() {
   );
 }
 
+const TESTIMONIALS = [
+  { name: "Camille, 24 ans", city: "Aix-en-Provence", text: "J'ai rejoint un footing sans connaître personne. En deux séances, j'avais déjà trouvé mon petit groupe du dimanche.", sport: "Running" },
+  { name: "Hugo, 29 ans", city: "Aix-en-Provence", text: "Le format est simple : je propose, les gens répondent, et on se retrouve sur le terrain. C'est exactement ce qu'il manquait.", sport: "Padel" },
+  { name: "Inès, 26 ans", city: "Aix-en-Provence", text: "J'apprécie de pouvoir choisir une séance entre femmes quand j'en ai envie, sans que ce soit imposé dans tout le reste de l'app.", sport: "Volley" },
+];
+
+export function TestimonialsSection() {
+  return (
+    <section className="bg-sand-50 py-20 md:py-28">
+      <Container>
+        <Reveal>
+          <SectionTitle
+            eyebrow="Ils bougent avec nous"
+            title="Des rencontres qui restent"
+            accent="après le match."
+            intro="Des séances locales, des profils authentiques et une communauté qui se retrouve vraiment."
+            center
+          />
+        </Reveal>
+        <ul className="mt-12 grid gap-4 md:grid-cols-3">
+          {TESTIMONIALS.map((testimonial, index) => (
+            <Reveal as="li" key={testimonial.name} delay={index * 100} className="rounded-card bg-card p-6 shadow-md">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-display font-bold text-ink">{testimonial.name}</p>
+                  <p className="text-sm text-gray-400">{testimonial.city} · {testimonial.sport}</p>
+                </div>
+                <span className="text-sunset-500" aria-label="5 étoiles">★★★★★</span>
+              </div>
+              <p className="mt-5 text-pretty leading-relaxed">&ldquo;{testimonial.text}&rdquo;</p>
+            </Reveal>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  );
+}
+
 /* -----------------------------------------------------------------------------
    FAQ (lever les freins à l'inscription)
    -------------------------------------------------------------------------- */

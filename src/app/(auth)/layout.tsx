@@ -13,6 +13,7 @@ import {
   SportsSection,
   StepsSection,
   StorySection,
+  TestimonialsSection,
 } from "@/components/landing/landing-sections";
 import { MobileCtaBar } from "@/components/landing/mobile-cta-bar";
 
@@ -106,6 +107,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         <FeaturesSection />
         <SportsSection />
         <StorySection />
+        <TestimonialsSection />
         <FaqSection />
         <FinalCtaSection />
       </main>
