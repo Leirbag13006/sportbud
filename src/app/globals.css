@@ -138,3 +138,164 @@
 :root {
   --bottom-nav-height: 4rem;
 }
+
+/* -----------------------------------------------------------------------------
+   Marqueurs de la carte (icônes HTML Leaflet, cf. components/map/marker-icons.ts)
+   -------------------------------------------------------------------------- */
+
+/* Marqueur d'activité : pastille ronde + pointe, badge de places en haut à droite. */
+.map-marker-activity {
+  position: relative;
+  width: 44px;
+  height: 52px;
+  transition: transform 150ms ease;
+  transform-origin: bottom center;
+}
+
+.map-marker-activity::before {
+  /* Pastille */
+  content: "";
+  position: absolute;
+  inset: 0 0 8px 0;
+  border-radius: 9999px;
+  background: var(--background);
+  border: 2.5px solid var(--primary);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.18);
+}
+
+.map-marker-activity::after {
+  /* Pointe vers la position exacte */
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--primary);
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 2px;
+  z-index: -1;
+}
+
+.map-marker-activity__emoji {
+  position: absolute;
+  inset: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.map-marker-activity__badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-sans), sans-serif;
+  box-shadow: 0 0 0 2px var(--background);
+}
+
+.leaflet-marker-icon:hover .map-marker-activity,
+.leaflet-marker-icon:focus-visible .map-marker-activity {
+  transform: scale(1.08);
+}
+
+.leaflet-marker-icon:focus-visible {
+  outline: none;
+}
+
+.leaflet-marker-icon:focus-visible .map-marker-activity::before {
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.map-marker-activity.is-selected {
+  transform: scale(1.18);
+}
+
+.map-marker-activity.is-selected::before {
+  background: var(--brand-soft);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.25);
+}
+
+/* Activité complète : grisée et en retrait. */
+.map-marker-activity.is-full {
+  opacity: 0.7;
+}
+
+.map-marker-activity.is-full::before {
+  border-color: var(--muted-foreground);
+}
+
+.map-marker-activity.is-full::after,
+.map-marker-activity.is-full .map-marker-activity__badge {
+  background: var(--muted-foreground);
+}
+
+.map-marker-activity.is-full .map-marker-activity__emoji {
+  filter: grayscale(1);
+}
+
+/* Marqueur « Moi » : point bleu avec halo pulsé. */
+.map-marker-user {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.map-marker-user__dot {
+  position: absolute;
+  inset: 4px;
+  border-radius: 9999px;
+  background: oklch(0.6 0.2 255);
+  border: 3px solid white;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+}
+
+.map-marker-user__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: oklch(0.6 0.2 255 / 0.35);
+  animation: map-user-pulse 2s ease-out infinite;
+}
+
+@keyframes map-user-pulse {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-marker-user__pulse {
+    animation: none;
+  }
+}
+
+/* Contrôles Leaflet harmonisés avec l'interface. */
+.leaflet-container {
+  font-family: var(--font-sans), sans-serif;
+  background: var(--muted);
+}
+
+.leaflet-control-zoom.leaflet-bar {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+}

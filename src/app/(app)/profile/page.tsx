@@ -9,18 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSportLevelLabel } from "@/config/sport-levels";
 import { requireUser } from "@/lib/auth/session";
+import { getInitials } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Profil" };
-
-/** Initiales affichées quand il n'y a pas de photo (« Camille Martin » → « CM »). */
-function getInitials(fullName: string) {
-  return fullName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]!.toUpperCase())
-    .join("");
-}
 
 const memberSince = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
 
