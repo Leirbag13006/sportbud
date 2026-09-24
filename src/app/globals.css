@@ -381,17 +381,55 @@
   }
 }
 
-/* Contrôles Leaflet harmonisés avec l'interface. */
+/* Carte sombre SportMates : contrôles Leaflet harmonisés avec le fond nuit. */
 .leaflet-container {
   font-family: var(--font-inter), sans-serif;
-  background: var(--color-sand-100);
+  /* Même teinte que le fond vectoriel : pas de flash clair pendant le chargement. */
+  background: var(--color-night-900);
 }
 
-.leaflet-control-zoom.leaflet-bar {
-  border: 1px solid var(--border);
+.leaflet-container .leaflet-control-zoom.leaflet-bar {
+  border: 1px solid var(--color-night-700);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.35);
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  background: var(--color-night-800);
+  color: var(--color-white, #fff);
+  border-bottom-color: var(--color-night-700);
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a:hover,
+.leaflet-container .leaflet-control-zoom.leaflet-bar a:focus-visible {
+  background: var(--color-night-700);
+  color: var(--color-mint-500);
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a.leaflet-disabled {
+  background: var(--color-night-800);
+  color: var(--color-gray-600);
+}
+
+/* Double classe : l'emporte sur leaflet.css, chargée après cette feuille. */
+.leaflet-container.leaflet-container .leaflet-control-attribution {
+  background: rgb(10 26 23 / 0.75);
+  color: var(--color-gray-400);
+  font-size: 10px;
+  border-top-right-radius: var(--radius-sm);
+}
+
+.leaflet-container.leaflet-container .leaflet-control-attribution a {
+  color: var(--color-mint-300);
+}
+
+/* Le canvas MapLibre ne doit pas capter les clics : Leaflet gère les interactions. */
+.leaflet-pane .maplibregl-canvas {
+  pointer-events: none;
 }
 
 /* Épingle du lieu en cours de choix (création d'activité). */

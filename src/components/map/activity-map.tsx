@@ -1,6 +1,7 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { LatLngTuple, Map as LeafletMap, Marker as LeafletMarker } from "leaflet";
 import { useEffect, useMemo } from "react";
@@ -8,16 +9,16 @@ import {
   AttributionControl,
   MapContainer,
   Marker,
-  TileLayer,
   ZoomControl,
   useMap,
   useMapEvents,
 } from "react-leaflet";
 
-import { DEFAULT_CENTER, DEFAULT_ZOOM, TILE_LAYER } from "@/config/map";
+import { DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM } from "@/config/map";
 import { getSport } from "@/config/sports";
 import type { ActivityWithCreator } from "@/lib/activities/types";
 import { formatDay, formatTime } from "@/lib/format";
+import { VectorBaseLayer } from "./vector-base-layer";
 import { createActivityIcon, createUserLocationIcon, draftLocationIcon, type MapUser } from "./marker-icons";
 
 interface ActivityMapProps {
@@ -59,6 +60,7 @@ export default function ActivityMap({
     <MapContainer
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
+      maxZoom={MAX_ZOOM}
       zoomControl={false}
       attributionControl={false}
       className="size-full"
@@ -66,7 +68,7 @@ export default function ActivityMap({
         if (map) onReady(map);
       }}
     >
-      <TileLayer {...TILE_LAYER} />
+      <VectorBaseLayer />
       <ResizeWatcher />
       <ZoomControl position="topright" />
       <AttributionControl position="bottomleft" prefix={false} />

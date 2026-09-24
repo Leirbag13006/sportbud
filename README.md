@@ -2,7 +2,7 @@
 
 *Bouge. Rencontre. Partage.* — Web app de mise en relation de partenaires de sport (liste d'activités et carte interactive).
 
-**Stack** : Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui · SQLite (Drizzle ORM + libSQL)
+**Stack** : Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui · SQLite (Drizzle ORM + libSQL) · Leaflet + MapLibre (fond de carte vectoriel OpenFreeMap aux couleurs SportMates, `src/config/map-style`)
 
 ## Lancer le projet
 
