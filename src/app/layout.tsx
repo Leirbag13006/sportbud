@@ -23,7 +23,13 @@ const caveat = Caveat({
   weight: ["700"],
 });
 
+/** Adresse publique du site (Vercel la fournit en production), utilisée pour les aperçus de liens. */
+const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "SportLink · Bouge. Rencontre. Partage.",
     template: "%s · SportLink",

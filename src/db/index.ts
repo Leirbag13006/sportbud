@@ -11,6 +11,10 @@ import * as schema from "./schema";
  * - En ligne : base Turso, en renseignant DATABASE_URL (libsql://…) et DATABASE_AUTH_TOKEN.
  */
 function createDbClient() {
+  // Sur Vercel, le disque n'est pas persistant : une base Turso est obligatoire.
+  if (process.env.VERCEL && !process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL manquante : configure la base Turso dans les variables d'environnement Vercel.");
+  }
   return createClient({
     url: process.env.DATABASE_URL ?? "file:local.db",
     authToken: process.env.DATABASE_AUTH_TOKEN,
