@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
-import { AudienceBadge } from "@/components/activities/audience-badge";
+import { AUDIENCE_BORDER_CLASSES, AudienceBadge } from "@/components/activities/audience-badge";
 import { AchievementMedal } from "@/components/achievements/achievements-grid";
 import { UserAvatar } from "@/components/applications/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,7 @@ export function ActivityCard({
         // Carte du design system : blanche, 16 px, ombre md ; au survol elle s'élève.
         "group relative flex gap-3.5 rounded-card bg-card p-3 shadow-md transition-all duration-250 ease-brand hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0",
         "has-[[data-card-link]:focus-visible]:ring-3 has-[[data-card-link]:focus-visible]:ring-ring",
+        AUDIENCE_BORDER_CLASSES[activity.audience],
       )}
     >
       <div className="relative size-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:size-28">

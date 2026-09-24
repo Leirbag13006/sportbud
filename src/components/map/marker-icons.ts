@@ -27,7 +27,13 @@ export function createActivityIcon(activity: ActivityWithCreator, selected: bool
   const isFull = activity.status !== "open";
   const badge = isFull ? "Complet" : String(activity.spotsAvailable);
 
-  const classes = ["map-marker-activity", isFull && "is-full", selected && "is-selected"]
+  const classes = [
+    "map-marker-activity",
+    activity.audience === "men" && "is-men",
+    activity.audience === "women" && "is-women",
+    isFull && "is-full",
+    selected && "is-selected",
+  ]
     .filter(Boolean)
     .join(" ");
 
