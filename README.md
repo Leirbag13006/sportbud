@@ -78,8 +78,13 @@ Ce choix fonctionne partout (serveur local comme hébergement serverless), contr
 connexion push en mémoire. Le rafraîchissement se met en pause quand l'onglet est masqué et
 reprend immédiatement au retour. L'envoi d'un message est optimiste (affichage immédiat).
 
-## Mise en ligne (optionnel)
+## Mise en ligne
 
-Un fichier SQLite ne fonctionne pas sur un hébergeur serverless (Vercel…). Créer une base
-[Turso](https://turso.tech) (gratuite) puis définir `DATABASE_URL` et `DATABASE_AUTH_TOKEN`
-(voir `.env.example`) : le code fonctionne sans modification.
+Le site est déployé sur **Vercel** (offre gratuite Hobby) avec une base **Turso** (SQLite hébergé, région
+`aws-eu-west-1`) : https://sportlink-weld.vercel.app
+
+- Variables d'environnement (Vercel → Settings → Environment Variables, Production) :
+  `DATABASE_URL` et `DATABASE_AUTH_TOKEN` (jeton : `turso db tokens create sportlink`).
+- À chaque déploiement, le script `vercel-build` applique les migrations à la base Turso puis construit le site.
+- Déployer manuellement : `npx vercel deploy --prod` (le fichier `.vercelignore` exclut la base locale et les secrets).
+- Les données en ligne sont indépendantes de `local.db` (comptes de test locaux).

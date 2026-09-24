@@ -1,0 +1,8 @@
+# Jamais envoyé à Vercel : base locale (comptes de test) et secrets.
+local.db
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env*
+!.env.example
