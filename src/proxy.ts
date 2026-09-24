@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 
 /** Pages accessibles uniquement aux visiteurs non connectés. */
-const GUEST_ONLY_PATHS = ["/login", "/register"];
+const GUEST_ONLY_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
 /** Pages publiques (accessibles connecté ou non). */
 const PUBLIC_PATHS = ["/credits"];
 const PUBLIC_PREFIXES = ["/legal/"];

@@ -63,6 +63,18 @@ Photos des sports : licence CC0 (domaine public), voir `public/sports/CREDITS.md
 Mots de passe hachés avec bcrypt, sessions stockées en base (jeton aléatoire dans un cookie
 `httpOnly`, seul son hash SHA-256 est enregistré), durée de 30 jours prolongée à l'usage.
 
+- **Mot de passe oublié** : lien à usage unique valable 1 h (hash stocké, 3 demandes/h max), envoyé par
+  SMTP (variables `SMTP_*` dans `.env.example`) ; sans SMTP, le lien est écrit dans les logs du serveur.
+  La réinitialisation ferme toutes les sessions du compte.
+- **Suppression du compte** (profil › Zone sensible), confirmée par le mot de passe : effacement en cascade.
+- **Parcours d'accueil** `/welcome` après l'inscription : sports favoris, niveau, ville (centre de l'exploration).
+
+## Confiance et sécurité
+
+- Avis dans les deux sens après chaque séance (organisateur ↔ participants), 1 à 5 étoiles + commentaire.
+- Menu « ⋯ » sur un membre : **signaler** (motif + précisions, enregistré dans `reports`) ou **bloquer**
+  (activités masquées dans les deux sens, candidatures en attente refusées, messagerie coupée).
+
 ## Messagerie et notifications « temps réel »
 
 Une conversation s'ouvre automatiquement quand une candidature est acceptée (message système).

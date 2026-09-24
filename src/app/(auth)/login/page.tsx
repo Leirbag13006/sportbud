@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
 import { LoginForm } from "@/components/auth/login-form";
+import { FormSuccess } from "@/components/forms/form-success";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 
 export const metadata: Metadata = { title: "Connexion" };
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
-  const { next } = await searchParams;
+  const { next, reset } = await searchParams;
   const safeNext = getSafeRedirectPath(next, "");
 
   return (
@@ -17,6 +18,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </h2>
         <p className="pt-1 text-sm">Connecte-toi pour retrouver tes séances et tes partenaires.</p>
       </div>
+      {reset === "1" && <FormSuccess message="Mot de passe modifié ! Connecte-toi avec ton nouveau mot de passe." />}
       <LoginForm next={safeNext || undefined} />
     </div>
   );

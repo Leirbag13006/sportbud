@@ -3,23 +3,18 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createHash, randomBytes } from "node:crypto";
 import { cache } from "react";
 
 import { db } from "@/db";
 import { sessions, users, type PublicUser } from "@/db/schema";
 import { SESSION_COOKIE_NAME } from "./constants";
+import { generateToken, hashToken } from "./tokens";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Durée de vie d'une session. */
 const SESSION_DURATION_MS = 30 * DAY_MS;
 /** En deçà de cette durée restante, la session est prolongée (session « glissante »). */
 const SESSION_RENEW_THRESHOLD_MS = 15 * DAY_MS;
-
-/** Identifiant stocké en base = hash du jeton : le jeton brut n'existe que dans le cookie. */
-function hashToken(token: string) {
-  return createHash("sha256").update(token).digest("hex");
-}
 
 async function setSessionCookie(token: string, expiresAt: Date) {
   (await cookies()).set(SESSION_COOKIE_NAME, token, {
@@ -33,7 +28,7 @@ async function setSessionCookie(token: string, expiresAt: Date) {
 
 /** Ouvre une session pour l'utilisateur et pose le cookie. À appeler depuis une Server Action. */
 export async function createSession(userId: string) {
-  const token = randomBytes(32).toString("base64url");
+  const token = generateToken();
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
 
   await db.insert(sessions).values({ id: hashToken(token), userId, expiresAt });

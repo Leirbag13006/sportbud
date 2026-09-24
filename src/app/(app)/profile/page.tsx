@@ -17,6 +17,8 @@ import { requireUser } from "@/lib/auth/session";
 import { getRatingSummary, getUserReviews } from "@/lib/reviews/queries";
 import { BlockedUsersList } from "@/components/safety/blocked-users-list";
 import { getBlockedUsers } from "@/lib/safety/queries";
+import { DeleteAccountDialog } from "@/components/profile/delete-account-dialog";
+import { LEGAL_PAGES } from "@/config/legal";
 
 export const metadata: Metadata = { title: "Profil" };
 
@@ -152,6 +154,34 @@ export default async function ProfilePage() {
             Se déconnecter
           </Button>
         </form>
+
+        {/* Zone sensible : suppression définitive (droit à l'effacement, RGPD) */}
+        <section aria-labelledby="danger-title" className="rounded-card border border-destructive/20 bg-card p-5">
+          <h2 id="danger-title" className="font-display text-base font-extrabold text-ink">
+            Zone sensible
+          </h2>
+          <p className="mt-1 mb-4 text-sm">
+            Supprime ton compte et toutes tes données. Cette action est définitive.
+          </p>
+          <DeleteAccountDialog />
+        </section>
+
+        <nav aria-label="Informations légales" className="pb-4">
+          <ul className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-gray-400">
+            {LEGAL_PAGES.map(({ slug, title, accent }) => (
+              <li key={slug}>
+                <Link href={`/legal/${slug}`} className="hover:text-ink hover:underline">
+                  {title} {accent.replace(/\.$/, "")}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link href="/credits" className="hover:text-ink hover:underline">
+                Crédits photos
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </div>
     </>
   );

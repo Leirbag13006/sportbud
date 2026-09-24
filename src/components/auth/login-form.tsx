@@ -46,7 +46,16 @@ export function LoginForm({ next }: LoginFormProps) {
         />
       </FormField>
 
-      <FormField id="password" label="Mot de passe" errors={state.fieldErrors?.password}>
+      <FormField
+        id="password"
+        label="Mot de passe"
+        errors={state.fieldErrors?.password}
+        labelAction={
+          <Link href="/forgot-password#acces" className="text-sm font-medium text-brand-text underline-offset-4 hover:underline">
+            Mot de passe oublié ?
+          </Link>
+        }
+      >
         <PasswordInput
           id="password"
           name="password"

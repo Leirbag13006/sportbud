@@ -1,14 +1,25 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from "@/lib/auth/password";
-import { createSession, deleteSession, findUserByEmail } from "@/lib/auth/session";
-import { loginSchema, registerSchema } from "@/lib/validations/auth";
+import { createPasswordResetToken, resetPasswordWithToken } from "@/lib/auth/password-reset";
+import { getSafeRedirectPath } from "@/lib/auth/redirect";
+import { createSession, deleteSession, findUserByEmail, getCurrentUser } from "@/lib/auth/session";
+import { sendEmail } from "@/lib/email";
+import { passwordResetEmail } from "@/lib/email/templates";
+import {
+  deleteAccountSchema,
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from "@/lib/validations/auth";
 
 /** État renvoyé aux formulaires d'authentification (via useActionState). */
 export type AuthFormState = {
@@ -18,7 +29,19 @@ export type AuthFormState = {
   fieldErrors?: Record<string, string[] | undefined>;
   /** Valeurs saisies, pour pré-remplir le formulaire après une erreur (jamais le mot de passe). */
   values?: Record<string, string>;
+  /** Action réussie sans redirection (ex. e-mail de réinitialisation envoyé). */
+  success?: boolean;
 };
+
+/**
+ * Adresse publique du site pour les liens envoyés par e-mail.
+ * En production, le domaine officiel (jamais l'en-tête Host, falsifiable) ; en local, l'hôte courant.
+ */
+async function getAppUrl() {
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  const host = (await headers()).get("host") ?? "localhost:3000";
+  return `${host.startsWith("localhost") ? "http" : "https"}://${host}`;
+}
 
 export async function login(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const raw = {
@@ -73,6 +96,67 @@ export async function register(_prev: AuthFormState, formData: FormData): Promis
 
   await createSession(user.id);
   redirect("/");
+}
+
+/**
+ * « Mot de passe oublié » : envoie un lien de réinitialisation.
+ * La réponse est la même que l'email corresponde à un compte ou non (pas de divulgation des inscrits).
+ */
+export async function requestPasswordReset(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const raw = { email: String(formData.get("email") ?? "") };
+  const parsed = forgotPasswordSchema.safeParse(raw);
+  if (!parsed.success) return { fieldErrors: z.flattenError(parsed.error).fieldErrors, values: raw };
+
+  const user = await findUserByEmail(parsed.data.email);
+  if (user) {
+    const token = await createPasswordResetToken(user.id);
+    if (token) {
+      const url = `${await getAppUrl()}/reset-password?token=${token}`;
+      try {
+        await sendEmail({ to: user.email, ...passwordResetEmail({ firstName: user.fullName.split(" ")[0]!, url }) });
+      } catch (error) {
+        console.error("[email] Échec de l'envoi du lien de réinitialisation", error);
+        return { error: "L'e-mail n'a pas pu être envoyé. Réessaie dans quelques minutes.", values: raw };
+      }
+    }
+  }
+  return { success: true, values: raw };
+}
+
+/** Nouveau mot de passe depuis le lien reçu par e-mail ; toutes les sessions sont fermées. */
+export async function resetPassword(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const parsed = resetPasswordSchema.safeParse({
+    token: String(formData.get("token") ?? ""),
+    password: String(formData.get("password") ?? ""),
+    confirmPassword: String(formData.get("confirmPassword") ?? ""),
+  });
+  if (!parsed.success) return { fieldErrors: z.flattenError(parsed.error).fieldErrors };
+
+  if (!(await resetPasswordWithToken(parsed.data.token, parsed.data.password))) {
+    return { error: "Ce lien a expiré ou a déjà été utilisé. Demande-en un nouveau." };
+  }
+  redirect("/login?reset=1");
+}
+
+/**
+ * Suppression définitive du compte (confirmée par le mot de passe).
+ * Supprime en cascade : activités organisées, candidatures, messages, avis, blocages.
+ */
+export async function deleteAccount(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const current = await getCurrentUser();
+  if (!current) redirect("/login");
+
+  const parsed = deleteAccountSchema.safeParse({ password: String(formData.get("password") ?? "") });
+  if (!parsed.success) return { fieldErrors: z.flattenError(parsed.error).fieldErrors };
+
+  const user = await findUserByEmail(current.email);
+  if (!user || !(await verifyPassword(parsed.data.password, user.passwordHash))) {
+    return { fieldErrors: { password: ["Mot de passe incorrect."] } };
+  }
+
+  await db.delete(users).where(eq(users.id, user.id));
+  await deleteSession();
+  redirect("/register?deleted=1");
 }
 
 export async function logout() {

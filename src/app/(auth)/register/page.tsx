@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 
 import { RegisterForm } from "@/components/auth/register-form";
+import { FormSuccess } from "@/components/forms/form-success";
 
 export const metadata: Metadata = { title: "Inscription" };
 
-export default function RegisterPage() {
+export default async function RegisterPage({ searchParams }: PageProps<"/register">) {
+  const { deleted } = await searchParams;
+
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
@@ -13,6 +16,7 @@ export default function RegisterPage() {
         </h2>
         <p className="pt-1 text-sm">Et trouve ta première séance dès aujourd&apos;hui.</p>
       </div>
+      {deleted === "1" && <FormSuccess message="Ton compte et tes données ont bien été supprimés. À bientôt sur le terrain !" />}
       <RegisterForm />
     </div>
   );
