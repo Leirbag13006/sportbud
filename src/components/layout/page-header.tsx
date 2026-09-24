@@ -1,6 +1,8 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 
+import { Marked } from "@/components/brand/scribble";
+
 interface PageHeaderProps {
   title: string;
   /** Fin du titre mise en valeur en menthe (règle du design system : « dernier mot en menthe »). */
@@ -34,7 +36,7 @@ export function PageHeader({ title, accent, description, action, image }: PageHe
         <div>
           <h1 className="sl-bar text-2xl leading-tight font-extrabold md:text-4xl">
             {title}
-            {accent && <span className="text-mint-500"> {accent}</span>}
+            {accent && <span className="text-mint-500"> <Marked>{accent}</Marked></span>}
           </h1>
           {description && <p className="mt-3 max-w-xl text-sm md:text-base">{description}</p>}
         </div>

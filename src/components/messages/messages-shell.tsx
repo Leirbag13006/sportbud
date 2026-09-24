@@ -4,6 +4,7 @@ import { useSelectedLayoutSegment } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { PhotoBackdrop } from "@/components/brand/photo-backdrop";
+import { Marked } from "@/components/brand/scribble";
 import type { ConversationSummaryDTO } from "@/lib/messages/types";
 import { cn } from "@/lib/utils";
 import { ConversationList } from "./conversation-list";
@@ -35,7 +36,7 @@ export function MessagesShell({ initialConversations, currentUserId, children }:
         <header className="sl-dark sticky top-0 z-10 overflow-hidden px-4 pt-[env(safe-area-inset-top)]">
           <PhotoBackdrop src="/images/friends-laughing.jpg" blur="sm" veil="left" position="center 35%" sizes="(min-width: 768px) 384px, 100vw" />
           <h1 className="relative flex h-16 items-center text-xl font-extrabold tracking-tight">
-            Tes <span className="ml-1.5 text-mint-500">messages.</span>
+            Tes <span className="ml-1.5 text-mint-500"><Marked>messages.</Marked></span>
           </h1>
         </header>
         <ConversationList

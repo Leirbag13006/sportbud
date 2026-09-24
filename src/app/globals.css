@@ -558,3 +558,74 @@
     transition: none;
   }
 }
+
+/* -----------------------------------------------------------------------------
+   Éléments « faits main » (components/brand/scribble, marquee, stamp)
+   -------------------------------------------------------------------------- */
+
+/* Tracé des traits : invisibles tant que le <Reveal> parent n'est pas visible, puis dessinés. */
+.sl-scribble path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: sl-draw 700ms cubic-bezier(0.6, 0, 0.3, 1) forwards;
+  animation-delay: calc(var(--scribble-delay, 0ms) + var(--scribble-index, 0) * 180ms);
+}
+.sl-reveal:not([data-visible="true"]) .sl-scribble path {
+  animation: none;
+}
+@keyframes sl-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Annotation manuscrite : apparaît juste avant sa flèche. */
+.sl-annotation {
+  opacity: 0;
+  animation: sl-fade-in 400ms ease-out forwards;
+  animation-delay: var(--scribble-delay, 0ms);
+}
+.sl-reveal:not([data-visible="true"]) .sl-annotation {
+  animation: none;
+}
+@keyframes sl-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-6deg);
+  }
+}
+
+.sl-marquee {
+  animation: sl-marquee 38s linear infinite;
+}
+@keyframes sl-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.sl-spin {
+  animation: sl-spin 22s linear infinite;
+}
+@keyframes sl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-scribble path,
+  .sl-annotation {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  .sl-marquee,
+  .sl-spin {
+    animation: none;
+  }
+}

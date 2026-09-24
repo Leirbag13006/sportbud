@@ -16,6 +16,8 @@ import {
   TestimonialsSection,
 } from "@/components/landing/landing-sections";
 import { MobileCtaBar } from "@/components/landing/mobile-cta-bar";
+import { Marquee } from "@/components/brand/marquee";
+import { Annotation, Marked } from "@/components/brand/scribble";
 
 export const metadata: Metadata = {
   description:
@@ -66,7 +68,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
             <div>
               <p className="sl-tagline text-xs text-white/75 md:text-sm">Bouge. Rencontre. Partage.</p>
               <h1 className="mt-4 font-display text-[clamp(2.4rem,4.5vw+1rem,4.25rem)] leading-[1.04] font-black tracking-tight text-balance">
-                Trouve des partenaires de sport <span className="text-mint-500">près de chez toi.</span>
+                Trouve des partenaires de sport <span className="text-mint-500">près de <Marked>chez toi.</Marked></span>
               </h1>
               <p className="sl-bar mt-6 max-w-lg text-base text-pretty md:text-lg">
                 Un five ce soir, un tennis demain, un footing dimanche : rejoins une séance ou lance la tienne. Débutant
@@ -99,12 +101,20 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
                 </span>
               </div>
               <AuthCard>{children}</AuthCard>
+              {/* Note dans la marge, pointant vers le formulaire (grand écran). */}
+              <Annotation
+                className="top-24 -left-52 hidden xl:flex"
+                arrowClassName="top-8 left-32 size-20 rotate-[-10deg]"
+              >
+                c&apos;est gratuit !
+              </Annotation>
             </div>
           </div>
         </section>
 
         <ShowcaseSection />
         <StepsSection />
+        <Marquee />
         <FeaturesSection />
         <SportsSection />
         <StorySection />

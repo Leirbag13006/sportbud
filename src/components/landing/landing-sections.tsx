@@ -13,6 +13,8 @@ import type { ReactNode } from "react";
 
 import { AUDIENCE_BORDER_CLASSES, AudienceBadge } from "@/components/activities/audience-badge";
 import { PhotoBackdrop } from "@/components/brand/photo-backdrop";
+import { Marked, Scribble } from "@/components/brand/scribble";
+import { Stamp } from "@/components/brand/stamp";
 import { Emoji, getEmojiSrc, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,7 @@ function SectionTitle({
   intro,
   onDark = false,
   center = false,
+  mark,
 }: {
   eyebrow: string;
   title: string;
@@ -42,6 +45,8 @@ function SectionTitle({
   intro?: string;
   onDark?: boolean;
   center?: boolean;
+  /** Trait à la main sur l'accent (souligné ou entouré). */
+  mark?: "underline" | "circle";
 }) {
   return (
     <div className={center ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
@@ -51,7 +56,8 @@ function SectionTitle({
       <h2
         className={`sl-bar mt-3 text-3xl leading-[1.1] font-extrabold text-balance md:text-[2.75rem] ${center ? "[&::after]:mx-auto" : ""}`}
       >
-        {title} <span className={onDark ? "text-mint-500" : "text-brand-text"}>{accent}</span>
+        {title}{" "}
+        <span className={onDark ? "text-mint-500" : "text-brand-text"}>{mark ? <Marked kind={mark}>{accent}</Marked> : accent}</span>
       </h2>
       {intro && <p className="mt-5 text-base text-pretty md:text-lg">{intro}</p>}
     </div>
@@ -67,8 +73,9 @@ export function ShowcaseSection() {
     <section aria-label="Aperçu de l'application" className="relative flow-root bg-sand-50 pb-20 md:pb-28">
       {/* L'aperçu remonte sur le bas du hero (effet de profondeur). */}
       <Container className="relative z-10 -mt-32 md:-mt-44">
-        <Reveal className="mx-auto max-w-5xl">
+        <Reveal className="relative mx-auto max-w-5xl">
           <ProductPreview />
+          <Stamp className="absolute -top-14 -right-4 hidden size-28 md:block lg:-right-12 lg:size-32" />
         </Reveal>
         <ul className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-6 text-center md:grid-cols-4">
           {[
@@ -116,7 +123,7 @@ export function StepsSection() {
       <PhotoBackdrop src="/sports/running.jpg" tone="light" position="center 60%" />
       <Container className="relative">
         <Reveal>
-          <SectionTitle eyebrow="Comment ça marche" title="Du canapé au terrain" accent="en 3 étapes." center />
+          <SectionTitle eyebrow="Comment ça marche" title="Du canapé au terrain" accent="en 3 étapes." center mark="underline" />
         </Reveal>
         <ol className="relative mt-14 grid gap-6 md:grid-cols-3">
           {/* Ligne menthe qui relie les étapes (desktop) */}
@@ -182,6 +189,7 @@ export function FeaturesSection() {
             eyebrow="Fonctionnalités"
             title="Tout ce qu'il faut pour"
             accent="ne plus jouer seul."
+            mark="underline"
             intro="Pensé pour aller vite : tu trouves, tu rejoins, tu joues. Et quand tu organises, c'est toi qui gardes la main."
             onDark
           />
@@ -352,7 +360,7 @@ export function SportsSection() {
       <Container>
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <Reveal>
-            <SectionTitle eyebrow="12 sports" title="Ton sport," accent="ton rythme." />
+            <SectionTitle eyebrow="12 sports" title="Ton sport," accent="ton rythme." mark="circle" />
           </Reveal>
           <Reveal delay={100}>
             <Button variant="outline" nativeButton={false} render={<Link href="/register#acces" />}>
@@ -405,8 +413,9 @@ export function StorySection() {
       </div>
       <Container className="relative py-24 md:py-36">
         <Reveal className="max-w-xl text-white/85">
-          <h2 id="story-title" className="text-4xl leading-[1.05] font-black text-white md:text-6xl">
+          <h2 id="story-title" className="relative text-4xl leading-[1.05] font-black text-white md:text-6xl">
             Le sport, c&apos;est mieux <span className="text-mint-500">à plusieurs.</span>
+            <Scribble kind="spark" stroke={3} delay={300} className="absolute -top-8 -left-10 size-10 md:-left-14 md:size-12" />
           </h2>
           <p className="sl-bar mt-6 text-lg text-pretty">
             Derrière chaque séance, il y a des gens qui avaient juste envie de bouger. Un five qui devient un rendez-vous
@@ -437,6 +446,7 @@ export function TestimonialsSection() {
             eyebrow="Ils bougent avec nous"
             title="Des rencontres qui restent"
             accent="après le match."
+            mark="underline"
             intro="Des séances locales, des profils authentiques et une communauté qui se retrouve vraiment."
             center
           />
@@ -554,7 +564,9 @@ export function FinalCtaSection() {
             <p className="relative mx-auto mt-4 max-w-lg text-lg">
               Rejoins la communauté en moins d&apos;une minute. C&apos;est gratuit, et tu peux commencer dès ce soir.
             </p>
+            <Scribble kind="zigzag" stroke={3} delay={200} className="absolute top-8 right-8 hidden h-5 w-28 md:block" />
             <div className="relative mt-8 flex flex-wrap justify-center gap-3">
+              <Scribble kind="arrow-curl" stroke={3} delay={500} className="absolute -top-16 left-[calc(50%-17rem)] hidden size-20 lg:block" />
               <Button size="lg" nativeButton={false} render={<Link href="/register#acces" />}>
                 Créer mon compte gratuit
                 <ArrowRight aria-hidden />

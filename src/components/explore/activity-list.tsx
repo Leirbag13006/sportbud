@@ -2,6 +2,7 @@
 
 import { SearchX, Sparkles } from "lucide-react";
 
+import { Scribble } from "@/components/brand/scribble";
 import { Button } from "@/components/ui/button";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
 import { pluralize } from "@/lib/format";
@@ -107,7 +108,7 @@ export function ActivityList({
           <div className="mb-5 flex items-end justify-between gap-4">
             <h2 id="for-you-title" className="sl-bar text-lg font-extrabold md:text-xl">
               <Sparkles className="mr-2 inline size-5 align-[-3px] text-brand-text" aria-hidden />
-              Pour <span className="text-brand-text">toi</span>
+              Pour <span className="relative text-brand-text">toi<Scribble kind="spark" stroke={2.5} className="absolute -top-3 -right-5 size-5" /></span>
             </h2>
             <p className="text-sm">Tes sports, à ton niveau</p>
           </div>
