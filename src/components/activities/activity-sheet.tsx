@@ -43,7 +43,7 @@ import { BadgeRow } from "@/components/achievements/achievements-grid";
 import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
 import { applyToActivity, withdrawApplication } from "@/lib/applications/actions";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
-import { formatDay, formatDuration, formatPrice, formatTime, pluralize } from "@/lib/format";
+import { formatDay, formatPrice, formatTimeRange, pluralize } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface ActivitySheetProps {
@@ -171,7 +171,7 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
             {formatDay(activity.startsAt)}
           </DetailItem>
           <DetailItem icon={Timer} label="Horaire">
-            {formatTime(activity.startsAt)} · {formatDuration(activity.durationMinutes)}
+            {formatTimeRange(activity.startsAt, activity.durationMinutes)}
           </DetailItem>
           <DetailItem icon={Gauge} label="Niveau requis">
             {activity.requiredLevel ? getSportLevelLabel(activity.requiredLevel) : "Tous niveaux"}

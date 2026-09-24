@@ -14,7 +14,7 @@ import { getActivityTitle, getSport } from "@/config/sports";
 import type { ExploreActivity } from "@/lib/activities/types";
 import { applyToActivity } from "@/lib/applications/actions";
 import type { MyApplicationSummary } from "@/lib/applications/types";
-import { formatDay, formatHour, formatPrice } from "@/lib/format";
+import { formatDay, formatPrice, formatTimeRange } from "@/lib/format";
 import { formatDistance } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 
@@ -97,7 +97,7 @@ export function ActivityCard({
           {activity.requiredLevel ? `Niveau ${getSportLevelLabel(activity.requiredLevel).toLowerCase()}` : "Tous niveaux bienvenus"}
         </p>
         <p className="truncate text-xs text-gray-400">
-          {formatDay(activity.startsAt)} • {formatHour(activity.startsAt)}
+          {formatDay(activity.startsAt)} • {formatTimeRange(activity.startsAt, activity.durationMinutes)}
         </p>
         <OrganizerLine activity={activity} />
 

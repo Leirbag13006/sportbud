@@ -17,7 +17,7 @@ import {
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM } from "@/config/map";
 import { getSport } from "@/config/sports";
 import type { ActivityWithCreator } from "@/lib/activities/types";
-import { formatDay, formatTime } from "@/lib/format";
+import { formatDay, formatTimeRange } from "@/lib/format";
 import { VectorBaseLayer } from "./vector-base-layer";
 import { createActivityIcon, createUserLocationIcon, draftLocationIcon, type MapUser } from "./marker-icons";
 
@@ -181,7 +181,7 @@ function ActivityMarker({ activity, selected, onSelect }: ActivityMarkerProps) {
       position={[activity.lat, activity.lng]}
       icon={icon}
       // Libellé lu par les lecteurs d'écran et affiché au survol.
-      title={`${label}, ${formatDay(activity.startsAt)} à ${formatTime(activity.startsAt)}, ${spots}`}
+      title={`${label}, ${formatDay(activity.startsAt)}, ${formatTimeRange(activity.startsAt, activity.durationMinutes)}, ${spots}`}
       // Les marqueurs sélectionnés et ouverts passent au premier plan.
       zIndexOffset={selected ? 1000 : activity.status === "open" ? 0 : -50}
       eventHandlers={eventHandlers}

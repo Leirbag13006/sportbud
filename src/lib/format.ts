@@ -22,6 +22,12 @@ export function formatTime(date: Date) {
   return timeFormatter.format(date);
 }
 
+/** Créneau d'une activité : « 17:00-18:30 ». */
+export function formatTimeRange(start: Date, durationMinutes: number) {
+  const end = new Date(start.getTime() + durationMinutes * 60_000);
+  return `${formatTime(start)}-${formatTime(end)}`;
+}
+
 /** Heure courte à la française : « 19h », « 19h30 ». */
 export function formatHour(date: Date) {
   const minutes = date.getMinutes();
