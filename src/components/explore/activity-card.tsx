@@ -51,6 +51,7 @@ export function ActivityCard({
   const sport = getSport(activity.sportType);
   const isFull = activity.status !== "open";
   const title = getActivityTitle(activity.sportType, isFull ? activity.spotsTotal : activity.spotsAvailable);
+  const place = activity.locationName ?? activity.address;
   const people = [activity.creator, ...activity.participants];
 
   return (
@@ -103,6 +104,14 @@ export function ActivityCard({
         <p className="truncate text-xs text-gray-400">
           {formatDay(activity.startsAt)} • {formatTimeRange(activity.startsAt, activity.durationMinutes)}
         </p>
+        <p className="flex min-w-0 items-center gap-1 text-xs text-gray-400">
+          <MapPin className="size-3.5 shrink-0" aria-hidden />
+          <span className="truncate">
+            {distanceKm !== null && <span className="font-semibold text-gray-600">{formatDistance(distanceKm)}</span>}
+            {distanceKm !== null && place && " • "}
+            {place ?? (distanceKm === null ? "Voir la carte" : null)}
+          </span>
+        </p>
         <OrganizerLine activity={activity} />
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
@@ -117,12 +126,6 @@ export function ActivityCard({
                 </span>
               )}
             </div>
-            <span className="flex min-w-0 items-center gap-1 text-xs font-medium text-gray-400">
-              <MapPin className="size-3.5 shrink-0" aria-hidden />
-              <span className="truncate">
-                {distanceKm !== null ? formatDistance(distanceKm) : (activity.locationName ?? activity.address ?? "Voir la carte")}
-              </span>
-            </span>
           </div>
 
           <div className="relative z-10 shrink-0">

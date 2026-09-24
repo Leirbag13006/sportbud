@@ -16,7 +16,7 @@ import { formatDay, formatTime, pluralize } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Mes activités" };
 
-/** Tableau de bord : candidatures à traiter, activités organisées, candidatures envoyées. */
+/** Tableau de bord : candidatures à traiter, avis à donner, activités organisées, candidatures envoyées. */
 export default async function ActivitiesPage() {
   const user = await requireUser();
   const [organized, received, sent, toReview] = await Promise.all([
@@ -32,6 +32,49 @@ export default async function ActivitiesPage() {
 
   const pendingReceived = received.filter((application) => application.status === "pending");
 
+  // Avis à donner : juste après les candidatures (action attendue) ; une fois tous donnés, en bas de page.
+  const reviewSection =
+    toReview.length > 0 ? (
+      <DashboardSection
+        id="to-review"
+        title={reviewsLeft > 0 ? "Séances terminées : laisse ton avis" : "Séances terminées"}
+        count={reviewsLeft}
+        isEmpty={false}
+        emptyMessage=""
+      >
+        <p className="-mt-1 text-sm">
+          {reviewsLeft > 0
+            ? "Participants comme organisateurs : ton avis aide toute la communauté à choisir ses partenaires. Il reste visible sur leur profil."
+            : "Merci pour tes avis ! Tu peux encore les modifier."}
+        </p>
+        <ul className="space-y-6">
+          {toReview.map((activity) => {
+            const sport = getSport(activity.sportType);
+            return (
+              <li key={`${activity.role}-${activity.id}`} className="space-y-2">
+                <p className="font-display text-sm font-bold text-ink">
+                  {sport.label} · {formatDay(activity.startsAt)} à {formatTime(activity.startsAt)}
+                  <span className="ml-2 font-sans text-xs font-normal text-gray-400">
+                    {activity.role === "organizer" ? "Tu organisais" : "Note l'organisateur·rice"}
+                  </span>
+                </p>
+                <div className="space-y-2">
+                  {activity.participants.map((participant) => (
+                    <ReviewForm
+                      key={participant.user.id}
+                      activityId={activity.id}
+                      participant={participant}
+                      revieweeRole={activity.role === "organizer" ? "participant" : "organizer"}
+                    />
+                  ))}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </DashboardSection>
+    ) : null;
+
   return (
     <>
       <PageHeader
@@ -42,46 +85,6 @@ export default async function ActivitiesPage() {
       />
 
       <div className="mx-auto w-full max-w-3xl space-y-10 px-4 py-8 md:px-6">
-        {toReview.length > 0 && (
-          <DashboardSection
-            id="to-review"
-            title="Séances terminées : laisse ton avis"
-            count={reviewsLeft}
-            isEmpty={false}
-            emptyMessage=""
-          >
-            <p className="-mt-1 text-sm">
-              Participants comme organisateurs : ton avis aide toute la communauté à choisir ses partenaires. Il reste
-              visible sur leur profil.
-            </p>
-            <ul className="space-y-6">
-              {toReview.map((activity) => {
-                const sport = getSport(activity.sportType);
-                return (
-                  <li key={`${activity.role}-${activity.id}`} className="space-y-2">
-                    <p className="font-display text-sm font-bold text-ink">
-                      {sport.label} · {formatDay(activity.startsAt)} à {formatTime(activity.startsAt)}
-                      <span className="ml-2 font-sans text-xs font-normal text-gray-400">
-                        {activity.role === "organizer" ? "Tu organisais" : "Note l'organisateur·rice"}
-                      </span>
-                    </p>
-                    <div className="space-y-2">
-                      {activity.participants.map((participant) => (
-                        <ReviewForm
-                          key={participant.user.id}
-                          activityId={activity.id}
-                          participant={participant}
-                          revieweeRole={activity.role === "organizer" ? "participant" : "organizer"}
-                        />
-                      ))}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </DashboardSection>
-        )}
-
         <DashboardSection
           id="pending-applications"
           title="Candidatures à traiter"
@@ -103,6 +106,8 @@ export default async function ActivitiesPage() {
             })}
           </ul>
         </DashboardSection>
+
+        {reviewsLeft > 0 && reviewSection}
 
         <DashboardSection
           id="organized-activities"
@@ -154,6 +159,8 @@ export default async function ActivitiesPage() {
             ))}
           </ul>
         </DashboardSection>
+
+        {reviewsLeft === 0 && reviewSection}
       </div>
     </>
   );

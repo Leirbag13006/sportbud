@@ -64,7 +64,7 @@ export function ActivityList({
   const renderCards = (list: ExploreItem[], priorityCount: number) => (
     <ul className="grid gap-3 lg:grid-cols-2">
       {list.map(({ activity, distanceKm }, index) => (
-        <li key={activity.id}>
+        <li key={activity.id} className="min-w-0">
           <ActivityCard
             activity={activity}
             distanceKm={distanceKm}

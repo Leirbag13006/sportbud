@@ -114,7 +114,7 @@ export function ProductPreview() {
         <div className="bg-sand-50 px-4 py-5 md:px-6">
           <ul className="grid gap-3 lg:grid-cols-2">
             {SEEDS.map((seed, index) => (
-              <li key={index}>
+              <li key={index} className="min-w-0">
                 <ActivityCard
                   activity={toActivity(seed, index)}
                   distanceKm={seed.distanceKm}
