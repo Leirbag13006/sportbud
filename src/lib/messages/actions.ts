@@ -25,9 +25,9 @@ export async function sendMessage(conversationId: string, content: string): Prom
   const parsed = contentSchema.safeParse(content);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]!.message };
 
-  if (!(await getConversation(user.id, conversationId))) {
-    return { ok: false, error: "Cette conversation n'est plus disponible." };
-  }
+  const conversation = await getConversation(user.id, conversationId);
+  if (!conversation) return { ok: false, error: "Cette conversation n'est plus disponible." };
+  if (conversation.blockStatus) return { ok: false, error: "Tu ne peux plus écrire à ce membre." };
 
   const [message] = await db
     .insert(messages)

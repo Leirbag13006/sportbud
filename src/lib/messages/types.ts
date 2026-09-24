@@ -1,5 +1,6 @@
 import type { Message, PublicUser, SportType } from "@/db/schema";
 import type { EarnedBadge } from "@/lib/achievements/definitions";
+import type { BlockStatus } from "@/lib/safety/types";
 
 /**
  * Types échangés avec le navigateur (API JSON) : les dates sont des chaînes ISO.
@@ -24,6 +25,8 @@ export interface ConversationDTO {
   otherUser: ConversationUser;
   /** Rôle de l'utilisateur courant dans l'activité. */
   myRole: "creator" | "participant";
+  /** Blocage entre les deux membres : la conversation reste lisible mais l'envoi est coupé. */
+  blockStatus: BlockStatus;
 }
 
 export interface MessageDTO {

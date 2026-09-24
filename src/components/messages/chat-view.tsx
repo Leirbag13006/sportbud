@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Loader2, MapPin, RotateCcw, SendHorizontal } from "lucide-react";
+import { ArrowLeft, Ban, Loader2, MapPin, RotateCcw, SendHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
@@ -8,6 +8,7 @@ import useSWR, { useSWRConfig } from "swr";
 
 import { UserAvatar } from "@/components/applications/user-avatar";
 import { NOTIFICATIONS_KEY } from "@/components/layout/app-navigation";
+import { UserSafetyMenu } from "@/components/safety/user-safety-menu";
 import { Button } from "@/components/ui/button";
 import { getSport } from "@/config/sports";
 import { FetchError, fetcher, POLL_INTERVALS } from "@/lib/fetcher";
@@ -98,15 +99,31 @@ export function ChatView({ initialData, currentUserId }: ChatViewProps) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <ChatHeader data={data} />
+      <ChatHeader data={data} onSafetyChange={() => void mutate()} />
       <MessageList messages={messages} currentUserId={currentUserId} otherUser={data.conversation.otherUser} onRetry={send} />
-      <Composer onSend={send} otherName={data.conversation.otherUser.fullName.split(" ")[0]!} />
+      {data.conversation.blockStatus ? (
+        <BlockedNotice status={data.conversation.blockStatus} />
+      ) : (
+        <Composer onSend={send} otherName={data.conversation.otherUser.fullName.split(" ")[0]!} />
+      )}
     </div>
   );
 }
 
-/** En-tête : retour (mobile), interlocuteur et activité concernée. */
-function ChatHeader({ data }: { data: ConversationWithMessagesDTO }) {
+/** Remplace la zone de saisie quand l'un des deux membres a bloqué l'autre. */
+function BlockedNotice({ status }: { status: "by-me" | "by-them" }) {
+  return (
+    <p className="flex shrink-0 items-center justify-center gap-2 border-t bg-muted/40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-center text-sm text-gray-600">
+      <Ban className="size-4 shrink-0" aria-hidden />
+      {status === "by-me"
+        ? "Tu as bloqué ce membre. Débloque-le depuis le menu ⋯ pour lui écrire à nouveau."
+        : "Tu ne peux plus écrire à ce membre."}
+    </p>
+  );
+}
+
+/** En-tête : retour (mobile), interlocuteur, activité concernée et options (signaler / bloquer). */
+function ChatHeader({ data, onSafetyChange }: { data: ConversationWithMessagesDTO; onSafetyChange: () => void }) {
   const { conversation } = data;
   const sport = getSport(conversation.activity.sportType);
   const startsAt = new Date(conversation.activity.startsAt);
@@ -140,6 +157,11 @@ function ChatHeader({ data }: { data: ConversationWithMessagesDTO }) {
         <MapPin aria-hidden />
         <span className="hidden sm:inline">Voir l&apos;activité</span>
       </Button>
+      <UserSafetyMenu
+        user={conversation.otherUser}
+        blockStatus={conversation.blockStatus}
+        onChange={onSafetyChange}
+      />
     </header>
   );
 }

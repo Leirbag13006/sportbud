@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { activities, applications, messages } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
+import { isBlockedBetween } from "@/lib/safety/queries";
 
 export type ApplicationActionResult = { ok: true } | { ok: false; error: string };
 
@@ -26,6 +27,9 @@ export async function applyToActivity(activityId: string): Promise<ApplicationAc
   if (activity.creatorId === user.id) return { ok: false, error: "Tu ne peux pas postuler à ta propre activité." };
   if (activity.startsAt.getTime() <= Date.now()) return { ok: false, error: "Cette activité a déjà commencé." };
   if (activity.status !== "open") return { ok: false, error: "Cette activité est complète." };
+  if (await isBlockedBetween(user.id, activity.creatorId)) {
+    return { ok: false, error: "Tu ne peux pas rejoindre cette activité." };
+  }
 
   const [created] = await db
     .insert(applications)
@@ -99,6 +103,9 @@ export async function respondToApplication(
       return { ok: false, error: "Candidature introuvable." };
     }
     if (application.status !== "pending") return { ok: false, error: "Cette candidature a déjà été traitée." };
+    if (decision === "accepted" && (await isBlockedBetween(user.id, application.applicantId))) {
+      return { ok: false, error: "Tu as bloqué ce membre (ou il t'a bloqué) : impossible de l'accepter." };
+    }
 
     if (decision === "accepted") {
       // Toutes les expressions du SET utilisent les valeurs avant mise à jour (SQL standard).

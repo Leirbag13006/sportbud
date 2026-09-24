@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge";
 import { ReceivedApplicationRow } from "@/components/applications/received-application-row";
 import { UserAvatar } from "@/components/applications/user-avatar";
+import { UserSafetyMenu } from "@/components/safety/user-safety-menu";
 import { SportIcon } from "@/components/brand/sport-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,7 @@ export function ActivitySheet({
             myApplication={myApplication}
             receivedApplications={receivedApplications}
             onShowOnMap={onShowOnMap}
+            onClose={onClose}
           />
         )}
       </DrawerContent>
@@ -102,9 +104,10 @@ interface ActivityDetailsProps {
   myApplication: MyApplicationSummary | null;
   receivedApplications: ReceivedApplication[];
   onShowOnMap?: () => void;
+  onClose: () => void;
 }
 
-function ActivityDetails({ activity, isOwn, myApplication, receivedApplications, onShowOnMap }: ActivityDetailsProps) {
+function ActivityDetails({ activity, isOwn, myApplication, receivedApplications, onShowOnMap, onClose }: ActivityDetailsProps) {
   const sport = getSport(activity.sportType);
   const isOpen = activity.status === "open";
   const takenSpots = activity.spotsTotal - activity.spotsAvailable;
@@ -152,7 +155,7 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
         {/* Créateur */}
         <div className="flex items-center gap-3 rounded-xl border p-3">
           <UserAvatar user={activity.creator} />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate font-medium">
               {activity.creator.fullName}
               {isOwn && <span className="font-normal text-muted-foreground"> (toi)</span>}
@@ -162,6 +165,8 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
             </p>
             <RatingSummaryBadge rating={activity.creatorRating} className="mt-1" />
           </div>
+          {/* Bloquer : l'activité disparaît de la liste, on ferme la fiche. */}
+          {!isOwn && <UserSafetyMenu user={activity.creator} onBlocked={onClose} className="-mr-1 shrink-0" />}
         </div>
         {activity.creatorBadges.length > 0 && <BadgeRow badges={activity.creatorBadges} className="-mt-2 justify-start" />}
 

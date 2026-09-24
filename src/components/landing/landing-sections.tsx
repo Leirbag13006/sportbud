@@ -14,6 +14,7 @@ import type { ReactNode } from "react";
 import { Emoji, getEmojiSrc, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
+import { LEGAL_PAGES } from "@/config/legal";
 import { SPORTS } from "@/config/sports";
 import type { SportType } from "@/db/schema";
 import { ProductPreview } from "./product-preview";
@@ -488,28 +489,68 @@ export function FinalCtaSection() {
   );
 }
 
+const FOOTER_COLUMNS = [
+  {
+    title: "Produit",
+    links: [
+      { href: "#fonctionnement", label: "Comment ça marche" },
+      { href: "#fonctionnalites", label: "Fonctionnalités" },
+      { href: "#faq", label: "Questions fréquentes" },
+    ],
+  },
+  {
+    title: "Compte",
+    links: [
+      { href: "/register#acces", label: "Créer un compte" },
+      { href: "/login#acces", label: "Se connecter" },
+      { href: "/forgot-password", label: "Mot de passe oublié" },
+    ],
+  },
+  {
+    title: "Légal",
+    links: [
+      ...LEGAL_PAGES.map(({ slug, title, accent }) => ({
+        href: `/legal/${slug}`,
+        label: `${title} ${accent.replace(/\.$/, "")}`,
+      })),
+      { href: "/credits", label: "Crédits photos" },
+    ],
+  },
+];
+
 export function LandingFooter() {
   return (
-    <footer className="bg-night-950 py-10 text-sm text-white/65">
-      <Container className="flex flex-col items-center justify-between gap-6 md:flex-row">
-        <Logo variant="dark" size="sm" href={null} />
-        <nav aria-label="Liens du pied de page">
-          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {[
-              { href: "#fonctionnement", label: "Comment ça marche" },
-              { href: "#faq", label: "Questions" },
-              { href: "/login#acces", label: "Se connecter" },
-              { href: "/credits", label: "Crédits photos" },
-            ].map(({ href, label }) => (
-              <li key={href}>
-                <Link href={href} className="rounded transition-colors outline-none hover:text-mint-500 focus-visible:ring-3 focus-visible:ring-ring">
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <p>© {new Date().getFullYear()} SportMates</p>
+    <footer className="bg-night-950 pt-14 pb-28 text-sm text-white/65 md:pb-10">
+      <Container>
+        <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+          <div>
+            <Logo variant="dark" size="sm" href={null} withTagline />
+            <p className="mt-4 max-w-xs text-pretty">
+              La communauté pour trouver des partenaires de sport près de chez toi, à ton niveau.
+            </p>
+          </div>
+          {FOOTER_COLUMNS.map((column) => (
+            <nav key={column.title} aria-label={column.title}>
+              <p className="font-display text-xs font-bold tracking-widest text-white uppercase">{column.title}</p>
+              <ul className="mt-4 space-y-2.5">
+                {column.links.map(({ href, label }) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className="rounded transition-colors outline-none hover:text-mint-500 focus-visible:ring-3 focus-visible:ring-ring"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+        <div className="mt-12 flex flex-col gap-2 border-t border-night-700 pt-6 text-xs md:flex-row md:justify-between">
+          <p>© {new Date().getFullYear()} SportMates. Tous droits réservés.</p>
+          <p>Fait avec passion pour les sportifs du dimanche… et des autres jours.</p>
+        </div>
       </Container>
     </footer>
   );

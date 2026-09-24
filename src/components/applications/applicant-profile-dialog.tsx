@@ -22,6 +22,7 @@ import { ReviewList } from "@/components/reviews/review-list";
 import type { ApplicantProfile } from "@/lib/applications/types";
 import type { RatingSummary, ReviewItem } from "@/lib/reviews/types";
 import { UserAvatar } from "./user-avatar";
+import { UserSafetyMenu } from "@/components/safety/user-safety-menu";
 
 const memberSince = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
 
@@ -43,6 +44,8 @@ export function ApplicantProfileDialog({ applicant, rating, reviews, badges, onC
       <DialogContent className="sm:max-w-sm">
         {applicant && (
           <>
+            {/* Coin supérieur gauche : le bouton de fermeture occupe le coin droit. */}
+            <UserSafetyMenu user={applicant} onBlocked={onClose} className="absolute top-2 left-2" />
             <DialogHeader className="items-center text-center">
               <UserAvatar user={applicant} className="size-20 text-xl" />
               <DialogTitle className="text-lg">{applicant.fullName}</DialogTitle>

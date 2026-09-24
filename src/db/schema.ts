@@ -331,6 +331,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   reviewsReceived: many(reviews, { relationName: "reviewee" }),
   reviewsWritten: many(reviews, { relationName: "reviewer" }),
+  blocksMade: many(blocks, { relationName: "blocker" }),
+  blocksReceived: many(blocks, { relationName: "blocked" }),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -353,6 +355,11 @@ export const applicationsRelations = relations(applications, ({ one, many }) => 
   activity: one(activities, { fields: [applications.activityId], references: [activities.id] }),
   applicant: one(users, { fields: [applications.applicantId], references: [users.id] }),
   messages: many(messages),
+}));
+
+export const blocksRelations = relations(blocks, ({ one }) => ({
+  blocker: one(users, { fields: [blocks.blockerId], references: [users.id], relationName: "blocker" }),
+  blocked: one(users, { fields: [blocks.blockedId], references: [users.id], relationName: "blocked" }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({

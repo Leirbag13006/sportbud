@@ -15,6 +15,8 @@ import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
 import { ReviewList } from "@/components/reviews/review-list";
 import { requireUser } from "@/lib/auth/session";
 import { getRatingSummary, getUserReviews } from "@/lib/reviews/queries";
+import { BlockedUsersList } from "@/components/safety/blocked-users-list";
+import { getBlockedUsers } from "@/lib/safety/queries";
 
 export const metadata: Metadata = { title: "Profil" };
 
@@ -23,10 +25,11 @@ const memberSince = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "num
 /** Profil de l'utilisateur connecté. */
 export default async function ProfilePage() {
   const user = await requireUser();
-  const [rating, reviews, achievements] = await Promise.all([
+  const [rating, reviews, achievements, blockedUsers] = await Promise.all([
     getRatingSummary(user.id),
     getUserReviews(user.id),
     getAchievements(user.id),
+    getBlockedUsers(user.id),
   ]);
   const unlockedCount = achievements.filter((achievement) => achievement.unlocked).length;
 
@@ -106,14 +109,14 @@ export default async function ProfilePage() {
           </div>
         </section>
 
-        {/* Réputation : avis laissés par les organisateurs des séances rejointes */}
+        {/* Réputation : avis reçus après les séances, en tant qu'organisateur ou participant */}
         <section aria-labelledby="reputation-title" className="rounded-card bg-card p-5 shadow-md">
           <h2 id="reputation-title" className="sl-bar text-lg font-extrabold">
             Ma réputation
           </h2>
           <p className="mt-4 mb-4 text-sm">
-            Après chaque séance, l&apos;organisateur peut te laisser une note. Elle aide les autres à t&apos;accepter
-            dans leurs activités.
+            Après chaque séance, organisateur et participants se notent mutuellement. Ta note aide les autres à
+            rejoindre tes activités… et à t&apos;accepter dans les leurs.
           </p>
           <ReviewList reviews={reviews} emptyMessage="Pas encore d'avis : participe à une séance pour en recevoir." />
         </section>
@@ -131,6 +134,17 @@ export default async function ProfilePage() {
           </span>
           <ChevronRight className="size-5 text-gray-400" aria-hidden />
         </Link>
+
+        {/* Sécurité : membres bloqués */}
+        <section aria-labelledby="blocked-title" className="rounded-card bg-card p-5 shadow-md">
+          <h2 id="blocked-title" className="sl-bar text-lg font-extrabold">
+            Membres bloqués
+          </h2>
+          <p className="mt-4 mb-4 text-sm">
+            Vous ne voyez plus vos activités respectives et ne pouvez plus vous écrire.
+          </p>
+          <BlockedUsersList users={blockedUsers} />
+        </section>
 
         <form action={logout}>
           <Button type="submit" variant="outline" className="w-full sm:w-auto">

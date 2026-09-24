@@ -7,6 +7,8 @@ import { activities, applications, messages, type Message } from "@/db/schema";
 import { countPendingReceivedApplications } from "@/lib/applications/queries";
 import { getUnseenAchievements, syncAchievements } from "@/lib/achievements/queries";
 import { countReviewsToWrite } from "@/lib/reviews/queries";
+import { getBlockRelations } from "@/lib/safety/queries";
+import type { BlockStatus } from "@/lib/safety/types";
 import type {
   ConversationDTO,
   ConversationSummaryDTO,
@@ -54,9 +56,14 @@ function findConversationRows(userId: string, applicationId?: string) {
   });
 }
 
-function toConversationDTO(row: ApplicationRow, userId: string): ConversationDTO {
+function toConversationDTO(
+  row: ApplicationRow,
+  userId: string,
+  statusWith: (otherId: string) => BlockStatus,
+): ConversationDTO {
   const { activity } = row;
   const isCreator = activity.creatorId === userId;
+  const otherUser = isCreator ? row.applicant : activity.creator;
   return {
     id: row.id,
     activity: {
@@ -66,8 +73,9 @@ function toConversationDTO(row: ApplicationRow, userId: string): ConversationDTO
       locationName: activity.locationName,
       address: activity.address,
     },
-    otherUser: isCreator ? row.applicant : activity.creator,
+    otherUser,
     myRole: isCreator ? "creator" : "participant",
+    blockStatus: statusWith(otherUser.id),
   };
 }
 
@@ -84,8 +92,11 @@ export function toMessageDTO(message: Pick<Message, "id" | "senderId" | "content
 
 /** Conversation si l'utilisateur y a accès, sinon null. */
 export async function getConversation(userId: string, applicationId: string): Promise<ConversationDTO | null> {
-  const [row] = await findConversationRows(userId, applicationId);
-  return row ? toConversationDTO(row, userId) : null;
+  const [[row], { statusWith }] = await Promise.all([
+    findConversationRows(userId, applicationId),
+    getBlockRelations(userId),
+  ]);
+  return row ? toConversationDTO(row, userId, statusWith) : null;
 }
 
 /** Messages d'une conversation, du plus ancien au plus récent. L'accès doit avoir été vérifié. */
@@ -106,7 +117,7 @@ export async function listConversations(userId: string): Promise<ConversationSum
   if (rows.length === 0) return [];
   const ids = rows.map((row) => row.id);
 
-  const [recentMessages, unreadRows] = await Promise.all([
+  const [recentMessages, unreadRows, { statusWith }] = await Promise.all([
     db.query.messages.findMany({
       columns: { applicationId: true, content: true, kind: true, senderId: true, createdAt: true },
       where: inArray(messages.applicationId, ids),
@@ -117,6 +128,7 @@ export async function listConversations(userId: string): Promise<ConversationSum
       .from(messages)
       .where(and(inArray(messages.applicationId, ids), ne(messages.senderId, userId), isNull(messages.readAt)))
       .groupBy(messages.applicationId),
+    getBlockRelations(userId),
   ]);
 
   // Messages triés du plus récent au plus ancien : le premier rencontré est le dernier envoyé.
@@ -130,7 +142,7 @@ export async function listConversations(userId: string): Promise<ConversationSum
     .map((row) => {
       const last = lastByConversation.get(row.id);
       return {
-        ...toConversationDTO(row, userId),
+        ...toConversationDTO(row, userId, statusWith),
         lastMessage: last
           ? { content: last.content, kind: last.kind, senderId: last.senderId, createdAt: last.createdAt.toISOString() }
           : null,

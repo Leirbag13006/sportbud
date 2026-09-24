@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { activities, applications } from "@/db/schema";
 import { getEarnedBadges } from "@/lib/achievements/queries";
 import { getRatingSummaries } from "@/lib/reviews/queries";
+import { getBlockRelations } from "@/lib/safety/queries";
 import { NO_RATING } from "@/lib/reviews/types";
 import type { ActivityWithCreator, ExploreActivity } from "./types";
 
@@ -15,11 +16,12 @@ const creatorColumns = { id: true, fullName: true, sportLevel: true, avatarUrl: 
 /**
  * Activités de l'écran Explorer (liste et carte) : non annulées, à venir ou en cours,
  * avec leurs participants acceptés. Les activités complètes restent visibles (grisées).
+ * Les activités des membres bloqués (dans un sens ou dans l'autre) sont masquées.
  */
-export async function getExploreActivities(): Promise<ExploreActivity[]> {
+export async function getExploreActivities(viewerId: string): Promise<ExploreActivity[]> {
   const now = Date.now();
 
-  const rows = await db.query.activities.findMany({
+  const [allRows, { hidden }] = await Promise.all([db.query.activities.findMany({
     columns: { createdAt: false, updatedAt: false },
     with: {
       creator: { columns: creatorColumns },
@@ -36,7 +38,8 @@ export async function getExploreActivities(): Promise<ExploreActivity[]> {
     ),
     orderBy: asc(activities.startsAt),
     limit: 300,
-  });
+  }), getBlockRelations(viewerId)]);
+  const rows = allRows.filter((row) => !hidden.has(row.creatorId));
 
   const creatorIds = rows.map((row) => row.creatorId);
   const [ratings, badges] = await Promise.all([getRatingSummaries(creatorIds), getEarnedBadges(creatorIds, 2)]);

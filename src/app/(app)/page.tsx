@@ -7,7 +7,7 @@ import { requireUser } from "@/lib/auth/session";
 export default async function ExplorePage({ searchParams }: PageProps<"/">) {
   const user = await requireUser();
   const [activities, myApplications, receivedApplications, { activity, view, create }] = await Promise.all([
-    getExploreActivities(),
+    getExploreActivities(user.id),
     getMyApplicationSummaries(user.id),
     getReceivedApplications(user.id),
     searchParams,

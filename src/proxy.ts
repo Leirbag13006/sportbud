@@ -6,6 +6,7 @@ import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 const GUEST_ONLY_PATHS = ["/login", "/register"];
 /** Pages publiques (accessibles connecté ou non). */
 const PUBLIC_PATHS = ["/credits"];
+const PUBLIC_PREFIXES = ["/legal/"];
 /** Routes techniques d'authentification, accessibles dans tous les cas. */
 const AUTH_ROUTES_PREFIX = "/auth/";
 
@@ -24,7 +25,9 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/api/")) return NextResponse.next();
 
   // Pages publiques, accessibles connecté ou non.
-  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
+  if (PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    return NextResponse.next();
+  }
   const isGuestOnly = GUEST_ONLY_PATHS.includes(pathname);
 
   if (!hasSession && !isGuestOnly) {
