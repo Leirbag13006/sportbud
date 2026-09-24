@@ -127,7 +127,7 @@ function ChatHeader({ data }: { data: ConversationWithMessagesDTO }) {
       <div className="min-w-0 flex-1">
         <h1 className="truncate font-semibold">{conversation.otherUser.fullName}</h1>
         <p className="truncate text-xs text-muted-foreground">
-          {conversation.myRole === "creator" ? "Participant" : "Organisateur"} · {sport.emoji} {sport.label},{" "}
+          {conversation.myRole === "creator" ? "Participant" : "Organisateur"} · {sport.label},{" "}
           {formatDay(startsAt).toLowerCase()} à {formatTime(startsAt)}
         </p>
       </div>
@@ -202,7 +202,7 @@ function MessageList({ messages, currentUserId, otherUser, onRetry }: MessageLis
               )}
 
               {message.kind === "system" ? (
-                <p className="my-2 self-center rounded-lg bg-brand-soft px-3 py-2 text-center text-xs text-primary">
+                <p className="my-2 self-center rounded-lg bg-brand-soft px-3 py-2 text-center text-xs text-brand-text">
                   🎉 {message.content}
                 </p>
               ) : (

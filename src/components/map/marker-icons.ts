@@ -1,6 +1,7 @@
 import { divIcon } from "leaflet";
 
-import { getSport } from "@/config/sports";
+import { SPORT_ICON_MARKUP, SPORT_ICON_SVG_ATTRS } from "@/components/brand/sport-icon";
+
 import type { ActivityWithCreator } from "@/lib/activities/types";
 import { getInitials } from "@/lib/format";
 
@@ -17,12 +18,12 @@ function escapeHtml(value: string) {
 
 /**
  * Icônes Leaflet en HTML (divIcon), stylées par les classes `.map-marker-*` de globals.css.
- * Le contenu injecté ne provient que de valeurs contrôlées (emoji de la config, nombres).
+ * Le contenu injecté ne provient que de valeurs contrôlées (icônes statiques, nombres) ou échappées.
  */
 
-/** Marqueur d'activité : pastille avec l'emoji du sport et un badge du nombre de places restantes. */
+/** Marqueur d'activité : pastille avec l'icône du sport et un badge du nombre de places restantes. */
 export function createActivityIcon(activity: ActivityWithCreator, selected: boolean) {
-  const { emoji } = getSport(activity.sportType);
+  const icon = `<svg ${SPORT_ICON_SVG_ATTRS}>${SPORT_ICON_MARKUP[activity.sportType]}</svg>`;
   const isFull = activity.status !== "open";
   const badge = isFull ? "Complet" : String(activity.spotsAvailable);
 
@@ -33,7 +34,7 @@ export function createActivityIcon(activity: ActivityWithCreator, selected: bool
   return divIcon({
     className: "", // supprime le style par défaut de Leaflet (carré blanc)
     html: `<div class="${classes}">
-      <span class="map-marker-activity__emoji" aria-hidden="true">${emoji}</span>
+      <span class="map-marker-activity__icon">${icon}</span>
       <span class="map-marker-activity__badge">${badge}</span>
     </div>`,
     iconSize: [44, 52],

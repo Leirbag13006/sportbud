@@ -5,7 +5,6 @@ import { Check, LocateFixed, Loader2, MapPin, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { CreateActivityFab } from "@/components/activities/create-activity-fab";
 import {
   createDefaultFormValues,
   type ActivityFormValues,
@@ -202,7 +201,7 @@ export function MapView({
         <>
           <div className="absolute inset-x-4 top-4 z-10 mx-auto max-w-md space-y-2.5 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur">
             <div className="flex items-center gap-3">
-              <MapPin className="size-5 shrink-0 text-primary" aria-hidden />
+              <MapPin className="size-5 shrink-0 text-brand-text" aria-hidden />
               <p className="flex-1 text-sm">
                 <span className="font-medium">Où se passe l&apos;activité ?</span>
                 <br />
@@ -236,7 +235,7 @@ export function MapView({
                 </>
               ) : (
                 <>
-                  <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
+                  <MapPin className="size-4 shrink-0 text-brand-text" aria-hidden />
                   <span className="truncate">{formValues.address || "Adresse inconnue : tu pourras la saisir"}</span>
                 </>
               )}
@@ -260,11 +259,10 @@ export function MapView({
             size="icon-lg"
             onClick={handleRecenter}
             aria-label="Recentrer sur ma position"
-            className="absolute right-4 bottom-22 z-10 size-11 rounded-full bg-background shadow-md md:right-6"
+            className="absolute right-4 bottom-4 z-10 size-11 rounded-full border-2 bg-card text-ink shadow-md md:right-6 md:bottom-6"
           >
             {isLocating ? <Loader2 className="animate-spin" /> : <LocateFixed />}
           </Button>
-          <CreateActivityFab onClick={startCreation} />
         </>
       )}
 

@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -21,16 +22,16 @@ export function ActivitySummaryLink({ activity, details, aside }: ActivitySummar
   return (
     <Link
       href={`/?activity=${activity.id}`}
-      className="flex items-center gap-3 rounded-xl border p-3 transition-colors outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="flex items-center gap-3 rounded-card bg-card p-3 shadow-md transition-all duration-150 ease-brand outline-none hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-3 focus-visible:ring-ring"
     >
-      <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-xl">
-        {sport.emoji}
+      <span className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+        <Image src={sport.image} alt="" fill sizes="48px" className="object-cover" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-medium">
+        <span className="block truncate font-display text-sm font-bold text-ink">
           {sport.label} · {formatDay(activity.startsAt)} à {formatTime(activity.startsAt)}
         </span>
-        {details && <span className="block truncate text-xs text-muted-foreground">{details}</span>}
+        {details && <span className="block truncate text-xs text-gray-400">{details}</span>}
       </span>
       {aside}
       <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />

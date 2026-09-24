@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/auth/session";
 /** Écran d'accueil : liste (par défaut) ou carte des activités disponibles. */
 export default async function ExplorePage({ searchParams }: PageProps<"/">) {
   const user = await requireUser();
-  const [activities, myApplications, receivedApplications, { activity, view }] = await Promise.all([
+  const [activities, myApplications, receivedApplications, { activity, view, create }] = await Promise.all([
     getExploreActivities(),
     getMyApplicationSummaries(user.id),
     getReceivedApplications(user.id),
@@ -23,6 +23,7 @@ export default async function ExplorePage({ searchParams }: PageProps<"/">) {
       // Lien vers une activité précise (« Voir sur la carte ») : ouverture sur la carte.
       initialView={view === "map" || activityId ? "map" : "list"}
       initialSelectedId={activityId}
+      createToken={typeof create === "string" ? create : undefined}
     />
   );
 }

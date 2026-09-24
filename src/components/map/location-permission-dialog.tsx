@@ -35,7 +35,7 @@ export function LocationPermissionDialog({ variant, onAllow, onClose }: Location
               </span>
               <DialogTitle className="text-lg">Localisation bloquée</DialogTitle>
               <DialogDescription>
-                Ton navigateur empêche SportBud d&apos;accéder à ta position. Pour la réactiver :
+                Ton navigateur empêche SportLink d&apos;accéder à ta position. Pour la réactiver :
               </DialogDescription>
             </DialogHeader>
             <ol className="list-decimal space-y-1.5 rounded-lg bg-muted/60 py-3 pr-3 pl-8 text-sm">
@@ -57,17 +57,17 @@ export function LocationPermissionDialog({ variant, onAllow, onClose }: Location
         ) : (
           <>
             <DialogHeader className="items-center text-center">
-              <span className="flex size-14 items-center justify-center rounded-full bg-brand-soft text-primary">
+              <span className="flex size-14 items-center justify-center rounded-full bg-brand-soft text-brand-text">
                 <MapPin className="size-7" aria-hidden />
               </span>
               <DialogTitle className="text-lg">Trouve des partenaires près de toi</DialogTitle>
               <DialogDescription>
-                SportBud utilise ta position pour centrer la carte sur toi et t&apos;afficher les activités à
+                SportLink utilise ta position pour centrer la carte sur toi et t&apos;afficher les activités à
                 proximité.
               </DialogDescription>
             </DialogHeader>
             <p className="flex items-start gap-2 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
-              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-brand-text" aria-hidden />
               Ta position reste sur ton appareil : elle n&apos;est jamais enregistrée ni partagée avec les
               autres membres.
             </p>

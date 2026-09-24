@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" role="img" aria-label="SportLink — Bouge. Rencontre. Partage.">
+  <!-- Version pour fond CLAIR : le blanc devient nuit, la menthe passe en mint-600 pour rester lisible -->
+  <g transform="translate(0,10)">
+    <g stroke="#1FB982" stroke-width="4" stroke-linecap="round">
+      <line x1="60" y1="6" x2="60" y2="16"/><line x1="47" y1="10" x2="51" y2="19"/><line x1="73" y1="10" x2="69" y2="19"/>
+    </g>
+    <ellipse cx="60" cy="94" rx="46" ry="15" fill="none" stroke="#1FB982" stroke-width="6"/>
+    <ellipse cx="60" cy="94" rx="22" ry="6" fill="none" stroke="#1FB982" stroke-width="3" opacity=".7"/>
+    <circle cx="30" cy="30" r="9" fill="#0A1A17"/>
+    <path d="M40 38 C 30 42, 22 52, 20 64 C 18 74, 22 82, 30 86 C 26 76, 28 66, 36 58 C 42 52, 48 50, 52 50 Z" fill="#0A1A17"/>
+    <path d="M40 40 C 44 34, 50 28, 56 24" stroke="#0A1A17" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <circle cx="90" cy="30" r="9" fill="#1FB982"/>
+    <path d="M80 38 C 90 42, 98 52, 100 64 C 102 74, 98 82, 90 86 C 94 76, 92 66, 84 58 C 78 52, 72 50, 68 50 Z" fill="#1FB982"/>
+    <path d="M80 40 C 76 34, 70 28, 64 24" stroke="#1FB982" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <path d="M60 46 C 50.6 46 43 53.6 43 63 C 43 75 60 90 60 90 C 60 90 77 75 77 63 C 77 53.6 69.4 46 60 46 Z" fill="#0A1A17"/>
+    <circle cx="60" cy="63" r="6.5" fill="#FFFFFF"/>
+  </g>
+  <text x="140" y="82" font-family="Montserrat, sans-serif" font-weight="900" font-style="italic" font-size="68" letter-spacing="-1">
+    <tspan fill="#0E1A18">Sport</tspan><tspan fill="#1FB982">Link</tspan>
+  </text>
+  <text x="146" y="116" font-family="Inter, sans-serif" font-style="italic" font-size="14" letter-spacing="5" fill="#4A5754">BOUGE. RENCONTRE. PARTAGE.</text>
+</svg>

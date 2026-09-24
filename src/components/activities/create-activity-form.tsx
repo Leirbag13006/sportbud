@@ -4,6 +4,7 @@ import { Loader2, MapPin, Minus, Plus } from "lucide-react";
 import { useState, useTransition, type FormEvent } from "react";
 import { toast } from "sonner";
 
+import { SportIcon } from "@/components/brand/sport-icon";
 import { FormAlert } from "@/components/forms/form-alert";
 import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import { MAX_SPOTS } from "@/lib/validations/activity";
 
 const DURATIONS = [30, 45, 60, 90, 120, 150, 180, 240];
 
-const SPORT_ITEMS = Object.fromEntries(SPORTS.map((sport) => [sport.value, `${sport.emoji}  ${sport.label}`]));
+const SPORT_ITEMS = Object.fromEntries(SPORTS.map((sport) => [sport.value, sport.label]));
 const DURATION_ITEMS = Object.fromEntries(DURATIONS.map((minutes) => [String(minutes), formatDuration(minutes)]));
 const LEVEL_OPTIONS = [{ value: "any", label: "Tous niveaux" }, ...SPORT_LEVELS];
 
@@ -180,7 +181,8 @@ export function CreateActivityForm({
             <SelectContent>
               {SPORTS.map((sport) => (
                 <SelectItem key={sport.value} value={sport.value}>
-                  {sport.emoji}&nbsp; {sport.label}
+                  <SportIcon sport={sport.value} className="size-4 text-mint-700" />
+                  {sport.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -242,7 +244,7 @@ export function CreateActivityForm({
             {LEVEL_OPTIONS.map((option) => (
               <label
                 key={option.value}
-                className="cursor-pointer rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-muted has-checked:border-primary has-checked:bg-brand-soft has-checked:font-medium has-checked:text-primary has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
+                className="cursor-pointer rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-muted has-checked:border-primary has-checked:bg-brand-soft has-checked:font-medium has-checked:text-brand-text has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
               >
                 <input
                   type="radio"

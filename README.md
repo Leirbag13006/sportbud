@@ -1,6 +1,6 @@
-# SportBud
+# SportLink
 
-Web app de mise en relation de partenaires de sport autour d'une carte interactive.
+*Bouge. Rencontre. Partage.* — Web app de mise en relation de partenaires de sport (liste d'activités et carte interactive).
 
 **Stack** : Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui · SQLite (Drizzle ORM + libSQL)
 
@@ -43,6 +43,11 @@ src/
 ├── lib/                # Authentification (sessions, mots de passe), validation Zod
 └── proxy.ts            # Redirections selon l'état de connexion
 ```
+
+## Design system
+
+La direction artistique SportLink est dans `design-system/` (`DESIGN.md`, tokens, logos, prototype de référence).
+Les tokens sont intégrés à Tailwind dans `src/app/globals.css` ; les consignes pour l'IA sont dans `CLAUDE.md`.
 
 ## Écran Explorer
 

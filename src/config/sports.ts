@@ -7,8 +7,6 @@ type SportKind = "team" | "racket" | "solo";
 export interface SportOption {
   value: SportType;
   label: string;
-  /** Pictogramme affiché dans les marqueurs et les listes. */
-  emoji: string;
   /** Photo d'illustration (CC0, voir public/sports/CREDITS.md). */
   image: string;
   kind: SportKind;
@@ -16,18 +14,18 @@ export interface SportOption {
 
 /** Sports proposés, dans l'ordre d'affichage des listes. */
 export const SPORTS: SportOption[] = [
-  { value: "football", label: "Football", emoji: "⚽", image: "/sports/football.jpg", kind: "team" },
-  { value: "basketball", label: "Basket", emoji: "🏀", image: "/sports/basketball.jpg", kind: "team" },
-  { value: "tennis", label: "Tennis", emoji: "🎾", image: "/sports/tennis.jpg", kind: "racket" },
-  { value: "padel", label: "Padel", emoji: "🏓", image: "/sports/padel.jpg", kind: "racket" },
-  { value: "badminton", label: "Badminton", emoji: "🏸", image: "/sports/badminton.jpg", kind: "racket" },
-  { value: "volleyball", label: "Volley", emoji: "🏐", image: "/sports/volleyball.jpg", kind: "team" },
-  { value: "running", label: "Running", emoji: "🏃", image: "/sports/running.jpg", kind: "solo" },
-  { value: "cycling", label: "Vélo", emoji: "🚴", image: "/sports/cycling.jpg", kind: "solo" },
-  { value: "swimming", label: "Natation", emoji: "🏊", image: "/sports/swimming.jpg", kind: "solo" },
-  { value: "climbing", label: "Escalade", emoji: "🧗", image: "/sports/climbing.jpg", kind: "solo" },
-  { value: "fitness", label: "Fitness", emoji: "🏋️", image: "/sports/fitness.jpg", kind: "solo" },
-  { value: "other", label: "Autre", emoji: "🏅", image: "/sports/other.jpg", kind: "solo" },
+  { value: "football", label: "Football", image: "/sports/football.jpg", kind: "team" },
+  { value: "basketball", label: "Basket", image: "/sports/basketball.jpg", kind: "team" },
+  { value: "tennis", label: "Tennis", image: "/sports/tennis.jpg", kind: "racket" },
+  { value: "padel", label: "Padel", image: "/sports/padel.jpg", kind: "racket" },
+  { value: "badminton", label: "Badminton", image: "/sports/badminton.jpg", kind: "racket" },
+  { value: "volleyball", label: "Volley", image: "/sports/volleyball.jpg", kind: "team" },
+  { value: "running", label: "Running", image: "/sports/running.jpg", kind: "solo" },
+  { value: "cycling", label: "Vélo", image: "/sports/cycling.jpg", kind: "solo" },
+  { value: "swimming", label: "Natation", image: "/sports/swimming.jpg", kind: "solo" },
+  { value: "climbing", label: "Escalade", image: "/sports/climbing.jpg", kind: "solo" },
+  { value: "fitness", label: "Fitness", image: "/sports/fitness.jpg", kind: "solo" },
+  { value: "other", label: "Autre", image: "/sports/other.jpg", kind: "solo" },
 ];
 
 const SPORTS_BY_VALUE = new Map(SPORTS.map((sport) => [sport.value, sport]));

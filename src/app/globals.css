@@ -2,27 +2,64 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* =============================================================================
+   Design system SportLink — source : design-system/DESIGN.md et design-system/theme.css
+   Les composants n'utilisent que ces tokens (aucune couleur en dur).
+   ========================================================================== */
+
 @custom-variant dark (&:is(.dark *));
 
+/* Palette et échelles de la marque (valeurs de design-system/theme.css). */
+@theme {
+  --color-night-950: #050f0d;
+  --color-night-900: #0a1a17;
+  --color-night-800: #10271f;
+  --color-night-700: #173a31;
+  --color-teal-600: #0e5a4c;
+  --color-mint-100: #ddfbef;
+  --color-mint-300: #9cf3d2;
+  --color-mint-400: #5bebb6;
+  --color-mint-500: #2fe0a0;
+  --color-mint-600: #1fb982;
+  --color-mint-700: #087a55;
+  --color-sand-50: #f6f7f5;
+  --color-sand-100: #ecefec;
+  --color-ink: #0e1a18;
+  --color-gray-400: #6b7975;
+  --color-gray-600: #4a5754;
+  --color-sunset-300: #ffc98a;
+  --color-sunset-500: #f29a3e;
+  --color-danger: #f0506e;
+  --color-info: #4fb3ff;
+
+  --tracking-tagline: 0.32em;
+  --tracking-eyebrow: 0.14em;
+
+  /* Rayons nommés du design system (l'échelle sm…4xl reste celle de shadcn, basée sur --radius). */
+  --radius-card: 16px;
+  --radius-block: 24px;
+
+  --shadow-md: 0 6px 20px rgb(5 15 13 / 0.1);
+  --shadow-lg: 0 20px 50px rgb(5 15 13 / 0.25);
+  --shadow-glow: 0 0 0 1px rgb(47 224 160 / 0.35), 0 0 24px rgb(47 224 160 / 0.35);
+
+  --ease-brand: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --background-image-hero:
+    radial-gradient(120% 90% at 0% 0%, rgb(47 224 160 / 0.28) 0%, rgb(14 90 76 / 0.25) 30%, transparent 60%),
+    linear-gradient(135deg, var(--color-night-950) 0%, var(--color-night-900) 55%, #0c2420 100%);
+  --background-image-photo-fade: linear-gradient(90deg, var(--color-night-950) 0%, rgb(5 15 13 / 0.6) 35%, transparent 70%);
+  --background-image-swoosh: linear-gradient(100deg, transparent 0%, rgb(47 224 160 / 0.55) 50%, transparent 100%);
+}
+
+/* Correspondance avec les variables shadcn (composants src/components/ui). */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-montserrat);
+  --font-script: var(--font-caveat);
+  --font-heading: var(--font-montserrat);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -40,6 +77,7 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   --color-brand-soft: var(--brand-soft);
+  --color-brand-text: var(--brand-text);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -50,75 +88,34 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.54 0.15 155);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.54 0.15 155);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.75rem;
-  /* Fond teinté léger pour les éléments de marque (pastilles, états vides) */
-  --brand-soft: oklch(0.96 0.04 155);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.72 0.17 155);
-  --primary-foreground: oklch(0.2 0.03 155);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.72 0.17 155);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --brand-soft: oklch(0.3 0.06 155);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: var(--color-sand-50);
+  --foreground: var(--color-ink);
+  --card: #fff;
+  --card-foreground: var(--color-ink);
+  --popover: #fff;
+  --popover-foreground: var(--color-ink);
+  /* Menthe : fonds de CTA uniquement ; texte nuit dessus (contraste 11:1). */
+  --primary: var(--color-mint-500);
+  --primary-foreground: var(--color-night-950);
+  --secondary: var(--color-sand-100);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-sand-100);
+  --muted-foreground: var(--color-gray-600);
+  --accent: var(--color-mint-100);
+  --accent-foreground: var(--color-mint-700);
+  --destructive: var(--color-danger);
+  --border: var(--color-sand-100);
+  /* Contour des champs : assez contrasté pour être perçu (WCAG 1.4.11). */
+  --input: color-mix(in oklch, var(--color-gray-400) 55%, white);
+  --ring: var(--color-mint-300);
+  /* Boutons 10 px (design system) ; cartes : rounded-card (16 px). */
+  --radius: 0.625rem;
+  /* Pastilles d'icônes et sélections sur fond clair. */
+  --brand-soft: var(--color-mint-100);
+  /* Texte / liens menthe sur fond clair : jamais mint-500 (contraste 1,7:1). */
+  --brand-text: var(--color-mint-700);
+  /* Hauteur de la barre de navigation mobile (éléments flottants positionnés au-dessus). */
+  --bottom-nav-height: 4.25rem;
 }
 
 @layer base {
@@ -126,17 +123,43 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-gray-600;
   }
-  html {
-    @apply font-sans;
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-ink;
   }
 }
 
-/* Hauteur de la Bottom Navigation Bar, réutilisée pour positionner les
-   éléments flottants (FAB, bottom sheets) au-dessus d'elle. */
-:root {
-  --bottom-nav-height: 4rem;
+@layer components {
+  /* Petite barre menthe sous les titres de section (signature du design system). */
+  .sl-bar::after {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin-top: 0.75rem;
+    border-radius: 999px;
+    background: var(--color-mint-500);
+  }
+
+  /* Tagline en capitales espacées : « BOUGE. RENCONTRE. PARTAGE. » */
+  .sl-tagline {
+    font-style: italic;
+    letter-spacing: var(--tracking-tagline);
+    text-transform: uppercase;
+  }
+
+  /* Fond sombre signature : dégradé nuit + halo menthe en haut à gauche. */
+  .sl-dark {
+    background-image: var(--background-image-hero);
+    color: rgb(255 255 255 / 0.82);
+  }
+  .sl-dark :is(h1, h2, h3, h4) {
+    color: #fff;
+  }
 }
 
 /* -----------------------------------------------------------------------------
@@ -159,7 +182,7 @@
   inset: 0 0 8px 0;
   border-radius: 9999px;
   background: var(--background);
-  border: 2.5px solid var(--primary);
+  border: 2.5px solid var(--color-mint-500);
   box-shadow: 0 4px 10px rgb(0 0 0 / 0.18);
 }
 
@@ -171,20 +194,24 @@
   left: 50%;
   width: 12px;
   height: 12px;
-  background: var(--primary);
+  background: var(--color-mint-500);
   transform: translateX(-50%) rotate(45deg);
   border-radius: 2px;
   z-index: -1;
 }
 
-.map-marker-activity__emoji {
+.map-marker-activity__icon {
   position: absolute;
   inset: 0 0 8px 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  line-height: 1;
+  color: var(--color-ink);
+}
+
+.map-marker-activity__icon svg {
+  width: 22px;
+  height: 22px;
 }
 
 .map-marker-activity__badge {
@@ -198,11 +225,11 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--color-mint-500);
+  color: var(--color-night-950);
   font-size: 11px;
-  font-weight: 700;
-  font-family: var(--font-sans), sans-serif;
+  font-weight: 800;
+  font-family: var(--font-montserrat), sans-serif;
   box-shadow: 0 0 0 2px var(--background);
 }
 
@@ -224,7 +251,7 @@
 }
 
 .map-marker-activity.is-selected::before {
-  background: var(--brand-soft);
+  background: var(--color-mint-500);
   box-shadow: 0 6px 16px rgb(0 0 0 / 0.25);
 }
 
@@ -234,16 +261,16 @@
 }
 
 .map-marker-activity.is-full::before {
-  border-color: var(--muted-foreground);
+  border-color: var(--color-gray-400);
 }
 
 .map-marker-activity.is-full::after,
 .map-marker-activity.is-full .map-marker-activity__badge {
-  background: var(--muted-foreground);
+  background: var(--color-gray-400);
 }
 
-.map-marker-activity.is-full .map-marker-activity__emoji {
-  filter: grayscale(1);
+.map-marker-activity.is-full .map-marker-activity__icon {
+  color: var(--color-gray-400);
 }
 
 /* Marqueur « Moi » : bulle avatar + pointe, halo pulsé au sol sur la position exacte. */
@@ -260,7 +287,7 @@
   width: 40px;
   height: 40px;
   border-radius: 9999px;
-  border: 3px solid oklch(0.6 0.2 255);
+  border: 3px solid var(--color-info);
   background: var(--brand-soft);
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.3);
   overflow: hidden;
@@ -278,7 +305,7 @@
   left: 50%;
   width: 10px;
   height: 10px;
-  background: oklch(0.6 0.2 255);
+  background: var(--color-info);
   transform: translateX(-50%) rotate(45deg);
   border-radius: 2px;
 }
@@ -290,10 +317,10 @@
 }
 
 .map-marker-user__initials {
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--color-mint-700);
 }
 
 .map-marker-user__label {
@@ -303,9 +330,9 @@
   z-index: 2;
   padding: 0 5px;
   border-radius: 9999px;
-  background: oklch(0.6 0.2 255);
+  background: var(--color-info);
   color: white;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
   font-size: 10px;
   font-weight: 700;
   line-height: 16px;
@@ -319,7 +346,7 @@
   width: 20px;
   height: 12px;
   border-radius: 9999px;
-  background: oklch(0.6 0.2 255 / 0.45);
+  background: color-mix(in oklch, var(--color-info) 45%, transparent);
   animation: map-user-pulse 2s ease-out infinite;
 }
 
@@ -342,8 +369,8 @@
 
 /* Contrôles Leaflet harmonisés avec l'interface. */
 .leaflet-container {
-  font-family: var(--font-sans), sans-serif;
-  background: var(--muted);
+  font-family: var(--font-inter), sans-serif;
+  background: var(--color-sand-100);
 }
 
 .leaflet-control-zoom.leaflet-bar {

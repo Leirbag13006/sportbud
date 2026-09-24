@@ -1,7 +1,10 @@
 "use client";
 
-import { List, Map as MapIcon, SlidersHorizontal } from "lucide-react";
+import { LayoutGrid, List, Loader2, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
+import type { ReactNode } from "react";
 
+import { SportIcon } from "@/components/brand/sport-icon";
+import { Logo } from "@/components/layout/logo";
 import { SPORTS } from "@/config/sports";
 import type { SportType } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -15,9 +18,17 @@ interface ExploreToolbarProps {
   onSportChange: (sport: SportType | null) => void;
   activeFilterCount: number;
   onOpenFilters: () => void;
+  /** Ville de l'utilisateur (null si inconnue). */
+  city: string | null;
+  hasPosition: boolean;
+  isLocating: boolean;
+  onRequestLocation: () => void;
 }
 
-/** Barre d'outils Explorer : bascule Liste / Carte, filtres et pastilles de sports. */
+/**
+ * En-tête sombre de l'Explorer (design system) : localisation, bascule Liste / Carte,
+ * filtres et rangée de pastilles de sports rondes à contour menthe.
+ */
 export function ExploreToolbar({
   view,
   onViewChange,
@@ -25,68 +36,105 @@ export function ExploreToolbar({
   onSportChange,
   activeFilterCount,
   onOpenFilters,
+  city,
+  hasPosition,
+  isLocating,
+  onRequestLocation,
 }: ExploreToolbarProps) {
   return (
-    <div className="shrink-0 space-y-3 border-b bg-background/95 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 md:px-6">
-        <h1 className="text-xl font-semibold tracking-tight md:text-2xl">Explorer</h1>
+    <div className="sl-dark shrink-0 pt-[max(0.75rem,env(safe-area-inset-top))] pb-4">
+      <div className="mx-auto w-full max-w-5xl space-y-4">
+        {/* Logo sur mobile (sur desktop, il est dans l'en-tête du site). */}
+        <div className="flex items-center justify-between px-4 md:hidden">
+          <Logo variant="dark" size="sm" />
+        </div>
 
-        <div role="group" aria-label="Affichage" className="flex rounded-full bg-muted p-1">
-          {(
-            [
-              ["list", "Liste", List],
-              ["map", "Carte", MapIcon],
-            ] as const
-          ).map(([value, label, Icon]) => (
+        <div className="flex items-center justify-between gap-3 px-4 md:px-6 md:pt-2">
+          <h1 className="sr-only">Explorer les activités</h1>
+          {/* Localisation (« 📍 Aix-en-Provence ») : invite à l'activer si elle est inconnue. */}
+          {hasPosition ? (
+            <p className="flex min-w-0 items-center gap-2 font-display text-lg font-bold text-white md:text-xl">
+              <MapPin className="size-5 shrink-0 text-mint-500" aria-hidden />
+              <span className="truncate">{city ?? "Autour de toi"}</span>
+            </p>
+          ) : (
             <button
-              key={value}
               type="button"
-              aria-pressed={view === value}
-              onClick={() => onViewChange(value)}
+              onClick={onRequestLocation}
+              className="flex min-w-0 items-center gap-2 rounded-lg font-display text-lg font-bold text-white outline-none focus-visible:ring-3 focus-visible:ring-ring md:text-xl"
+            >
+              {isLocating ? (
+                <Loader2 className="size-5 shrink-0 animate-spin text-mint-500" aria-hidden />
+              ) : (
+                <MapPin className="size-5 shrink-0 text-mint-500" aria-hidden />
+              )}
+              <span className="truncate underline decoration-mint-500 decoration-2 underline-offset-4">
+                {isLocating ? "Localisation…" : "Active ta localisation"}
+              </span>
+            </button>
+          )}
+
+          <div className="flex shrink-0 items-center gap-2">
+            <div role="group" aria-label="Affichage" className="flex rounded-lg border border-night-700 bg-night-950/60 p-1">
+              {(
+                [
+                  ["list", "Liste", List],
+                  ["map", "Carte", MapIcon],
+                ] as const
+              ).map(([value, label, Icon]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={view === value}
+                  onClick={() => onViewChange(value)}
+                  className={cn(
+                    "flex h-8 items-center gap-1.5 rounded-md px-3 font-display text-xs font-bold transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring",
+                    view === value ? "bg-mint-500 text-night-950" : "text-white/75 hover:text-white",
+                  )}
+                >
+                  <Icon className="size-4" aria-hidden />
+                  <span className="hidden sm:inline">{label}</span>
+                  <span className="sr-only sm:hidden">{label}</span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={onOpenFilters}
+              aria-label={activeFilterCount > 0 ? `Filtres (${activeFilterCount} actifs)` : "Filtres"}
               className={cn(
-                "flex h-8 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                view === value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                "relative flex size-10 items-center justify-center rounded-lg border border-night-700 bg-night-950/60 text-white transition-colors outline-none hover:border-mint-500 focus-visible:ring-3 focus-visible:ring-ring",
+                activeFilterCount > 0 && "border-mint-500 text-mint-500",
               )}
             >
-              <Icon className="size-4" aria-hidden />
-              {label}
+              <SlidersHorizontal className="size-5" aria-hidden />
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-mint-500 font-display text-[11px] font-bold text-night-950">
+                  {activeFilterCount}
+                </span>
+              )}
             </button>
-          ))}
+          </div>
         </div>
-      </div>
 
-      {/* Pastilles défilantes : filtres + sports. */}
-      <div className="mx-auto w-full max-w-5xl">
-        <div className="flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:px-6 [&::-webkit-scrollbar]:hidden">
-          <button
-            type="button"
-            onClick={onOpenFilters}
-            className={cn(
-              "flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
-              activeFilterCount > 0 && "border-primary text-primary",
-            )}
-          >
-            <SlidersHorizontal className="size-4" aria-hidden />
-            Filtres
-            {activeFilterCount > 0 && (
-              <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[11px] text-primary-foreground">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-
-          <span aria-hidden className="my-1.5 w-px shrink-0 bg-border" />
-
-          <SportChip selected={sport === null} onClick={() => onSportChange(null)}>
-            Tous
+        {/* Pastilles de sports : cercles 48 px à contour menthe, l'actif est plein. */}
+        <div
+          role="group"
+          aria-label="Filtrer par sport"
+          className="flex gap-4 overflow-x-auto px-4 pt-1 pb-1 [scrollbar-width:none] md:px-6 [&::-webkit-scrollbar]:hidden"
+        >
+          <SportChip label="Tous" selected={sport === null} onClick={() => onSportChange(null)}>
+            <LayoutGrid className="size-5" aria-hidden />
           </SportChip>
           {SPORTS.map((option) => (
             <SportChip
               key={option.value}
+              label={option.label}
               selected={sport === option.value}
               onClick={() => onSportChange(sport === option.value ? null : option.value)}
             >
-              <span aria-hidden>{option.emoji}</span> {option.label}
+              <SportIcon sport={option.value} className="size-5" />
             </SportChip>
           ))}
         </div>
@@ -95,18 +143,39 @@ export function ExploreToolbar({
   );
 }
 
-function SportChip({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
+interface SportChipProps {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}
+
+function SportChip({ label, selected, onClick, children }: SportChipProps) {
   return (
     <button
       type="button"
       aria-pressed={selected}
       onClick={onClick}
-      className={cn(
-        "flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-        selected ? "bg-foreground text-background" : "bg-muted text-foreground hover:bg-muted/70",
-      )}
+      className="group flex w-14 shrink-0 flex-col items-center gap-1.5 outline-none"
     >
-      {children}
+      <span
+        className={cn(
+          "flex size-12 items-center justify-center rounded-full border-2 border-mint-500 backdrop-blur-sm transition-all duration-150 ease-brand group-focus-visible:ring-3 group-focus-visible:ring-ring",
+          selected
+            ? "bg-mint-500 text-night-950 shadow-glow"
+            : "bg-night-950/55 text-white group-hover:bg-night-800",
+        )}
+      >
+        {children}
+      </span>
+      <span
+        className={cn(
+          "font-display text-[11px] font-semibold whitespace-nowrap",
+          selected ? "text-mint-500" : "text-white/80",
+        )}
+      >
+        {label}
+      </span>
     </button>
   );
 }

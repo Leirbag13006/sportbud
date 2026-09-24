@@ -80,7 +80,7 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
   );
 
   return (
-    <li className="flex flex-wrap items-center gap-3 rounded-xl border p-3">
+    <li className="flex flex-wrap items-center gap-3 rounded-card bg-card p-3 shadow-md">
       <button
         type="button"
         onClick={() => setShowProfile(true)}
@@ -89,7 +89,7 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
       >
         <UserAvatar user={applicant} />
         <span className="min-w-0">
-          <span className="block truncate font-medium">{applicant.fullName}</span>
+          <span className="block truncate font-display text-sm font-bold text-ink">{applicant.fullName}</span>
           <span className="block truncate text-xs text-muted-foreground">
             {context ?? getSportLevelLabel(applicant.sportLevel)} · Voir le profil
           </span>

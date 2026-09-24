@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge";
 import { ReceivedApplicationRow } from "@/components/applications/received-application-row";
 import { UserAvatar } from "@/components/applications/user-avatar";
+import { SportIcon } from "@/components/brand/sport-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -104,8 +105,9 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
           className={cn("object-cover", !isOpen && "grayscale")}
         />
         <div aria-hidden className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
-        <span className="absolute bottom-3 left-4 rounded-full bg-background/90 px-2.5 py-1 text-sm font-medium shadow-sm">
-          {sport.emoji} {sport.label}
+        <span className="absolute bottom-3 left-4 flex items-center gap-1.5 rounded-full bg-night-950/80 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm">
+          <SportIcon sport={activity.sportType} className="size-4 text-mint-500" />
+          {sport.label}
         </span>
       </div>
 
@@ -178,7 +180,7 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
 
         {/* Adresse + itinéraire */}
         <div className="flex items-center gap-3 rounded-xl border p-3">
-          <MapPin className="size-5 shrink-0 text-primary" aria-hidden />
+          <MapPin className="size-5 shrink-0 text-brand-text" aria-hidden />
           <div className="min-w-0 flex-1">
             <p className="text-xs text-muted-foreground">Adresse</p>
             <p className="text-sm font-medium">{activity.address ?? "Indiquée par le marqueur sur la carte"}</p>
@@ -319,7 +321,7 @@ function ApplicantActions({
     <div className="space-y-3">
       <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-3 py-2.5">
         {myApplication.status === "accepted" ? (
-          <Check className="size-5 shrink-0 text-primary" aria-hidden />
+          <Check className="size-5 shrink-0 text-brand-text" aria-hidden />
         ) : (
           <ApplicationStatusBadge status={myApplication.status} />
         )}
@@ -355,7 +357,7 @@ interface DetailItemProps {
 function DetailItem({ icon: Icon, label, children }: DetailItemProps) {
   return (
     <div className="flex items-start gap-2 rounded-lg bg-muted/60 p-3">
-      <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+      <Icon className="mt-0.5 size-4 shrink-0 text-brand-text" aria-hidden />
       <div className="min-w-0">
         <dt className="text-xs text-muted-foreground">{label}</dt>
         <dd className="text-sm font-medium">{children}</dd>

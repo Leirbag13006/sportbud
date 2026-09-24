@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ActivitySheet } from "@/components/activities/activity-sheet";
-import { CreateActivityFab } from "@/components/activities/create-activity-fab";
 import { LocationPermissionDialog } from "@/components/map/location-permission-dialog";
 import type { MapUser } from "@/components/map/marker-icons";
 import { MapView } from "@/components/map/map-view";
+import { useCityName } from "@/hooks/use-city-name";
 import { useLocationAccess } from "@/hooks/use-location-access";
 import type { ExploreActivity } from "@/lib/activities/types";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
@@ -23,6 +23,8 @@ interface ExploreViewProps {
   initialView: ExploreViewMode;
   /** Activité à ouvrir au chargement (lien « Voir sur la carte »). */
   initialSelectedId?: string;
+  /** Jeton de création (bouton « + » de la navigation) : chaque nouvelle valeur lance une création. */
+  createToken?: string;
 }
 
 /**
@@ -36,8 +38,10 @@ export function ExploreView({
   receivedApplications,
   initialView,
   initialSelectedId,
+  createToken,
 }: ExploreViewProps) {
   const location = useLocationAccess();
+  const city = useCityName(location.position);
   const [view, setView] = useState<ExploreViewMode>(initialView);
   const [filters, setFilters] = useState<ExploreFilters>(DEFAULT_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -70,6 +74,19 @@ export function ExploreView({
     setCreateRequest((count) => count + 1);
   };
 
+  // Bouton « + » de la navigation : /?create=<jeton>. On lance la création puis on nettoie l'URL.
+  // (ajustement d'état pendant le rendu, cf. « You might not need an effect »).
+  const [handledCreateToken, setHandledCreateToken] = useState<string | undefined>();
+  if (createToken && createToken !== handledCreateToken) {
+    setHandledCreateToken(createToken);
+    setSelectedId(null);
+    setView("map");
+    setCreateRequest((count) => count + 1);
+  }
+  useEffect(() => {
+    if (createToken) window.history.replaceState(null, "", "/?view=map");
+  }, [createToken]);
+
   const handleCreated = useCallback((activityId: string) => {
     setSelectedId(activityId);
   }, []);
@@ -84,6 +101,10 @@ export function ExploreView({
           onSportChange={(sport) => setFilters((current) => ({ ...current, sport }))}
           activeFilterCount={countActiveFilters(filters)}
           onOpenFilters={() => setFiltersOpen(true)}
+          city={city}
+          hasPosition={location.position !== null}
+          isLocating={location.isLocating}
+          onRequestLocation={location.ensureLocation}
         />
       )}
 
@@ -99,12 +120,6 @@ export function ExploreView({
             onResetFilters={() => setFilters(DEFAULT_FILTERS)}
             onCreate={startCreation}
           />
-          {/* Bouton « + » flottant, collé en bas de la zone visible pendant le défilement. */}
-          <div className="pointer-events-none sticky bottom-0 mt-auto h-0">
-            <div className="pointer-events-auto absolute right-0 bottom-0">
-              <CreateActivityFab onClick={startCreation} />
-            </div>
-          </div>
         </div>
       ) : (
         <MapView

@@ -50,7 +50,7 @@ export function AppNavigation({ initialNotifications, children }: AppNavigationP
     if (data.pendingApplications > before.pendingApplications) {
       toast("🙋 Nouvelle candidature", {
         description: "Un membre souhaite rejoindre une de tes activités.",
-        action: { label: "Voir", onClick: () => router.push("/profile") },
+        action: { label: "Voir", onClick: () => router.push("/activities") },
       });
     }
 
@@ -61,7 +61,7 @@ export function AppNavigation({ initialNotifications, children }: AppNavigationP
     }
   }, [data, pathname, router]);
 
-  const badges = { messages: data.unreadMessages, profile: data.pendingApplications };
+  const badges = { messages: data.unreadMessages, activities: data.pendingApplications };
 
   return (
     <div className="flex h-dvh flex-col bg-background">

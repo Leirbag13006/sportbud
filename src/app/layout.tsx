@@ -1,25 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Caveat, Inter, Montserrat } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-sans",
+/* Typographies du design system : Montserrat (titres, logo), Inter (texte), Caveat (accroche). */
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["600", "700", "800", "900"],
+  style: ["normal", "italic"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["700"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "SportBud",
-    template: "%s · SportBud",
+    default: "SportLink · Bouge. Rencontre. Partage.",
+    template: "%s · SportLink",
   },
-  description: "Trouve des partenaires de sport autour de toi.",
-  applicationName: "SportBud",
+  description: "Le sport nous rapproche, partout. Trouve des partenaires sportifs près de chez toi.",
+  applicationName: "SportLink",
   appleWebApp: {
     capable: true,
-    title: "SportBud",
-    statusBarStyle: "default",
+    title: "SportLink",
+    statusBarStyle: "black-translucent",
   },
 };
 
@@ -29,19 +43,19 @@ export const viewport: Viewport = {
   // Permet au contenu de s'étendre sous l'encoche / la barre d'accueil iOS ;
   // les zones de sécurité sont gérées via env(safe-area-inset-*).
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-  ],
+  // Barre du navigateur mobile aux couleurs de l'en-tête (nuit).
+  themeColor: "#050f0d",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="fr" className={`${inter.variable} h-full antialiased`}>
+    <html
+      lang="fr"
+      className={`${montserrat.variable} ${inter.variable} ${caveat.variable} h-full antialiased`}
+    >
       <body className="h-full">
         {children}
-        {/* Toasts globaux, affichés en haut pour ne pas masquer la Bottom Bar.
-            Thème forcé en clair tant que le mode sombre n'est pas activé dans l'app. */}
+        {/* Toasts globaux, affichés en haut pour ne pas masquer la barre de navigation. */}
         <Toaster position="top-center" theme="light" richColors closeButton />
       </body>
     </html>

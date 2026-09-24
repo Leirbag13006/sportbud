@@ -8,9 +8,11 @@ export default function RegisterPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Crée ton compte</h1>
-        <p className="text-sm text-muted-foreground">
-          Rejoins la communauté et trouve tes partenaires de sport.
+        <h1 className="sl-bar text-3xl font-extrabold">
+          Rejoins la <span className="text-brand-text">communauté.</span>
+        </h1>
+        <p className="text-sm">
+          Crée ton compte et trouve des partenaires près de chez toi.
         </p>
       </div>
       <RegisterForm />

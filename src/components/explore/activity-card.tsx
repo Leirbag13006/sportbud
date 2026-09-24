@@ -54,11 +54,12 @@ export function ActivityCard({
   return (
     <article
       className={cn(
-        "group relative flex gap-4 rounded-2xl border bg-card p-3 shadow-xs transition-shadow hover:shadow-md",
-        "has-[[data-card-link]:focus-visible]:ring-3 has-[[data-card-link]:focus-visible]:ring-ring/50",
+        // Carte du design system : blanche, 16 px, ombre md ; au survol elle s'élève.
+        "group relative flex gap-3.5 rounded-card bg-card p-3 shadow-md transition-all duration-250 ease-brand hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        "has-[[data-card-link]:focus-visible]:ring-3 has-[[data-card-link]:focus-visible]:ring-ring",
       )}
     >
-      <div className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:size-28">
+      <div className="relative size-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:size-28">
         <Image
           src={sport.image}
           alt=""
@@ -67,29 +68,26 @@ export function ActivityCard({
           priority={priority}
           className={cn("object-cover transition-transform duration-300 group-hover:scale-105", isFull && "grayscale")}
         />
-        <span aria-hidden className="absolute top-1.5 left-1.5 rounded-md bg-background/90 px-1.5 py-0.5 text-xs shadow-sm">
-          {sport.emoji}
-        </span>
         {isFull && (
-          <span className="absolute inset-x-0 bottom-0 bg-foreground/70 py-0.5 text-center text-[11px] font-semibold text-background">
+          <span className="absolute inset-x-0 bottom-0 bg-night-950/75 py-0.5 text-center font-display text-[11px] font-bold text-white">
             Complet
           </span>
         )}
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <h3 className="truncate text-base leading-tight font-semibold">
+        <h3 className="truncate text-[15px] leading-tight font-bold">
           {/* Lien étiré : rend toute la carte cliquable sans imbriquer de boutons. */}
-          <button type="button" onClick={onOpen} data-card-link className="text-left outline-none after:absolute after:inset-0 after:rounded-2xl">
+          <button type="button" onClick={onOpen} data-card-link className="text-left outline-none after:absolute after:inset-0 after:rounded-card">
             {title}
           </button>
         </h3>
-        <p className="mt-0.5 truncate text-sm text-muted-foreground">
-          {sport.label} ·{" "}
+        <p className="mt-1 truncate text-xs text-gray-400">
+          {sport.label} •{" "}
           {activity.requiredLevel ? `Niveau ${getSportLevelLabel(activity.requiredLevel).toLowerCase()}` : "Tous niveaux bienvenus"}
         </p>
-        <p className="truncate text-sm text-muted-foreground">
-          {formatDay(activity.startsAt)} · {formatHour(activity.startsAt)}
+        <p className="truncate text-xs text-gray-400">
+          {formatDay(activity.startsAt)} • {formatHour(activity.startsAt)}
         </p>
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
@@ -99,12 +97,12 @@ export function ActivityCard({
                 <UserAvatar key={person.id} user={person} className="size-7 text-[10px] ring-2 ring-card" />
               ))}
               {people.length > MAX_AVATARS && (
-                <span className="flex size-7 items-center justify-center rounded-full bg-muted text-[10px] font-semibold ring-2 ring-card">
+                <span className="flex size-7 items-center justify-center rounded-full bg-sand-100 text-[10px] font-semibold text-ink ring-2 ring-card">
                   +{people.length - MAX_AVATARS}
                 </span>
               )}
             </div>
-            <span className="flex min-w-0 items-center gap-1 text-sm text-muted-foreground">
+            <span className="flex min-w-0 items-center gap-1 text-xs font-medium text-gray-400">
               <MapPin className="size-3.5 shrink-0" aria-hidden />
               <span className="truncate">
                 {distanceKm !== null ? formatDistance(distanceKm) : (activity.locationName ?? activity.address ?? "Voir la carte")}
@@ -136,7 +134,7 @@ function CardAction({
   onOpen,
 }: Pick<ActivityCardProps, "activity" | "isOwn" | "myApplication" | "pendingCount" | "onOpen">) {
   const [isPending, startTransition] = useTransition();
-  const buttonClass = "h-8 rounded-full px-3.5 font-semibold";
+  const buttonClass = "px-3.5";
 
   if (isOwn) {
     return (
@@ -155,7 +153,7 @@ function CardAction({
       <Button
         variant="outline"
         size="sm"
-        className={cn(buttonClass, "border-primary text-primary")}
+        className={buttonClass}
         nativeButton={false}
         render={<Link href={`/messages/${myApplication.id}`} />}
       >

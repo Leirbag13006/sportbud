@@ -87,3 +87,25 @@ export async function reverseGeocode(
   // « Nom, rue, quartier, ville, …, pays » : on garde les 3 premiers éléments, plus lisibles.
   return data.display_name?.split(", ").slice(0, 3).join(", ") ?? null;
 }
+
+/** Nom de la ville correspondant à une position (« Aix-en-Provence »), ou null. */
+export async function reverseGeocodeCity(
+  [lat, lng]: [number, number],
+  { signal }: { signal?: AbortSignal } = {},
+): Promise<string | null> {
+  const ign = await fetch(`${IGN_URL}/reverse?lat=${lat}&lon=${lng}&limit=1&index=address`, { signal });
+  if (ign.ok) {
+    const data = (await ign.json()) as { features: IgnFeature[] };
+    const city = data.features[0]?.properties.city;
+    if (city) return city;
+  }
+
+  const osm = await fetch(
+    `${NOMINATIM_URL}/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1&accept-language=fr`,
+    { signal },
+  );
+  if (!osm.ok) return null;
+  const data = (await osm.json()) as { address?: Record<string, string | undefined> };
+  const address = data.address ?? {};
+  return address.city ?? address.town ?? address.village ?? address.municipality ?? null;
+}

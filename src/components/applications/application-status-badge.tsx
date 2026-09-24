@@ -5,8 +5,8 @@ import type { Application } from "@/db/schema";
 import { cn } from "@/lib/utils";
 
 const STATUS_CONFIG = {
-  pending: { label: "En attente", icon: Clock, className: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300" },
-  accepted: { label: "Acceptée", icon: Check, className: "bg-brand-soft text-primary" },
+  pending: { label: "En attente", icon: Clock, className: "bg-sunset-300/45 text-ink" },
+  accepted: { label: "Acceptée", icon: Check, className: "bg-brand-soft text-brand-text" },
   rejected: { label: "Refusée", icon: X, className: "bg-muted text-muted-foreground" },
 } as const;
 

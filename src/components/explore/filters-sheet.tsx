@@ -71,7 +71,7 @@ export function FiltersSheet({
               onClick={onRequestLocation}
               className="flex w-full items-center gap-3 rounded-xl border border-dashed p-3 text-left text-sm transition-colors hover:bg-muted"
             >
-              <LocateFixed className="size-5 shrink-0 text-primary" aria-hidden />
+              <LocateFixed className="size-5 shrink-0 text-brand-text" aria-hidden />
               <span>
                 <span className="font-medium">Active ta localisation</span>
                 <span className="block text-muted-foreground">pour trier et filtrer par distance.</span>
@@ -199,7 +199,7 @@ function Chip({ name, checked, disabled, onChange, children }: ChipProps) {
     <label
       className={cn(
         "cursor-pointer rounded-full border px-3.5 py-1.5 text-sm transition-colors hover:bg-muted has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
-        checked && "border-primary bg-brand-soft font-medium text-primary hover:bg-brand-soft",
+        checked && "border-primary bg-brand-soft font-medium text-brand-text hover:bg-brand-soft",
         disabled && "cursor-not-allowed opacity-50 hover:bg-transparent",
       )}
     >

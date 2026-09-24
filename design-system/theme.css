@@ -1,0 +1,41 @@
+/* SportLink — Tailwind v4 (@theme). Dans ton CSS principal : @import "tailwindcss"; @import "./design-system/theme.css"; */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&family=Inter:wght@300;400;500;600&family=Caveat:wght@600;700&display=swap');
+
+@theme {
+  --color-night-950: #050F0D;
+  --color-night-900: #0A1A17;
+  --color-night-800: #10271F;
+  --color-night-700: #173A31;
+  --color-teal-600:  #0E5A4C;
+  --color-mint-100: #DDFBEF;
+  --color-mint-300: #9CF3D2;
+  --color-mint-400: #5BEBB6;
+  --color-mint-500: #2FE0A0;
+  --color-mint-600: #1FB982;
+  --color-mint-700: #087A55;
+  --color-sand-50:  #F6F7F5;
+  --color-sand-100: #ECEFEC;
+  --color-ink: #0E1A18;
+  --color-gray-400: #6B7975;
+  --color-gray-600: #4A5754;
+  --color-sunset-300: #FFC98A;
+  --color-sunset-500: #F29A3E;
+  --color-danger: #F0506E;
+  --color-info: #4FB3FF;
+
+  --font-display: 'Montserrat', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-script: 'Caveat', cursive;
+
+  --tracking-tagline: .32em;
+  --tracking-eyebrow: .14em;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --shadow-md: 0 6px 20px rgba(5,15,13,.10);
+  --shadow-lg: 0 20px 50px rgba(5,15,13,.25);
+  --shadow-glow: 0 0 0 1px rgba(47,224,160,.35), 0 0 24px rgba(47,224,160,.35);
+}

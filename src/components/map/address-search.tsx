@@ -107,7 +107,7 @@ export function AddressSearch({ near, onSelect }: AddressSearchProps) {
                   value={item}
                   className="flex cursor-default items-start gap-2.5 px-3 py-2 text-sm outline-none select-none data-highlighted:bg-muted"
                 >
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-brand-text" aria-hidden />
                   <span className="min-w-0">
                     <span className="block truncate font-medium">{item.name}</span>
                     <span className="block truncate text-xs text-muted-foreground">{item.context}</span>

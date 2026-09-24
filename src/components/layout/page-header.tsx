@@ -2,24 +2,27 @@ import type { ReactNode } from "react";
 
 interface PageHeaderProps {
   title: string;
+  /** Fin du titre mise en valeur en menthe (règle du design system : « dernier mot en menthe »). */
+  accent?: string;
   description?: string;
   /** Action optionnelle alignée à droite (bouton, menu…). */
   action?: ReactNode;
 }
 
 /**
- * Titre des pages à contenu (Messages, Profil…).
- * Mobile : barre collante façon app. Desktop : titre de page classique, aligné sur le contenu.
+ * En-tête de page sombre (dégradé nuit + halo menthe), titre Montserrat avec barre menthe.
+ * Utilisé par les pages de contenu (Activités, Profil…).
  */
-export function PageHeader({ title, description, action }: PageHeaderProps) {
+export function PageHeader({ title, accent, description, action }: PageHeaderProps) {
   return (
-    <header className="sticky top-0 z-10 border-b bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:border-none md:bg-transparent md:pt-10 md:backdrop-blur-none">
-      <div className="mx-auto flex min-h-14 w-full max-w-3xl items-center justify-between gap-4 px-4 md:px-6">
+    <header className="sl-dark shrink-0 pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto flex w-full max-w-3xl items-end justify-between gap-4 px-4 pt-6 pb-7 md:px-6 md:pt-10 md:pb-10">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight md:text-3xl">{title}</h1>
-          {description && (
-            <p className="mt-1 hidden text-muted-foreground md:block">{description}</p>
-          )}
+          <h1 className="sl-bar text-2xl leading-tight font-extrabold md:text-4xl">
+            {title}
+            {accent && <span className="text-mint-500"> {accent}</span>}
+          </h1>
+          {description && <p className="mt-3 max-w-xl text-sm md:text-base">{description}</p>}
         </div>
         {action}
       </div>

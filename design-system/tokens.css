@@ -1,0 +1,229 @@
+/* ==========================================================================
+   SportLink — Design tokens
+   Source : prototype visuel "Le sport nous rapproche, partout."
+   Import : <link rel="stylesheet" href="/design-system/tokens.css"> (après les Google Fonts)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&family=Inter:wght@300;400;500;600&family=Caveat:wght@600;700&display=swap');
+
+:root {
+  /* ---------- Couleurs de marque ---------- */
+  /* Nuit (fonds sombres, vert-noir profond) */
+  --sl-night-950: #050F0D;   /* fond le plus profond, hero */
+  --sl-night-900: #0A1A17;   /* fond sombre par défaut */
+  --sl-night-800: #10271F;   /* cartes / blocs sur fond sombre */
+  --sl-night-700: #173A31;   /* bordures, séparateurs sur sombre */
+  --sl-teal-600:  #0E5A4C;   /* halo / dégradé */
+
+  /* Menthe (couleur signature) */
+  --sl-mint-100: #DDFBEF;
+  --sl-mint-300: #9CF3D2;
+  --sl-mint-400: #5BEBB6;
+  --sl-mint-500: #2FE0A0;    /* PRIMAIRE : CTA, mots accentués, icônes */
+  --sl-mint-600: #1FB982;    /* hover CTA */
+  --sl-mint-700: #087A55;    /* texte menthe sur fond clair (AA) */
+
+  /* Neutres clairs */
+  --sl-white:    #FFFFFF;
+  --sl-sand-50:  #F6F7F5;    /* fond des sections claires */
+  --sl-sand-100: #ECEFEC;
+  --sl-gray-400: #6B7975;
+  --sl-gray-600: #4A5754;    /* texte courant sur clair */
+  --sl-ink:      #0E1A18;    /* titres sur clair */
+
+  /* Accent coucher de soleil (photo) — à utiliser avec parcimonie */
+  --sl-sunset-500: #F29A3E;
+  --sl-sunset-300: #FFC98A;
+
+  /* Sémantique */
+  --sl-success: var(--sl-mint-500);
+  --sl-warning: var(--sl-sunset-500);
+  --sl-danger:  #F0506E;
+  --sl-info:    #4FB3FF;
+
+  /* ---------- Rôles (à utiliser dans les composants) ---------- */
+  --color-bg:            var(--sl-sand-50);
+  --color-bg-dark:       var(--sl-night-900);
+  --color-surface:       var(--sl-white);
+  --color-surface-dark:  var(--sl-night-800);
+  --color-text:          var(--sl-gray-600);
+  --color-heading:       var(--sl-ink);
+  --color-text-on-dark:  rgba(255,255,255,.82);
+  --color-heading-on-dark: var(--sl-white);
+  --color-primary:       var(--sl-mint-500);
+  --color-primary-hover: var(--sl-mint-600);
+  --color-on-primary:    var(--sl-night-950);  /* texte sur bouton menthe */
+  --color-border:        var(--sl-sand-100);
+  --color-border-dark:   var(--sl-night-700);
+
+  /* ---------- Dégradés & effets ---------- */
+  --sl-gradient-hero:
+    radial-gradient(120% 90% at 0% 0%, rgba(47,224,160,.28) 0%, rgba(14,90,76,.25) 30%, transparent 60%),
+    linear-gradient(135deg, var(--sl-night-950) 0%, var(--sl-night-900) 55%, #0C2420 100%);
+  --sl-gradient-swoosh: linear-gradient(100deg, transparent 0%, rgba(47,224,160,.55) 50%, transparent 100%);
+  --sl-gradient-photo-fade: linear-gradient(90deg, var(--sl-night-950) 0%, rgba(5,15,13,.6) 35%, transparent 70%);
+  --sl-glow-mint: 0 0 0 1px rgba(47,224,160,.35), 0 0 24px rgba(47,224,160,.35);
+
+  /* ---------- Typographie ---------- */
+  --font-display: 'Montserrat', system-ui, sans-serif;  /* titres, logo (800–900) */
+  --font-body:    'Inter', system-ui, sans-serif;       /* texte courant */
+  --font-script:  'Caveat', cursive;                    /* accroches manuscrites */
+
+  --fs-hero:  clamp(2.5rem, 5vw + 1rem, 4.5rem);  /* "Le sport nous rapproche" */
+  --fs-h1:    clamp(2rem, 3vw + 1rem, 3rem);
+  --fs-h2:    clamp(1.5rem, 1.5vw + 1rem, 2rem);  /* "Comment ça marche ?" */
+  --fs-h3:    1.25rem;                            /* "Notre mission" */
+  --fs-h4:    1.0625rem;                          /* "Choisis ta ville" */
+  --fs-body:  1rem;
+  --fs-small: .875rem;
+  --fs-xs:    .75rem;
+  --fs-script: clamp(1.75rem, 2vw + 1rem, 2.75rem);
+
+  --lh-tight: 1.05;
+  --lh-snug:  1.25;
+  --lh-body:  1.55;
+  --tracking-tagline: .32em;   /* "BOUGE. RENCONTRE. PARTAGE." */
+  --tracking-eyebrow: .14em;
+
+  /* ---------- Espacements (base 4) ---------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+
+  /* ---------- Rayons ---------- */
+  --radius-sm: 8px;     /* champs, tags */
+  --radius-md: 10px;    /* boutons */
+  --radius-lg: 16px;    /* cartes */
+  --radius-xl: 24px;    /* blocs éditoriaux, mockup */
+  --radius-pill: 999px; /* chips, badges */
+
+  /* ---------- Ombres ---------- */
+  --shadow-sm: 0 1px 2px rgba(5,15,13,.08);
+  --shadow-md: 0 6px 20px rgba(5,15,13,.10);
+  --shadow-lg: 0 20px 50px rgba(5,15,13,.25);
+
+  /* ---------- Mouvement ---------- */
+  --ease-out: cubic-bezier(.2,.8,.2,1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+
+  /* ---------- Layout ---------- */
+  --container: 1200px;
+  --gutter: clamp(16px, 4vw, 40px);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--color-heading);
+  line-height: var(--lh-snug);
+  margin: 0 0 var(--space-3);
+}
+h1 { font-size: var(--fs-h1); font-weight: 900; line-height: var(--lh-tight); }
+h2 { font-size: var(--fs-h2); font-weight: 800; }
+h3 { font-size: var(--fs-h3); font-weight: 800; }
+h4 { font-size: var(--fs-h4); font-weight: 700; }
+
+/* ==========================================================================
+   Utilitaires & composants de marque
+   ========================================================================== */
+.sl-container { max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
+
+.sl-dark { background: var(--sl-gradient-hero); color: var(--color-text-on-dark); }
+.sl-dark h1, .sl-dark h2, .sl-dark h3, .sl-dark h4 { color: var(--color-heading-on-dark); }
+
+.sl-hero-title { font-size: var(--fs-hero); font-weight: 900; line-height: var(--lh-tight); letter-spacing: -.01em; }
+.sl-accent { color: var(--color-primary); }              /* "partout." */
+.sl-light .sl-accent, .sl-accent--on-light { color: var(--sl-mint-700); }
+.sl-dark .sl-accent, .sl-card--dark .sl-accent { color: var(--color-primary); } /* toujours menthe vif sur sombre */
+
+/* Petite barre menthe sous les titres (signature du prototype) */
+.sl-bar::after {
+  content: ""; display: block; width: 40px; height: 4px; margin-top: var(--space-3);
+  border-radius: var(--radius-pill); background: var(--color-primary);
+}
+
+.sl-tagline {
+  font-family: var(--font-body); font-weight: 400; font-style: italic;
+  font-size: var(--fs-small); letter-spacing: var(--tracking-tagline); text-transform: uppercase;
+}
+.sl-eyebrow {
+  font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+}
+.sl-script {
+  font-family: var(--font-script); font-weight: 700; font-size: var(--fs-script);
+  line-height: 1.1; transform: rotate(-8deg); display: inline-block; color: var(--sl-white);
+}
+
+/* Boutons */
+.sl-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: 44px; padding: 0 var(--space-5);
+  font-family: var(--font-display); font-weight: 700; font-size: var(--fs-small);
+  border-radius: var(--radius-md); border: 2px solid transparent; cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast);
+  text-decoration: none;
+}
+.sl-btn:active { transform: translateY(1px); }
+.sl-btn:focus-visible { outline: 3px solid var(--sl-mint-300); outline-offset: 2px; }
+.sl-btn--primary { background: var(--color-primary); color: var(--color-on-primary); }
+.sl-btn--primary:hover { background: var(--color-primary-hover); }
+.sl-btn--outline { background: transparent; color: var(--sl-mint-700); border-color: var(--color-primary); }
+.sl-dark .sl-btn--outline { color: var(--color-primary); }
+.sl-btn--outline:hover { background: rgba(47,224,160,.12); }
+.sl-btn--sm { min-height: 32px; padding: 0 var(--space-4); font-size: var(--fs-xs); }
+
+/* Chips de sport (cercles contour menthe) */
+.sl-sport-chip {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: inline-grid; place-items: center;
+  border: 2px solid var(--color-primary); color: var(--sl-white);
+  background: rgba(5,15,13,.55); backdrop-filter: blur(6px);
+}
+.sl-sport-chip[aria-pressed="true"] { background: var(--color-primary); color: var(--color-on-primary); }
+
+/* Pastille d'icône (valeurs) */
+.sl-icon-badge {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: inline-grid; place-items: center;
+  background: var(--sl-mint-100); color: var(--sl-mint-700);
+}
+
+/* Étapes numérotées */
+.sl-step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: inline-grid; place-items: center;
+  background: var(--color-primary); color: var(--color-on-primary);
+  font-family: var(--font-display); font-weight: 800; font-size: var(--fs-small);
+}
+
+/* Cartes */
+.sl-card {
+  background: var(--color-surface); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md); padding: var(--space-4);
+}
+.sl-card--dark {
+  background: var(--color-surface-dark); color: var(--color-text-on-dark);
+  border: 1px solid var(--color-border-dark); border-radius: var(--radius-lg);
+}
+
+/* Localisation "📍 Aix-en-Provence" */
+.sl-location {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-family: var(--font-display); font-weight: 700; color: var(--sl-white);
+}
+
+/* Méta d'annonce (niveau, horaire, distance) */
+.sl-meta { font-size: var(--fs-xs); color: var(--sl-gray-400); }

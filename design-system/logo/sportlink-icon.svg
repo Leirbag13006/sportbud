@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="SportLink">
+  <!-- Rayons -->
+  <g stroke="#2FE0A0" stroke-width="4" stroke-linecap="round">
+    <line x1="60" y1="6" x2="60" y2="16"/>
+    <line x1="47" y1="10" x2="51" y2="19"/>
+    <line x1="73" y1="10" x2="69" y2="19"/>
+  </g>
+  <!-- Anneau (terrain) -->
+  <ellipse cx="60" cy="94" rx="46" ry="15" fill="none" stroke="#2FE0A0" stroke-width="6"/>
+  <ellipse cx="60" cy="94" rx="22" ry="6" fill="none" stroke="#2FE0A0" stroke-width="3" opacity=".7"/>
+  <!-- Silhouette gauche (blanche) -->
+  <circle cx="30" cy="30" r="9" fill="#FFFFFF"/>
+  <path d="M40 38 C 30 42, 22 52, 20 64 C 18 74, 22 82, 30 86 C 26 76, 28 66, 36 58 C 42 52, 48 50, 52 50 Z" fill="#FFFFFF"/>
+  <path d="M40 40 C 44 34, 50 28, 56 24" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <!-- Silhouette droite (menthe) -->
+  <circle cx="90" cy="30" r="9" fill="#2FE0A0"/>
+  <path d="M80 38 C 90 42, 98 52, 100 64 C 102 74, 98 82, 90 86 C 94 76, 92 66, 84 58 C 78 52, 72 50, 68 50 Z" fill="#2FE0A0"/>
+  <path d="M80 40 C 76 34, 70 28, 64 24" stroke="#2FE0A0" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <!-- Pin de localisation -->
+  <path d="M60 46 C 50.6 46 43 53.6 43 63 C 43 75 60 90 60 90 C 60 90 77 75 77 63 C 77 53.6 69.4 46 60 46 Z" fill="#FFFFFF"/>
+  <circle cx="60" cy="63" r="6.5" fill="#0A1A17"/>
+</svg>
