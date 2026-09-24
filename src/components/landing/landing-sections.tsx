@@ -71,7 +71,7 @@ export function ShowcaseSection() {
           {[
             { value: "12", label: "sports, du foot à l'escalade" },
             { value: "3", label: "niveaux, du débutant au confirmé" },
-            { value: "0 €", label: "gratuit, sans abonnement" },
+            { value: "0 €", label: "d'inscription, sans abonnement" },
             { value: "1 clic", label: "pour rejoindre une séance" },
           ].map(({ value, label }, index) => (
             <Reveal as="li" key={label} delay={index * 80}>
@@ -389,7 +389,8 @@ export function StorySection() {
 const FAQ = [
   {
     question: "C'est vraiment gratuit ?",
-    answer: "Oui. Créer un compte, rejoindre des séances, en organiser et discuter avec tes partenaires : tout est gratuit.",
+    answer:
+      "L'inscription et l'app sont gratuites : créer un compte, rejoindre ou organiser des séances, discuter avec tes partenaires. Certaines séances ont un coût (location d'un terrain, d'un court…) : le prix par personne est affiché avant de candidater et se règle sur place, directement à l'organisateur.",
   },
   {
     question: "Je débute, est-ce que j'ai ma place ?",

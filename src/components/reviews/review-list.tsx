@@ -23,7 +23,8 @@ export function ReviewList({ reviews, emptyMessage }: { reviews: ReviewItem[]; e
               <span className="sr-only">{review.rating} sur 5</span>
             </div>
             <p className="text-xs text-gray-400">
-              {getSport(review.sportType).label} · {dateFormatter.format(review.createdAt)}
+              {getSport(review.sportType).label} · {review.revieweeRole === "organizer" ? "en tant qu'organisateur·rice" : "en tant que participant·e"} ·{" "}
+              {dateFormatter.format(review.createdAt)}
             </p>
             {review.comment && <p className="mt-1 text-sm whitespace-pre-line">{review.comment}</p>}
           </div>

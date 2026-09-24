@@ -6,23 +6,33 @@ export interface RatingSummary {
   count: number;
 }
 
+/** Rôle d'un membre dans une séance. */
+export type ActivityRole = "organizer" | "participant";
+
 /** Avis reçu, tel qu'affiché sur un profil. */
 export type ReviewItem = Pick<Review, "id" | "rating" | "comment" | "createdAt"> & {
   reviewer: Pick<PublicUser, "id" | "fullName" | "avatarUrl">;
   sportType: SportType;
+  /** Rôle du membre noté dans la séance (« en tant qu'organisateur / participant »). */
+  revieweeRole: ActivityRole;
 };
 
-/** Participant d'une séance passée, avec l'avis déjà laissé par l'organisateur s'il existe. */
+/** Membre à noter après une séance, avec l'avis déjà laissé par l'utilisateur s'il existe. */
 export interface ParticipantToReview {
   user: Pick<PublicUser, "id" | "fullName" | "avatarUrl" | "sportLevel">;
   review: Pick<Review, "rating" | "comment"> | null;
 }
 
-/** Séance terminée organisée par l'utilisateur, avec ses participants à noter. */
+/**
+ * Séance terminée à laquelle l'utilisateur a pris part :
+ * - organisateur (`role: "organizer"`) : il note chacun de ses participants ;
+ * - participant (`role: "participant"`) : il note l'organisateur (seul membre de `participants`).
+ */
 export interface ActivityToReview {
   id: string;
   sportType: SportType;
   startsAt: Date;
+  role: ActivityRole;
   participants: ParticipantToReview[];
 }
 

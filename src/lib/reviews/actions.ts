@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -14,8 +14,9 @@ export type ReviewActionResult =
   | { ok: false; error?: string; fieldErrors?: Record<string, string[] | undefined> };
 
 /**
- * L'organisateur note un participant accepté d'une séance terminée.
- * Un seul avis par participant et par séance : un nouvel envoi remplace le précédent.
+ * Avis après une séance terminée, dans les deux sens :
+ * l'organisateur note un participant accepté, un participant accepté note l'organisateur.
+ * Un seul avis par auteur, membre noté et séance : un nouvel envoi remplace le précédent.
  */
 export async function submitReview(input: {
   activityId: string;
@@ -30,27 +31,45 @@ export async function submitReview(input: {
   if (!parsed.success) return { ok: false, fieldErrors: z.flattenError(parsed.error).fieldErrors };
   const { activityId, revieweeId, rating, comment } = parsed.data;
 
-  // Séance de l'utilisateur, terminée, et participant réellement accepté.
-  const [eligible] = await db
-    .select({ id: applications.id })
-    .from(applications)
-    .innerJoin(activities, eq(applications.activityId, activities.id))
+  const [activity] = await db
+    .select({ creatorId: activities.creatorId })
+    .from(activities)
     .where(
       and(
         eq(activities.id, activityId),
-        eq(activities.creatorId, user.id),
+        ne(activities.status, "cancelled"),
         sql`${activities.startsAt} + ${activities.durationMinutes} * 60000 <= ${Date.now()}`,
-        eq(applications.applicantId, revieweeId),
-        eq(applications.status, "accepted"),
       ),
     );
-  if (!eligible) return { ok: false, error: "Tu ne peux noter que les participants de tes séances terminées." };
+
+  /** Vrai si le membre a été accepté sur la séance. */
+  const isAccepted = async (userId: string) => {
+    const [row] = await db
+      .select({ id: applications.id })
+      .from(applications)
+      .where(
+        and(
+          eq(applications.activityId, activityId),
+          eq(applications.applicantId, userId),
+          eq(applications.status, "accepted"),
+        ),
+      );
+    return Boolean(row);
+  };
+
+  const allowed =
+    activity !== undefined &&
+    revieweeId !== user.id &&
+    (activity.creatorId === user.id
+      ? await isAccepted(revieweeId) // l'organisateur note un participant
+      : revieweeId === activity.creatorId && (await isAccepted(user.id))); // un participant note l'organisateur
+  if (!allowed) return { ok: false, error: "Tu ne peux noter que les membres de tes séances terminées." };
 
   await db
     .insert(reviews)
     .values({ activityId, reviewerId: user.id, revieweeId, rating, comment })
     .onConflictDoUpdate({
-      target: [reviews.activityId, reviews.revieweeId],
+      target: [reviews.activityId, reviews.reviewerId, reviews.revieweeId],
       set: { rating, comment, updatedAt: new Date() },
     });
 

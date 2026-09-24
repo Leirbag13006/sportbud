@@ -77,6 +77,7 @@ export function ActivityCard({
           )}
         >
           {formatPrice(activity.priceCents)}
+          {activity.priceCents > 0 && <span className="sr-only"> par personne, à régler sur place</span>}
         </span>
         {isFull && (
           <span className="absolute inset-x-0 bottom-0 bg-night-950/75 py-0.5 text-center font-display text-[11px] font-bold text-white">

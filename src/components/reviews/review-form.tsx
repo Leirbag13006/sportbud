@@ -9,22 +9,31 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { getSportLevelLabel } from "@/config/sport-levels";
 import { submitReview } from "@/lib/reviews/actions";
-import type { ParticipantToReview } from "@/lib/reviews/types";
+import type { ActivityRole, ParticipantToReview } from "@/lib/reviews/types";
 import { cn } from "@/lib/utils";
 import { RatingStars } from "./rating-stars";
 import { StarInput } from "./star-input";
 
-/** Suggestions pour aller vite (ajoutées au commentaire). */
+/** Absence ou annulation : 1 étoile par défaut quand on choisit ce tag. */
 const NO_SHOW = "Ne s'est pas présenté·e";
-const QUICK_TAGS = ["Ponctuel·le", "Super ambiance", "Bon niveau", "Fair-play", NO_SHOW, "En retard"];
+const CANCELLED = "Annulé sans prévenir";
+
+/** Suggestions pour aller vite (ajoutées au commentaire), selon le rôle du membre noté. */
+const QUICK_TAGS: Record<ActivityRole, string[]> = {
+  participant: ["Ponctuel·le", "Super ambiance", "Bon niveau", "Fair-play", NO_SHOW, "En retard"],
+  organizer: ["Bien organisé", "Accueillant·e", "Lieu au top", "Ponctuel·le", CANCELLED, "En retard"],
+};
+const SEVERE_TAGS = new Set([NO_SHOW, CANCELLED]);
 
 interface ReviewFormProps {
   activityId: string;
   participant: ParticipantToReview;
+  /** Rôle du membre noté : adapte les suggestions. */
+  revieweeRole?: ActivityRole;
 }
 
-/** Note (1 à 5) + commentaire d'un participant par l'organisateur, après la séance. */
-export function ReviewForm({ activityId, participant }: ReviewFormProps) {
+/** Note (1 à 5) + commentaire d'un membre après la séance (participant ou organisateur). */
+export function ReviewForm({ activityId, participant, revieweeRole = "participant" }: ReviewFormProps) {
   const { user, review } = participant;
   const [editing, setEditing] = useState(review === null);
   const [rating, setRating] = useState(review?.rating ?? 0);
@@ -35,8 +44,8 @@ export function ReviewForm({ activityId, participant }: ReviewFormProps) {
 
   const addTag = (tag: string) => {
     setComment((current) => (current.includes(tag) ? current : current ? `${current.trim()} · ${tag}` : tag));
-    // Absence sans note choisie : 1 étoile par défaut (modifiable).
-    if (tag === NO_SHOW && rating === 0) setRating(1);
+    // Absence ou annulation sans note choisie : 1 étoile par défaut (modifiable).
+    if (SEVERE_TAGS.has(tag) && rating === 0) setRating(1);
     setErrors((previous) => ({ ...previous, comment: undefined, rating: undefined }));
   };
 
@@ -64,7 +73,9 @@ export function ReviewForm({ activityId, participant }: ReviewFormProps) {
         <UserAvatar user={user} />
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-sm font-bold text-ink">{user.fullName}</p>
-          <p className="text-xs text-gray-400">{getSportLevelLabel(user.sportLevel)}</p>
+          <p className="text-xs text-gray-400">
+            {revieweeRole === "organizer" ? "Organisateur·rice" : getSportLevelLabel(user.sportLevel)}
+          </p>
         </div>
         {!editing && (
           <Button variant="ghost" size="sm" onClick={() => setEditing(true)} aria-label={`Modifier l'avis sur ${user.fullName}`}>
@@ -85,7 +96,7 @@ export function ReviewForm({ activityId, participant }: ReviewFormProps) {
           </div>
 
           <div className="flex flex-wrap gap-1.5">
-            {QUICK_TAGS.map((tag) => (
+            {QUICK_TAGS[revieweeRole].map((tag) => (
               <button
                 key={tag}
                 type="button"

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** Avis laissé par un organisateur sur un participant. */
+/** Avis laissé après une séance (organisateur → participant, ou participant → organisateur). */
 export const reviewSchema = z
   .object({
     activityId: z.string().min(1),

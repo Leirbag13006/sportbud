@@ -18,17 +18,17 @@ import { MobileCtaBar } from "@/components/landing/mobile-cta-bar";
 
 export const metadata: Metadata = {
   description:
-    "Trouve des partenaires de sport près de chez toi : rejoins une séance ou lance la tienne, tous niveaux, gratuitement.",
+    "Trouve des partenaires de sport près de chez toi : rejoins une séance ou lance la tienne, tous niveaux. Inscription gratuite.",
   openGraph: {
     title: "SportMates · Trouve des partenaires de sport près de chez toi",
-    description: "Foot, tennis, running, padel… Rejoins une séance ou lance la tienne. Tous niveaux, 100 % gratuit.",
+    description: "Foot, tennis, running, padel… Rejoins une séance ou lance la tienne. Tous niveaux, inscription gratuite.",
     images: [{ url: "/images/hero-friends-sunset.jpg", width: 960, height: 540 }],
     locale: "fr_FR",
     type: "website",
   },
 };
 
-const PROMISES = ["100 % gratuit", "Tous niveaux", "Inscription en 1 minute"];
+const PROMISES = ["Inscription gratuite", "Tous niveaux", "Prêt en 1 minute"];
 
 /**
  * Landing publique (pages /register et /login), pensée pour convertir :

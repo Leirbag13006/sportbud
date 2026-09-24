@@ -45,25 +45,34 @@ export default async function ActivitiesPage() {
         {toReview.length > 0 && (
           <DashboardSection
             id="to-review"
-            title="Séances terminées : note tes partenaires"
+            title="Séances terminées : laisse ton avis"
             count={reviewsLeft}
             isEmpty={false}
             emptyMessage=""
           >
             <p className="-mt-1 text-sm">
-              Ton avis aide toute la communauté à choisir ses partenaires. Il reste visible sur leur profil.
+              Participants comme organisateurs : ton avis aide toute la communauté à choisir ses partenaires. Il reste
+              visible sur leur profil.
             </p>
             <ul className="space-y-6">
               {toReview.map((activity) => {
                 const sport = getSport(activity.sportType);
                 return (
-                  <li key={activity.id} className="space-y-2">
+                  <li key={`${activity.role}-${activity.id}`} className="space-y-2">
                     <p className="font-display text-sm font-bold text-ink">
                       {sport.label} · {formatDay(activity.startsAt)} à {formatTime(activity.startsAt)}
+                      <span className="ml-2 font-sans text-xs font-normal text-gray-400">
+                        {activity.role === "organizer" ? "Tu organisais" : "Note l'organisateur·rice"}
+                      </span>
                     </p>
                     <div className="space-y-2">
                       {activity.participants.map((participant) => (
-                        <ReviewForm key={participant.user.id} activityId={activity.id} participant={participant} />
+                        <ReviewForm
+                          key={participant.user.id}
+                          activityId={activity.id}
+                          participant={participant}
+                          revieweeRole={activity.role === "organizer" ? "participant" : "organizer"}
+                        />
                       ))}
                     </div>
                   </li>

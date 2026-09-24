@@ -43,6 +43,13 @@
       "when": 1790271496193,
       "tag": "0005_user_achievements",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790276125821,
+      "tag": "0006_trust_onboarding_reviews",
+      "breakpoints": true
     }
   ]
 }

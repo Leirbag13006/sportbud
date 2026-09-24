@@ -20,6 +20,8 @@ export const ACTIVITY_STATUS_VALUES = ["open", "full", "cancelled"] as const;
 export const APPLICATION_STATUS_VALUES = ["pending", "accepted", "rejected"] as const;
 /** text = message écrit par un membre ; system = notification automatique (ex. candidature acceptée). */
 export const MESSAGE_KIND_VALUES = ["text", "system"] as const;
+/** Motifs de signalement d'un membre. */
+export const REPORT_REASON_VALUES = ["no_show", "inappropriate", "harassment", "fake_profile", "unsafe", "other"] as const;
 
 /** Liste SQL pour les contraintes CHECK : ('a', 'b', …). */
 const sqlList = (values: readonly string[]) => sql.raw(`(${values.map((v) => `'${v}'`).join(", ")})`);
@@ -50,6 +52,12 @@ export const users = sqliteTable(
     avatarUrl: text("avatar_url"),
     /** Sports favoris (5 max), affichés sur le profil. */
     favoriteSports: text("favorite_sports", { mode: "json" }).$type<SportType[]>().notNull().default(sql`'[]'`),
+    /** Ville choisie à l'accueil (libellé affiché) et sa position : centre par défaut de l'exploration. */
+    city: text("city"),
+    homeLat: real("home_lat"),
+    homeLng: real("home_lng"),
+    /** null = parcours d'accueil (sports, niveau, ville) pas encore terminé. */
+    onboardedAt: integer("onboarded_at", { mode: "timestamp_ms" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -166,7 +174,8 @@ export const applications = sqliteTable(
 );
 
 // -----------------------------------------------------------------------------
-// Avis : l'organisateur note chaque participant après la séance (1 à 5 étoiles + commentaire)
+// Avis après la séance (1 à 5 étoiles + commentaire), dans les deux sens :
+// l'organisateur note chaque participant, chaque participant note l'organisateur.
 // -----------------------------------------------------------------------------
 
 export const reviews = sqliteTable(
@@ -176,11 +185,11 @@ export const reviews = sqliteTable(
     activityId: text("activity_id")
       .notNull()
       .references(() => activities.id, { onDelete: "cascade" }),
-    /** Auteur de l'avis (l'organisateur). */
+    /** Auteur de l'avis (l'organisateur ou un participant). */
     reviewerId: text("reviewer_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    /** Membre noté (un participant accepté). */
+    /** Membre noté (un participant accepté, ou l'organisateur). */
     revieweeId: text("reviewee_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -190,8 +199,8 @@ export const reviews = sqliteTable(
     updatedAt: updatedAt(),
   },
   (t) => [
-    // Un seul avis par participant et par séance.
-    uniqueIndex("reviews_activity_reviewee_unique").on(t.activityId, t.revieweeId),
+    // Un seul avis par auteur, par membre noté et par séance.
+    uniqueIndex("reviews_activity_reviewer_reviewee_unique").on(t.activityId, t.reviewerId, t.revieweeId),
     index("reviews_reviewee_id_idx").on(t.revieweeId),
     check("reviews_rating_range", sql`${t.rating} between 1 and 5`),
     check("reviews_comment_length", sql`${t.comment} is null or length(${t.comment}) <= 500`),
@@ -221,6 +230,69 @@ export const userAchievements = sqliteTable(
     primaryKey({ columns: [t.userId, t.achievementId, t.tier] }),
     check("user_achievements_tier_range", sql`${t.tier} between 1 and 3`),
   ],
+);
+
+// -----------------------------------------------------------------------------
+// Confiance et sécurité : signalements (traités par l'équipe) et blocages entre membres
+// -----------------------------------------------------------------------------
+
+export const reports = sqliteTable(
+  "reports",
+  {
+    id: id(),
+    reporterId: text("reporter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reportedId: text("reported_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reason: text("reason", { enum: REPORT_REASON_VALUES }).notNull(),
+    details: text("details"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("reports_reported_id_idx").on(t.reportedId),
+    check("reports_reason_check", sql`${t.reason} in ${sqlList(REPORT_REASON_VALUES)}`),
+    check("reports_details_length", sql`${t.details} is null or length(${t.details}) <= 1000`),
+    check("reports_not_self", sql`${t.reporterId} <> ${t.reportedId}`),
+  ],
+);
+
+/** Un membre bloqué ne voit plus les activités de celui qui l'a bloqué, et inversement. */
+export const blocks = sqliteTable(
+  "blocks",
+  {
+    blockerId: text("blocker_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    blockedId: text("blocked_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.blockerId, t.blockedId] }),
+    index("blocks_blocked_id_idx").on(t.blockedId),
+    check("blocks_not_self", sql`${t.blockerId} <> ${t.blockedId}`),
+  ],
+);
+
+/**
+ * Liens « mot de passe oublié » (valables 1 h, usage unique).
+ * Comme pour les sessions, seul le hash SHA-256 du jeton est stocké.
+ */
+export const passwordResetTokens = sqliteTable(
+  "password_reset_tokens",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    usedAt: integer("used_at", { mode: "timestamp_ms" }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("password_reset_tokens_user_id_idx").on(t.userId)],
 );
 
 // -----------------------------------------------------------------------------
@@ -299,6 +371,7 @@ export type Activity = typeof activities.$inferSelect;
 export type Application = typeof applications.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
+export type ReportReason = (typeof REPORT_REASON_VALUES)[number];
 
 export type SportLevel = (typeof SPORT_LEVEL_VALUES)[number];
 export type SportType = (typeof SPORT_TYPE_VALUES)[number];
