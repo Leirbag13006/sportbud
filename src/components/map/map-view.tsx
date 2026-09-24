@@ -14,6 +14,7 @@ import {
 } from "@/components/activities/create-activity-form";
 import { CreateActivitySheet } from "@/components/activities/create-activity-sheet";
 import { AddressSearch } from "@/components/map/address-search";
+import { LocationPermissionDialog } from "@/components/map/location-permission-dialog";
 import { Button } from "@/components/ui/button";
 import { USER_ZOOM } from "@/config/map";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -59,7 +60,10 @@ export function MapView({
   receivedApplications,
   initialSelectedId,
 }: MapViewProps) {
-  const geolocation = useGeolocation();
+  const { state: geolocation, permission, request: requestLocation } = useGeolocation();
+  // Fenêtre d'explication : proposée une fois par session, puis rouverte via le bouton de recentrage.
+  const [promptDismissed, setPromptDismissed] = useState(readPromptDismissed);
+  const [manualDialog, setManualDialog] = useState<"prompt" | "denied" | null>(null);
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [mode, setMode] = useState<Mode>("browse");
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
@@ -89,25 +93,41 @@ export function MapView({
     map.flyTo(userPosition, USER_ZOOM, { duration: 1 });
   }, [map, userPosition]);
 
-  // Informe l'utilisateur si la géolocalisation n'est pas disponible.
+  // Informe l'utilisateur si la localisation échoue après avoir été demandée.
   useEffect(() => {
     if (geolocation.status === "denied") {
       toast.info("Position non partagée : la carte est centrée sur Marseille.", {
-        description: "Autorise la localisation dans ton navigateur pour voir les activités autour de toi.",
+        description: "Tu peux l'activer à tout moment avec le bouton de localisation.",
       });
     } else if (geolocation.status === "unavailable") {
       toast.warning("Impossible de déterminer ta position.");
     }
   }, [geolocation.status]);
 
+  // Proposée automatiquement si le navigateur n'a encore ni autorisé ni refusé la localisation.
+  const autoPrompt = permission === "prompt" && geolocation.status === "idle" && !promptDismissed;
+  const permissionDialog = manualDialog ?? (autoPrompt ? "prompt" : null);
+
+  const closePermissionDialog = () => {
+    setManualDialog(null);
+    setPromptDismissed(true);
+    try {
+      sessionStorage.setItem(PROMPT_DISMISSED_KEY, "1");
+    } catch {
+      // Stockage indisponible (navigation privée…) : la fenêtre pourra réapparaître, sans gravité.
+    }
+  };
+
   const handleRecenter = () => {
     if (!map) return;
     if (userPosition) {
       map.flyTo(userPosition, Math.max(map.getZoom(), USER_ZOOM), { duration: 0.8 });
-    } else {
-      toast.info("Ta position n'est pas disponible.", {
-        description: "Autorise la localisation dans les réglages de ton navigateur.",
-      });
+    } else if (permission === "denied") {
+      setManualDialog("denied");
+    } else if (permission === "unsupported") {
+      toast.warning("Ton navigateur ne permet pas la localisation.");
+    } else if (geolocation.status !== "locating") {
+      setManualDialog("prompt");
     }
   };
 
@@ -279,6 +299,16 @@ export function MapView({
         onClose={() => setSelectedId(null)}
       />
 
+      <LocationPermissionDialog
+        variant={permissionDialog}
+        onAllow={() => {
+          closePermissionDialog();
+          // Déclenche la demande native du navigateur.
+          requestLocation();
+        }}
+        onClose={closePermissionDialog}
+      />
+
       <CreateActivitySheet
         open={mode === "form"}
         location={draftLocation}
@@ -290,4 +320,15 @@ export function MapView({
       />
     </div>
   );
+}
+
+const PROMPT_DISMISSED_KEY = "sportbud:location-prompt-dismissed";
+
+/** La fenêtre de localisation a-t-elle déjà été fermée pendant cette session ? */
+function readPromptDismissed() {
+  try {
+    return typeof window !== "undefined" && sessionStorage.getItem(PROMPT_DISMISSED_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
