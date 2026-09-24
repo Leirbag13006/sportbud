@@ -27,6 +27,8 @@ interface ActivityMapProps {
   currentUser: MapUser;
   userPosition: LatLngTuple | null;
   selectedId: string | null;
+  /** Activité survolée dans la liste (vue côte à côte) : marqueur mis en avant. */
+  highlightedId?: string | null;
   onSelect: (activity: ActivityWithCreator) => void;
   /** Lieu en cours de choix (création d'activité), ou null. */
   draftLocation: [number, number] | null;
@@ -45,6 +47,7 @@ export default function ActivityMap({
   currentUser,
   userPosition,
   selectedId,
+  highlightedId = null,
   onSelect,
   draftLocation,
   onDraftLocationChange,
@@ -89,7 +92,7 @@ export default function ActivityMap({
           <ActivityMarker
             key={activity.id}
             activity={activity}
-            selected={activity.id === selectedId}
+            selected={activity.id === selectedId || activity.id === highlightedId}
             onSelect={onSelect}
           />
         ))}

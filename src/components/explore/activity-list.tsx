@@ -5,6 +5,7 @@ import { SearchX, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
 import { pluralize } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { ActivityCard } from "./activity-card";
 import type { ExploreItem } from "./filters";
 
@@ -19,9 +20,13 @@ interface ActivityListProps {
   onOpen: (activityId: string) => void;
   onResetFilters: () => void;
   onCreate: () => void;
+  /** grid : pleine largeur (2 colonnes sur grand écran) ; column : colonne unique à côté de la carte. */
+  layout?: "grid" | "column";
+  /** Survol d'une carte (vue côte à côte : met en avant son marqueur). */
+  onHover?: (activityId: string | null) => void;
 }
 
-/** Liste des activités filtrées, en cartes (une colonne sur mobile, deux sur grand écran). */
+/** Liste des activités filtrées, en cartes (une colonne sur mobile, deux sur grand écran, une à côté de la carte). */
 export function ActivityList({
   items,
   recommended = [],
@@ -32,6 +37,8 @@ export function ActivityList({
   onOpen,
   onResetFilters,
   onCreate,
+  layout = "grid",
+  onHover,
 }: ActivityListProps) {
   if (items.length === 0) {
     const isFiltered = totalCount > 0;
@@ -62,9 +69,14 @@ export function ActivityList({
   const others = items.filter(({ activity }) => !recommendedIds.has(activity.id));
 
   const renderCards = (list: ExploreItem[], priorityCount: number) => (
-    <ul className="grid gap-3 lg:grid-cols-2">
+    <ul className={cn("grid gap-3", layout === "grid" && "lg:grid-cols-2")}>
       {list.map(({ activity, distanceKm }, index) => (
-        <li key={activity.id} className="min-w-0">
+        <li
+          key={activity.id}
+          className="min-w-0"
+          onMouseEnter={onHover && (() => onHover(activity.id))}
+          onMouseLeave={onHover && (() => onHover(null))}
+        >
           <ActivityCard
             activity={activity}
             distanceKm={distanceKm}
@@ -84,7 +96,12 @@ export function ActivityList({
   );
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-10 px-4 pt-4 pb-24 md:px-6">
+    <div
+      className={cn(
+        "w-full space-y-10 px-4",
+        layout === "grid" ? "mx-auto max-w-5xl pt-4 pb-24 md:px-6" : "pt-5 pb-8",
+      )}
+    >
       {recommended.length > 0 && (
         <section aria-labelledby="for-you-title">
           <div className="mb-5 flex items-end justify-between gap-4">

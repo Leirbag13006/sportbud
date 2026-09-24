@@ -7,6 +7,7 @@ import { LocationPermissionDialog } from "@/components/map/location-permission-d
 import type { MapUser } from "@/components/map/marker-icons";
 import { MapView } from "@/components/map/map-view";
 import { useCityName } from "@/hooks/use-city-name";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { useLocationAccess } from "@/hooks/use-location-access";
 import type { ExploreActivity } from "@/lib/activities/types";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
@@ -36,9 +37,13 @@ interface ExploreViewProps {
   createToken?: string;
 }
 
+/** Largeur à partir de laquelle liste et carte s'affichent côte à côte. */
+const SPLIT_QUERY = "(min-width: 1280px)";
+
 /**
  * Écran d'accueil « Explorer » : liste de cartes (par défaut) ou carte interactive,
- * avec filtres partagés, détail d'activité et création.
+ * avec filtres partagés, détail d'activité et création. Sur grand écran, liste et carte
+ * sont côte à côte : survoler une carte met son marqueur en avant, cliquer centre la carte.
  */
 export function ExploreView({
   activities,
@@ -63,6 +68,9 @@ export function ExploreView({
   const [createRequest, setCreateRequest] = useState(0);
   const [editRequest, setEditRequest] = useState<{ token: number; activity: ExploreActivity } | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const isSplit = useMediaQuery(SPLIT_QUERY);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [panRequest, setPanRequest] = useState<{ token: number; activityId: string } | null>(null);
 
   const items = useMemo(
     () => applyFilters(activities, filters, referencePosition),
@@ -116,12 +124,56 @@ export function ExploreView({
     setSelectedId(activityId);
   }, []);
 
+  /** Ouverture depuis la liste : en vue côte à côte, la carte se centre aussi sur l'activité. */
+  const openFromList = (activityId: string) => {
+    setSelectedId(activityId);
+    if (isSplit) setPanRequest((previous) => ({ token: (previous?.token ?? 0) + 1, activityId }));
+  };
+
+  const activityList = (
+    <ActivityList
+      items={items}
+      recommended={recommended}
+      totalCount={activities.length}
+      currentUserId={currentUser.id}
+      myApplications={myApplications}
+      receivedApplications={receivedApplications}
+      onOpen={openFromList}
+      onResetFilters={() => setFilters(DEFAULT_FILTERS)}
+      onCreate={startCreation}
+      layout={isSplit ? "column" : "grid"}
+      onHover={isSplit ? setHoveredId : undefined}
+    />
+  );
+
+  const mapView = (
+    <MapView
+      activities={items.map(({ activity }) => activity)}
+      currentUser={currentUser}
+      userPosition={location.position}
+      homePosition={preferences.home?.position ?? null}
+      isLocating={location.isLocating}
+      onRequestLocation={location.ensureLocation}
+      selectedId={selectedId}
+      onSelect={setSelectedId}
+      focusId={focusId}
+      createRequest={createRequest}
+      onCreatingChange={setIsCreating}
+      onCreated={handleCreated}
+      creatorGender={preferences.gender}
+      editRequest={editRequest}
+      highlightedId={hoveredId}
+      panRequest={panRequest}
+    />
+  );
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {!isCreating && (
         <ExploreToolbar
           view={view}
           onViewChange={changeView}
+          showViewToggle={!isSplit}
           sport={filters.sport}
           onSportChange={(sport) => setFilters((current) => ({ ...current, sport }))}
           activeFilterCount={countActiveFilters(filters)}
@@ -133,37 +185,20 @@ export function ExploreView({
         />
       )}
 
-      {view === "list" ? (
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
-          <ActivityList
-            items={items}
-            recommended={recommended}
-            totalCount={activities.length}
-            currentUserId={currentUser.id}
-            myApplications={myApplications}
-            receivedApplications={receivedApplications}
-            onOpen={setSelectedId}
-            onResetFilters={() => setFilters(DEFAULT_FILTERS)}
-            onCreate={startCreation}
-          />
+      {isSplit ? (
+        <div className="flex min-h-0 flex-1">
+          {/* Pendant la création, la carte prend toute la largeur pour choisir le lieu. */}
+          {!isCreating && (
+            <aside aria-label="Liste des activités" className="w-[420px] shrink-0 overflow-y-auto border-r xl:w-[480px]">
+              {activityList}
+            </aside>
+          )}
+          {mapView}
         </div>
+      ) : view === "list" ? (
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">{activityList}</div>
       ) : (
-        <MapView
-          activities={items.map(({ activity }) => activity)}
-          currentUser={currentUser}
-          userPosition={location.position}
-          homePosition={preferences.home?.position ?? null}
-          isLocating={location.isLocating}
-          onRequestLocation={location.ensureLocation}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          focusId={focusId}
-          createRequest={createRequest}
-          onCreatingChange={setIsCreating}
-          onCreated={handleCreated}
-          creatorGender={preferences.gender}
-          editRequest={editRequest}
-        />
+        mapView
       )}
 
       <ActivitySheet
@@ -174,7 +209,7 @@ export function ExploreView({
           selected ? receivedApplications.filter((application) => application.activityId === selected.id) : []
         }
         onShowOnMap={
-          view === "list" && selected
+          view === "list" && !isSplit && selected
             ? () => {
                 setFocusId(selected.id);
                 changeView("map");

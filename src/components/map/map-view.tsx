@@ -59,6 +59,24 @@ interface MapViewProps {
   creatorGender: Gender | null;
   /** Demande de modification d'une activité (nouveau jeton = nouvelle demande). */
   editRequest?: { token: number; activity: ActivityWithCreator } | null;
+  /** Activité survolée dans la liste (vue côte à côte). */
+  highlightedId?: string | null;
+  /** Centrage demandé sur une activité (clic dans la liste ; nouveau jeton = nouvelle demande). */
+  panRequest?: { token: number; activityId: string } | null;
+}
+
+/** Largeur du panneau de détail sur grand écran (Drawer latéral de 24rem, cf. components/ui/drawer). */
+const DETAIL_PANEL_WIDTH_PX = 384;
+
+/**
+ * Centre à viser pour qu'une activité reste visible à gauche du panneau de détail
+ * (grand écran). Sur mobile, le détail s'ouvre en bas : on centre simplement.
+ */
+function besideDetailPanel(map: LeafletMap, position: [number, number], zoom: number): [number, number] {
+  if (!window.matchMedia("(min-width: 768px)").matches) return position;
+  const shifted = map.project(position, zoom).add([DETAIL_PANEL_WIDTH_PX / 2, 0]);
+  const { lat, lng } = map.unproject(shifted, zoom);
+  return [lat, lng];
 }
 
 /** Vue carte de l'écran Explorer : marqueurs, recentrage et création d'activité. */
@@ -77,6 +95,8 @@ export function MapView({
   onCreated,
   creatorGender,
   editRequest = null,
+  highlightedId = null,
+  panRequest = null,
 }: MapViewProps) {
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [mode, setMode] = useState<Mode>("browse");
@@ -99,6 +119,16 @@ export function MapView({
     hasCentered.current = true;
     map.setView([target.lat, target.lng], 15);
   }, [map, focusId, activities]);
+
+  // Clic sur une carte de la liste (vue côte à côte) : la carte se centre sur l'activité.
+  useEffect(() => {
+    if (!map || !panRequest) return;
+    const target = activities.find((activity) => activity.id === panRequest.activityId);
+    if (!target) return;
+    hasCentered.current = true;
+    const zoom = Math.max(map.getZoom(), 14);
+    map.flyTo(besideDetailPanel(map, [target.lat, target.lng], zoom), zoom, { duration: 0.6 });
+  }, [map, panRequest]); // eslint-disable-line react-hooks/exhaustive-deps -- uniquement à chaque nouvelle demande
 
   // Sinon, premier centrage automatique sur l'utilisateur dès que sa position est connue.
   useEffect(() => {
@@ -124,7 +154,7 @@ export function MapView({
   const handleSelect = useCallback(
     (activity: ActivityWithCreator) => {
       onSelect(activity.id);
-      map?.panTo([activity.lat, activity.lng], { animate: true });
+      if (map) map.panTo(besideDetailPanel(map, [activity.lat, activity.lng], map.getZoom()), { animate: true });
     },
     [map, onSelect],
   );
@@ -226,6 +256,7 @@ export function MapView({
           currentUser={currentUser}
           userPosition={userPosition}
           selectedId={selectedId}
+          highlightedId={highlightedId}
           onSelect={handleSelect}
           draftLocation={mode === "browse" ? null : draftLocation}
           onDraftLocationChange={mode === "pick" ? moveDraftTo : undefined}

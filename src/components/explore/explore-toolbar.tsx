@@ -14,6 +14,8 @@ export type ExploreViewMode = "list" | "map";
 interface ExploreToolbarProps {
   view: ExploreViewMode;
   onViewChange: (view: ExploreViewMode) => void;
+  /** Masqué dans la vue côte à côte (grand écran), où liste et carte sont toutes deux visibles. */
+  showViewToggle?: boolean;
   sport: SportType | null;
   onSportChange: (sport: SportType | null) => void;
   activeFilterCount: number;
@@ -32,6 +34,7 @@ interface ExploreToolbarProps {
 export function ExploreToolbar({
   view,
   onViewChange,
+  showViewToggle = true,
   sport,
   onSportChange,
   activeFilterCount,
@@ -75,21 +78,22 @@ export function ExploreToolbar({
           )}
 
           <div className="flex shrink-0 items-center gap-2">
-            <div role="group" aria-label="Affichage" className="flex rounded-lg border border-night-700 bg-night-950/60 p-1">
-              {(
-                [
-                  ["list", "Liste", List],
-                  ["map", "Carte", MapIcon],
-                ] as const
-              ).map(([value, label, Icon]) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={view === value}
-                  onClick={() => onViewChange(value)}
-                  className={cn(
-                    "flex h-8 items-center gap-1.5 rounded-md px-3 font-display text-xs font-bold transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring",
-                    view === value ? "bg-mint-500 text-night-950" : "text-white/75 hover:text-white",
+            {showViewToggle && (
+              <div role="group" aria-label="Affichage" className="flex rounded-lg border border-night-700 bg-night-950/60 p-1">
+                {(
+                  [
+                    ["list", "Liste", List],
+                    ["map", "Carte", MapIcon],
+                  ] as const
+                ).map(([value, label, Icon]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={view === value}
+                    onClick={() => onViewChange(value)}
+                    className={cn(
+                      "flex h-8 items-center gap-1.5 rounded-md px-3 font-display text-xs font-bold transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring",
+                      view === value ? "bg-mint-500 text-night-950" : "text-white/75 hover:text-white",
                   )}
                 >
                   <Icon className="size-4" aria-hidden />
@@ -98,6 +102,7 @@ export function ExploreToolbar({
                 </button>
               ))}
             </div>
+            )}
 
             <button
               type="button"
