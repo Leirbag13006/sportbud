@@ -1,30 +1,55 @@
 import type { SportType } from "@/db/schema";
+import { pluralize } from "@/lib/format";
+
+/** Famille de sport : sert à formuler le titre d'une annonce. */
+type SportKind = "team" | "racket" | "solo";
 
 export interface SportOption {
   value: SportType;
   label: string;
   /** Pictogramme affiché dans les marqueurs et les listes. */
   emoji: string;
+  /** Photo d'illustration (CC0, voir public/sports/CREDITS.md). */
+  image: string;
+  kind: SportKind;
 }
 
 /** Sports proposés, dans l'ordre d'affichage des listes. */
 export const SPORTS: SportOption[] = [
-  { value: "football", label: "Football", emoji: "⚽" },
-  { value: "basketball", label: "Basket", emoji: "🏀" },
-  { value: "tennis", label: "Tennis", emoji: "🎾" },
-  { value: "padel", label: "Padel", emoji: "🏓" },
-  { value: "badminton", label: "Badminton", emoji: "🏸" },
-  { value: "volleyball", label: "Volley", emoji: "🏐" },
-  { value: "running", label: "Running", emoji: "🏃" },
-  { value: "cycling", label: "Vélo", emoji: "🚴" },
-  { value: "swimming", label: "Natation", emoji: "🏊" },
-  { value: "climbing", label: "Escalade", emoji: "🧗" },
-  { value: "fitness", label: "Fitness", emoji: "🏋️" },
-  { value: "other", label: "Autre", emoji: "🏅" },
+  { value: "football", label: "Football", emoji: "⚽", image: "/sports/football.jpg", kind: "team" },
+  { value: "basketball", label: "Basket", emoji: "🏀", image: "/sports/basketball.jpg", kind: "team" },
+  { value: "tennis", label: "Tennis", emoji: "🎾", image: "/sports/tennis.jpg", kind: "racket" },
+  { value: "padel", label: "Padel", emoji: "🏓", image: "/sports/padel.jpg", kind: "racket" },
+  { value: "badminton", label: "Badminton", emoji: "🏸", image: "/sports/badminton.jpg", kind: "racket" },
+  { value: "volleyball", label: "Volley", emoji: "🏐", image: "/sports/volleyball.jpg", kind: "team" },
+  { value: "running", label: "Running", emoji: "🏃", image: "/sports/running.jpg", kind: "solo" },
+  { value: "cycling", label: "Vélo", emoji: "🚴", image: "/sports/cycling.jpg", kind: "solo" },
+  { value: "swimming", label: "Natation", emoji: "🏊", image: "/sports/swimming.jpg", kind: "solo" },
+  { value: "climbing", label: "Escalade", emoji: "🧗", image: "/sports/climbing.jpg", kind: "solo" },
+  { value: "fitness", label: "Fitness", emoji: "🏋️", image: "/sports/fitness.jpg", kind: "solo" },
+  { value: "other", label: "Autre", emoji: "🏅", image: "/sports/other.jpg", kind: "solo" },
 ];
 
 const SPORTS_BY_VALUE = new Map(SPORTS.map((sport) => [sport.value, sport]));
 
 export function getSport(value: SportType): SportOption {
   return SPORTS_BY_VALUE.get(value) ?? SPORTS[SPORTS.length - 1]!;
+}
+
+/**
+ * Titre d'annonce lisible selon le sport et le nombre de personnes recherchées :
+ * « Recherche 2 joueurs », « Partenaire de tennis », « Sortie running »…
+ */
+export function getActivityTitle(sportType: SportType, spots: number) {
+  const sport = getSport(sportType);
+  switch (sport.kind) {
+    case "team":
+      return `Recherche ${pluralize(spots, "joueur")}`;
+    case "racket":
+      return spots === 1 ? `Partenaire de ${sport.label.toLowerCase()}` : `${sport.label} : recherche ${spots} joueurs`;
+    default:
+      if (sportType === "other") return spots === 1 ? "Recherche un partenaire" : `Recherche ${spots} partenaires`;
+      if (sportType === "fitness") return "Séance de fitness";
+      return `Sortie ${sport.label.toLowerCase()}`;
+  }
 }

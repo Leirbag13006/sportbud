@@ -2,6 +2,18 @@ import { divIcon } from "leaflet";
 
 import { getSport } from "@/config/sports";
 import type { ActivityWithCreator } from "@/lib/activities/types";
+import { getInitials } from "@/lib/format";
+
+/** Utilisateur représenté par le marqueur « Moi ». */
+export interface MapUser {
+  fullName: string;
+  avatarUrl: string | null;
+}
+
+/** Échappe le texte injecté dans le HTML des icônes (nom saisi par l'utilisateur). */
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
+}
 
 /**
  * Icônes Leaflet en HTML (divIcon), stylées par les classes `.map-marker-*` de globals.css.
@@ -29,13 +41,26 @@ export function createActivityIcon(activity: ActivityWithCreator, selected: bool
   });
 }
 
-/** Marqueur « Moi » : point bleu avec halo pulsé. */
-export const userLocationIcon = divIcon({
-  className: "",
-  html: `<div class="map-marker-user"><span class="map-marker-user__pulse"></span><span class="map-marker-user__dot"></span></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-});
+/**
+ * Marqueur « Moi » : bulle avec la photo de profil (ou les initiales), pointe vers la position,
+ * et halo pulsé au sol.
+ */
+export function createUserLocationIcon(user: MapUser) {
+  const content = user.avatarUrl
+    ? `<img src="${escapeHtml(user.avatarUrl)}" alt="" class="map-marker-user__photo" />`
+    : `<span class="map-marker-user__initials">${escapeHtml(getInitials(user.fullName))}</span>`;
+
+  return divIcon({
+    className: "",
+    html: `<div class="map-marker-user">
+      <span class="map-marker-user__pulse"></span>
+      <span class="map-marker-user__bubble">${content}</span>
+      <span class="map-marker-user__label">Moi</span>
+    </div>`,
+    iconSize: [48, 64],
+    iconAnchor: [24, 58], // centre du halo sur la position exacte
+  });
+}
 
 /** Épingle du lieu en cours de choix (création d'activité), déplaçable. */
 export const draftLocationIcon = divIcon({

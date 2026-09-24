@@ -246,27 +246,80 @@
   filter: grayscale(1);
 }
 
-/* Marqueur « Moi » : point bleu avec halo pulsé. */
+/* Marqueur « Moi » : bulle avatar + pointe, halo pulsé au sol sur la position exacte. */
 .map-marker-user {
   position: relative;
-  width: 24px;
-  height: 24px;
+  width: 48px;
+  height: 64px;
 }
 
-.map-marker-user__dot {
+.map-marker-user__bubble {
   position: absolute;
-  inset: 4px;
+  top: 0;
+  left: 4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: 3px solid oklch(0.6 0.2 255);
+  background: var(--brand-soft);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.3);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.map-marker-user::before {
+  /* Pointe sous la bulle, vers la position */
+  content: "";
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: oklch(0.6 0.2 255);
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 2px;
+}
+
+.map-marker-user__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.map-marker-user__initials {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.map-marker-user__label {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  z-index: 2;
+  padding: 0 5px;
   border-radius: 9999px;
   background: oklch(0.6 0.2 255);
-  border: 3px solid white;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  color: white;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  box-shadow: 0 0 0 2px white;
 }
 
 .map-marker-user__pulse {
   position: absolute;
-  inset: 0;
+  bottom: 0;
+  left: 14px;
+  width: 20px;
+  height: 12px;
   border-radius: 9999px;
-  background: oklch(0.6 0.2 255 / 0.35);
+  background: oklch(0.6 0.2 255 / 0.45);
   animation: map-user-pulse 2s ease-out infinite;
 }
 
@@ -276,7 +329,7 @@
     opacity: 1;
   }
   to {
-    transform: scale(2.6);
+    transform: scale(2.8);
     opacity: 0;
   }
 }

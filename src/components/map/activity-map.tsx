@@ -3,13 +3,14 @@
 import "leaflet/dist/leaflet.css";
 
 import type { LatLngTuple, Map as LeafletMap, Marker as LeafletMarker } from "leaflet";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   AttributionControl,
   MapContainer,
   Marker,
   TileLayer,
   ZoomControl,
+  useMap,
   useMapEvents,
 } from "react-leaflet";
 
@@ -17,10 +18,12 @@ import { DEFAULT_CENTER, DEFAULT_ZOOM, TILE_LAYER } from "@/config/map";
 import { getSport } from "@/config/sports";
 import type { ActivityWithCreator } from "@/lib/activities/types";
 import { formatDay, formatTime } from "@/lib/format";
-import { createActivityIcon, draftLocationIcon, userLocationIcon } from "./marker-icons";
+import { createActivityIcon, createUserLocationIcon, draftLocationIcon, type MapUser } from "./marker-icons";
 
 interface ActivityMapProps {
   activities: ActivityWithCreator[];
+  /** Utilisateur connecté, représenté par sa photo / ses initiales sur sa position. */
+  currentUser: MapUser;
   userPosition: LatLngTuple | null;
   selectedId: string | null;
   onSelect: (activity: ActivityWithCreator) => void;
@@ -38,6 +41,7 @@ interface ActivityMapProps {
  */
 export default function ActivityMap({
   activities,
+  currentUser,
   userPosition,
   selectedId,
   onSelect,
@@ -46,6 +50,10 @@ export default function ActivityMap({
   onReady,
 }: ActivityMapProps) {
   const isPicking = Boolean(onDraftLocationChange);
+  const userIcon = useMemo(
+    () => createUserLocationIcon(currentUser),
+    [currentUser.fullName, currentUser.avatarUrl], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   return (
     <MapContainer
@@ -59,13 +67,14 @@ export default function ActivityMap({
       }}
     >
       <TileLayer {...TILE_LAYER} />
+      <ResizeWatcher />
       <ZoomControl position="topright" />
       <AttributionControl position="bottomleft" prefix={false} />
 
       {userPosition && (
         <Marker
           position={userPosition}
-          icon={userLocationIcon}
+          icon={userIcon}
           title="Ma position"
           keyboard={false}
           zIndexOffset={-100}
@@ -88,6 +97,20 @@ export default function ActivityMap({
       {draftLocation && <DraftMarker position={draftLocation} onChange={onDraftLocationChange} />}
     </MapContainer>
   );
+}
+
+/**
+ * Recalcule la taille de la carte quand son conteneur change de dimensions
+ * (barre d'outils masquée, rotation d'écran…) : sinon Leaflet laisse des zones grises.
+ */
+function ResizeWatcher() {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
 }
 
 /** Place l'épingle là où l'utilisateur clique / touche la carte. */

@@ -4,9 +4,7 @@ import type { Map as LeafletMap } from "leaflet";
 import { Check, LocateFixed, Loader2, MapPin, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
-import { ActivitySheet } from "@/components/activities/activity-sheet";
 import { CreateActivityFab } from "@/components/activities/create-activity-fab";
 import {
   createDefaultFormValues,
@@ -14,14 +12,12 @@ import {
 } from "@/components/activities/create-activity-form";
 import { CreateActivitySheet } from "@/components/activities/create-activity-sheet";
 import { AddressSearch } from "@/components/map/address-search";
-import { LocationPermissionDialog } from "@/components/map/location-permission-dialog";
 import { Button } from "@/components/ui/button";
 import { USER_ZOOM } from "@/config/map";
-import { useGeolocation } from "@/hooks/use-geolocation";
 import type { ActivityWithCreator } from "@/lib/activities/types";
-import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
 import { reverseGeocode, type AddressSuggestion } from "@/lib/geocoding";
 import { cn } from "@/lib/utils";
+import type { MapUser } from "./marker-icons";
 
 // Leaflet a besoin de `window` : la carte n'est rendue que dans le navigateur.
 const ActivityMap = dynamic(() => import("./activity-map"), {
@@ -34,7 +30,7 @@ const ActivityMap = dynamic(() => import("./activity-map"), {
 });
 
 /**
- * Modes de l'écran carte :
+ * Modes de la carte :
  * - browse : consultation, clic sur un marqueur → détail ;
  * - pick   : choix du lieu d'une nouvelle activité (clic ou glisser l'épingle) ;
  * - form   : formulaire de création ouvert, épingle figée.
@@ -43,100 +39,74 @@ type Mode = "browse" | "pick" | "form";
 
 interface MapViewProps {
   activities: ActivityWithCreator[];
-  currentUserId: string;
-  /** Candidatures de l'utilisateur, par activité. */
-  myApplications: Record<string, MyApplicationSummary>;
-  /** Candidatures reçues sur les activités de l'utilisateur. */
-  receivedApplications: ReceivedApplication[];
-  /** Activité à ouvrir au chargement (lien « Voir sur la carte »). */
-  initialSelectedId?: string;
+  currentUser: MapUser;
+  userPosition: [number, number] | null;
+  isLocating: boolean;
+  /** Demande la position (fenêtre d'autorisation) quand elle est inconnue. */
+  onRequestLocation: () => void;
+  selectedId: string | null;
+  onSelect: (activityId: string) => void;
+  /** Activité sur laquelle centrer la carte à l'ouverture. */
+  focusId?: string | null;
+  /** Incrémenté par le parent pour lancer la création d'une activité (bouton + de la liste). */
+  createRequest: number;
+  onCreatingChange: (isCreating: boolean) => void;
+  onCreated: (activityId: string) => void;
 }
 
-/** Écran carte : géolocalisation, marqueurs, détail d'activité et création. */
+/** Vue carte de l'écran Explorer : marqueurs, recentrage et création d'activité. */
 export function MapView({
   activities,
-  currentUserId,
-  myApplications,
-  receivedApplications,
-  initialSelectedId,
+  currentUser,
+  userPosition,
+  isLocating,
+  onRequestLocation,
+  selectedId,
+  onSelect,
+  focusId,
+  createRequest,
+  onCreatingChange,
+  onCreated,
 }: MapViewProps) {
-  const { state: geolocation, permission, request: requestLocation } = useGeolocation();
-  // Fenêtre d'explication : proposée une fois par session, puis rouverte via le bouton de recentrage.
-  const [promptDismissed, setPromptDismissed] = useState(readPromptDismissed);
-  const [manualDialog, setManualDialog] = useState<"prompt" | "denied" | null>(null);
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [mode, setMode] = useState<Mode>("browse");
-  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const [draftLocation, setDraftLocation] = useState<[number, number] | null>(null);
   const [formValues, setFormValues] = useState<ActivityFormValues>(createDefaultFormValues);
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
-  const hasCenteredOnUser = useRef(false);
+  const hasCentered = useRef(false);
+  const handledCreateRequest = useRef(0);
   const geocodeAbortRef = useRef<AbortController | null>(null);
 
-  const userPosition = geolocation.position;
-  // Dérivé des données serveur : se met à jour quand la carte est rafraîchie.
-  const selected = activities.find((activity) => activity.id === selectedId) ?? null;
+  useEffect(() => onCreatingChange(mode !== "browse"), [mode, onCreatingChange]);
 
-  // Activité demandée dans l'URL : la carte s'ouvre dessus plutôt que sur l'utilisateur.
+  // Activité demandée (lien « Voir sur la carte », carte de la liste) : la carte s'ouvre dessus.
   useEffect(() => {
-    if (!map || !initialSelectedId || hasCenteredOnUser.current) return;
-    const target = activities.find((activity) => activity.id === initialSelectedId);
+    if (!map || !focusId || hasCentered.current) return;
+    const target = activities.find((activity) => activity.id === focusId);
     if (!target) return;
-    hasCenteredOnUser.current = true;
+    hasCentered.current = true;
     map.setView([target.lat, target.lng], 15);
-  }, [map, initialSelectedId, activities]);
+  }, [map, focusId, activities]);
 
-  // Premier centrage automatique sur l'utilisateur dès que sa position est connue.
+  // Sinon, premier centrage automatique sur l'utilisateur dès que sa position est connue.
   useEffect(() => {
-    if (!map || !userPosition || hasCenteredOnUser.current) return;
-    hasCenteredOnUser.current = true;
+    if (!map || !userPosition || hasCentered.current) return;
+    hasCentered.current = true;
     map.flyTo(userPosition, USER_ZOOM, { duration: 1 });
   }, [map, userPosition]);
 
-  // Informe l'utilisateur si la localisation échoue après avoir été demandée.
-  useEffect(() => {
-    if (geolocation.status === "denied") {
-      toast.info("Position non partagée : la carte est centrée sur Marseille.", {
-        description: "Tu peux l'activer à tout moment avec le bouton de localisation.",
-      });
-    } else if (geolocation.status === "unavailable") {
-      toast.warning("Impossible de déterminer ta position.");
-    }
-  }, [geolocation.status]);
-
-  // Proposée automatiquement si le navigateur n'a encore ni autorisé ni refusé la localisation.
-  const autoPrompt = permission === "prompt" && geolocation.status === "idle" && !promptDismissed;
-  const permissionDialog = manualDialog ?? (autoPrompt ? "prompt" : null);
-
-  const closePermissionDialog = () => {
-    setManualDialog(null);
-    setPromptDismissed(true);
-    try {
-      sessionStorage.setItem(PROMPT_DISMISSED_KEY, "1");
-    } catch {
-      // Stockage indisponible (navigation privée…) : la fenêtre pourra réapparaître, sans gravité.
-    }
-  };
-
   const handleRecenter = () => {
     if (!map) return;
-    if (userPosition) {
-      map.flyTo(userPosition, Math.max(map.getZoom(), USER_ZOOM), { duration: 0.8 });
-    } else if (permission === "denied") {
-      setManualDialog("denied");
-    } else if (permission === "unsupported") {
-      toast.warning("Ton navigateur ne permet pas la localisation.");
-    } else if (geolocation.status !== "locating") {
-      setManualDialog("prompt");
-    }
+    if (userPosition) map.flyTo(userPosition, Math.max(map.getZoom(), USER_ZOOM), { duration: 0.8 });
+    else onRequestLocation();
   };
 
   const handleSelect = useCallback(
     (activity: ActivityWithCreator) => {
-      setSelectedId(activity.id);
+      onSelect(activity.id);
       map?.panTo([activity.lat, activity.lng], { animate: true });
     },
-    [map],
+    [map, onSelect],
   );
 
   /**
@@ -171,15 +141,23 @@ export function MapView({
     map?.flyTo(suggestion.position, Math.max(map.getZoom(), 17), { duration: 0.8 });
   };
 
-  /** FAB « + » : passe en mode choix du lieu, épingle pré-placée au centre de la carte. */
-  const startCreation = () => {
-    setSelectedId(null);
-    if (!draftLocation && map) {
+  /** Bouton « + » : passe en mode choix du lieu, épingle pré-placée (position de l'utilisateur ou centre). */
+  const startCreation = useCallback(() => {
+    if (!map) return;
+    if (!draftLocation) {
       const center = map.getCenter();
-      moveDraftTo([center.lat, center.lng]);
+      moveDraftTo(userPosition ?? [center.lat, center.lng]);
+      if (userPosition) map.setView(userPosition, Math.max(map.getZoom(), USER_ZOOM));
     }
     setMode("pick");
-  };
+  }, [map, draftLocation, moveDraftTo, userPosition]);
+
+  // Création demandée depuis la liste : lancée dès que la carte est prête.
+  useEffect(() => {
+    if (!map || createRequest === 0 || handledCreateRequest.current === createRequest) return;
+    handledCreateRequest.current = createRequest;
+    startCreation();
+  }, [map, createRequest, startCreation]);
 
   const cancelCreation = () => {
     geocodeAbortRef.current?.abort();
@@ -189,21 +167,22 @@ export function MapView({
   };
 
   const handleCreated = (activityId: string) => {
-    // La carte est rafraîchie par le serveur (revalidatePath) : on sélectionne la nouvelle activité.
     setMode("browse");
-    setSelectedId(activityId);
     setDraftLocation(null);
     setFormValues(createDefaultFormValues());
+    // Les données sont rafraîchies par le serveur (revalidatePath) : le parent sélectionne la nouvelle activité.
+    onCreated(activityId);
   };
 
   return (
     <div className={cn("relative flex-1", mode === "pick" && "map-picking")}>
-      <h1 className="sr-only">Carte des activités</h1>
+      <h2 className="sr-only">Carte des activités</h2>
 
       {/* isolate : contient les z-index internes de Leaflet sous les éléments flottants de l'app. */}
       <div className="absolute inset-0 isolate">
         <ActivityMap
           activities={activities}
+          currentUser={currentUser}
           userPosition={userPosition}
           selectedId={selectedId}
           onSelect={handleSelect}
@@ -215,7 +194,7 @@ export function MapView({
 
       {mode === "browse" && activities.length === 0 && (
         <p className="absolute top-4 left-1/2 z-10 w-max max-w-[calc(100%-6rem)] -translate-x-1/2 rounded-full border bg-background/95 px-4 py-2 text-center text-sm shadow-md">
-          Aucune activité pour l&apos;instant : crée la première avec le bouton +
+          Aucune activité ne correspond à tes filtres
         </p>
       )}
 
@@ -283,31 +262,11 @@ export function MapView({
             aria-label="Recentrer sur ma position"
             className="absolute right-4 bottom-22 z-10 size-11 rounded-full bg-background shadow-md md:right-6"
           >
-            {geolocation.status === "locating" ? <Loader2 className="animate-spin" /> : <LocateFixed />}
+            {isLocating ? <Loader2 className="animate-spin" /> : <LocateFixed />}
           </Button>
           <CreateActivityFab onClick={startCreation} />
         </>
       )}
-
-      <ActivitySheet
-        activity={mode === "browse" ? selected : null}
-        currentUserId={currentUserId}
-        myApplication={selected ? (myApplications[selected.id] ?? null) : null}
-        receivedApplications={
-          selected ? receivedApplications.filter((application) => application.activityId === selected.id) : []
-        }
-        onClose={() => setSelectedId(null)}
-      />
-
-      <LocationPermissionDialog
-        variant={permissionDialog}
-        onAllow={() => {
-          closePermissionDialog();
-          // Déclenche la demande native du navigateur.
-          requestLocation();
-        }}
-        onClose={closePermissionDialog}
-      />
 
       <CreateActivitySheet
         open={mode === "form"}
@@ -320,15 +279,4 @@ export function MapView({
       />
     </div>
   );
-}
-
-const PROMPT_DISMISSED_KEY = "sportbud:location-prompt-dismissed";
-
-/** La fenêtre de localisation a-t-elle déjà été fermée pendant cette session ? */
-function readPromptDismissed() {
-  try {
-    return typeof window !== "undefined" && sessionStorage.getItem(PROMPT_DISMISSED_KEY) === "1";
-  } catch {
-    return false;
-  }
 }

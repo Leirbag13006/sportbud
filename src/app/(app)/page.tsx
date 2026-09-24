@@ -1,25 +1,28 @@
-import { MapView } from "@/components/map/map-view";
-import { getMapActivities } from "@/lib/activities/queries";
+import { ExploreView } from "@/components/explore/explore-view";
+import { getExploreActivities } from "@/lib/activities/queries";
 import { getMyApplicationSummaries, getReceivedApplications } from "@/lib/applications/queries";
 import { requireUser } from "@/lib/auth/session";
 
-/** Écran principal : la carte interactive des activités. */
-export default async function MapPage({ searchParams }: PageProps<"/">) {
+/** Écran d'accueil : liste (par défaut) ou carte des activités disponibles. */
+export default async function ExplorePage({ searchParams }: PageProps<"/">) {
   const user = await requireUser();
-  const [activities, myApplications, receivedApplications, { activity }] = await Promise.all([
-    getMapActivities(),
+  const [activities, myApplications, receivedApplications, { activity, view }] = await Promise.all([
+    getExploreActivities(),
     getMyApplicationSummaries(user.id),
     getReceivedApplications(user.id),
     searchParams,
   ]);
+  const activityId = typeof activity === "string" ? activity : undefined;
 
   return (
-    <MapView
+    <ExploreView
       activities={activities}
-      currentUserId={user.id}
+      currentUser={{ id: user.id, fullName: user.fullName, avatarUrl: user.avatarUrl }}
       myApplications={myApplications}
       receivedApplications={receivedApplications}
-      initialSelectedId={typeof activity === "string" ? activity : undefined}
+      // Lien vers une activité précise (« Voir sur la carte ») : ouverture sur la carte.
+      initialView={view === "map" || activityId ? "map" : "list"}
+      initialSelectedId={activityId}
     />
   );
 }

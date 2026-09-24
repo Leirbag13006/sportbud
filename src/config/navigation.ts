@@ -1,4 +1,4 @@
-import { MapPin, MessageCircle, User, type LucideIcon } from "lucide-react";
+import { Compass, MessageCircle, User, type LucideIcon } from "lucide-react";
 
 /** Clés des onglets pouvant afficher un badge de notification. */
 export type NavBadgeKey = "messages" | "profile";
@@ -16,7 +16,7 @@ export interface NavItem {
 
 /** Entrées de navigation (header desktop et Bottom Bar mobile), dans l'ordre d'affichage. */
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Carte", icon: MapPin },
+  { href: "/", label: "Explorer", icon: Compass },
   { href: "/messages", label: "Messages", icon: MessageCircle, badgeKey: "messages" },
   { href: "/profile", label: "Profil", icon: User, badgeKey: "profile" },
 ];

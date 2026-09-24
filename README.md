@@ -44,6 +44,15 @@ src/
 └── proxy.ts            # Redirections selon l'état de connexion
 ```
 
+## Écran Explorer
+
+L'accueil affiche les activités disponibles en **liste de cartes** (photo du sport, niveau, date,
+participants, distance, bouton Rejoindre) ou sur la **carte** (bouton Liste / Carte, mémorisé dans
+l'URL `?view=map`). Les filtres (sport, distance, date, niveau, places disponibles, tri) s'appliquent
+aux deux vues. Les distances sont calculées dans le navigateur à partir de la position de l'utilisateur.
+
+Photos des sports : licence CC0 (domaine public), voir `public/sports/CREDITS.md`.
+
 ## Authentification
 
 Mots de passe hachés avec bcrypt, sessions stockées en base (jeton aléatoire dans un cookie

@@ -1,6 +1,7 @@
 "use client";
 
-import { CalendarDays, Check, Gauge, Loader2, MapPin, MessageCircle, Navigation, Timer, Users, X } from "lucide-react";
+import { CalendarDays, Check, Gauge, Loader2, Map as MapIcon, MapPin, MessageCircle, Navigation, Timer, Users, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -20,7 +21,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { getSportLevelLabel } from "@/config/sport-levels";
-import { getSport } from "@/config/sports";
+import { getActivityTitle, getSport } from "@/config/sports";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import type { ActivityWithCreator } from "@/lib/activities/types";
 import { applyToActivity, withdrawApplication } from "@/lib/applications/actions";
@@ -36,6 +37,8 @@ interface ActivitySheetProps {
   myApplication: MyApplicationSummary | null;
   /** Candidatures reçues (uniquement si l'utilisateur est le créateur). */
   receivedApplications: ReceivedApplication[];
+  /** Affiche l'activité sur la carte (depuis la vue liste). */
+  onShowOnMap?: () => void;
   onClose: () => void;
 }
 
@@ -48,6 +51,7 @@ export function ActivitySheet({
   currentUserId,
   myApplication,
   receivedApplications,
+  onShowOnMap,
   onClose,
 }: ActivitySheetProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -67,6 +71,7 @@ export function ActivitySheet({
             isOwn={activity.creatorId === currentUserId}
             myApplication={myApplication}
             receivedApplications={receivedApplications}
+            onShowOnMap={onShowOnMap}
           />
         )}
       </DrawerContent>
@@ -79,24 +84,36 @@ interface ActivityDetailsProps {
   isOwn: boolean;
   myApplication: MyApplicationSummary | null;
   receivedApplications: ReceivedApplication[];
+  onShowOnMap?: () => void;
 }
 
-function ActivityDetails({ activity, isOwn, myApplication, receivedApplications }: ActivityDetailsProps) {
+function ActivityDetails({ activity, isOwn, myApplication, receivedApplications, onShowOnMap }: ActivityDetailsProps) {
   const sport = getSport(activity.sportType);
   const isOpen = activity.status === "open";
   const takenSpots = activity.spotsTotal - activity.spotsAvailable;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <DrawerHeader className="flex-row items-start gap-3 pb-4 text-left">
-        <span
-          aria-hidden
-          className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-2xl"
-        >
-          {sport.emoji}
+      {/* Bandeau photo du sport */}
+      <div className="relative h-36 shrink-0 overflow-hidden rounded-t-[inherit] md:h-44">
+        <Image
+          src={sport.image}
+          alt=""
+          fill
+          sizes="(min-width: 768px) 384px, 100vw"
+          className={cn("object-cover", !isOpen && "grayscale")}
+        />
+        <div aria-hidden className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
+        <span className="absolute bottom-3 left-4 rounded-full bg-background/90 px-2.5 py-1 text-sm font-medium shadow-sm">
+          {sport.emoji} {sport.label}
         </span>
+      </div>
+
+      <DrawerHeader className="flex-row items-start gap-3 pt-4 pb-4 text-left">
         <div className="min-w-0 flex-1 space-y-1 text-left">
-          <DrawerTitle className="text-lg font-semibold">{sport.label}</DrawerTitle>
+          <DrawerTitle className="text-lg font-semibold">
+            {getActivityTitle(activity.sportType, isOpen ? activity.spotsAvailable : activity.spotsTotal)}
+          </DrawerTitle>
           <DrawerDescription className="truncate text-left">
             {activity.locationName ?? activity.address ?? "Lieu indiqué sur la carte"}
           </DrawerDescription>
@@ -166,21 +183,29 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications 
             <p className="text-xs text-muted-foreground">Adresse</p>
             <p className="text-sm font-medium">{activity.address ?? "Indiquée par le marqueur sur la carte"}</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            nativeButton={false}
-            render={
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${activity.lat},${activity.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              />
-            }
-          >
-            <Navigation aria-hidden />
-            Itinéraire
-          </Button>
+          <div className="flex shrink-0 flex-col gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${activity.lat},${activity.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
+            >
+              <Navigation aria-hidden />
+              Itinéraire
+            </Button>
+            {onShowOnMap && (
+              <Button variant="ghost" size="sm" onClick={onShowOnMap}>
+                <MapIcon aria-hidden />
+                Sur la carte
+              </Button>
+            )}
+          </div>
         </div>
 
         {activity.description && (

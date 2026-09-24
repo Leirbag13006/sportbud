@@ -22,6 +22,12 @@ export function formatTime(date: Date) {
   return timeFormatter.format(date);
 }
 
+/** Heure courte à la française : « 19h », « 19h30 ». */
+export function formatHour(date: Date) {
+  const minutes = date.getMinutes();
+  return `${date.getHours()}h${minutes ? String(minutes).padStart(2, "0") : ""}`;
+}
+
 /** « 45 min », « 1 h », « 1 h 30 ». */
 export function formatDuration(minutes: number) {
   const hours = Math.floor(minutes / 60);
