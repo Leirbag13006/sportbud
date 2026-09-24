@@ -25,6 +25,8 @@ import { cn } from "@/lib/utils";
 
 interface ActivitySheetProps {
   activity: ActivityWithCreator | null;
+  /** Pour distinguer ses propres activités (pas de candidature possible). */
+  currentUserId: string;
   onClose: () => void;
 }
 
@@ -32,7 +34,7 @@ interface ActivitySheetProps {
  * Détail d'une activité sélectionnée sur la carte.
  * Mobile : tiroir glissant depuis le bas. Desktop : panneau latéral à droite, la carte reste utilisable.
  */
-export function ActivitySheet({ activity, onClose }: ActivitySheetProps) {
+export function ActivitySheet({ activity, currentUserId, onClose }: ActivitySheetProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
@@ -44,13 +46,13 @@ export function ActivitySheet({ activity, onClose }: ActivitySheetProps) {
       showSwipeHandle={!isDesktop}
     >
       <DrawerContent className="md:shadow-xl md:data-[swipe-axis=x]:top-16">
-        {activity && <ActivityDetails activity={activity} />}
+        {activity && <ActivityDetails activity={activity} isOwn={activity.creatorId === currentUserId} />}
       </DrawerContent>
     </Drawer>
   );
 }
 
-function ActivityDetails({ activity }: { activity: ActivityWithCreator }) {
+function ActivityDetails({ activity, isOwn }: { activity: ActivityWithCreator; isOwn: boolean }) {
   const sport = getSport(activity.sportType);
   const isOpen = activity.status === "open";
   const takenSpots = activity.spotsTotal - activity.spotsAvailable;
@@ -90,7 +92,10 @@ function ActivityDetails({ activity }: { activity: ActivityWithCreator }) {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate font-medium">{activity.creator.fullName}</p>
+            <p className="truncate font-medium">
+              {activity.creator.fullName}
+              {isOwn && <span className="font-normal text-muted-foreground"> (toi)</span>}
+            </p>
             <p className="text-xs text-muted-foreground">
               Organisateur · {getSportLevelLabel(activity.creator.sportLevel)}
             </p>
@@ -142,14 +147,20 @@ function ActivityDetails({ activity }: { activity: ActivityWithCreator }) {
       </div>
 
       <DrawerFooter className="border-t pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <Button
-          className="h-11 w-full text-base"
-          disabled={!isOpen}
-          // TODO (étape 5) : créer la candidature.
-          onClick={() => toast.info("La candidature arrive à l'étape 5.")}
-        >
-          {isOpen ? "Postuler" : "Plus de place disponible"}
-        </Button>
+        {isOwn ? (
+          <p className="rounded-lg bg-muted px-3 py-2.5 text-center text-sm text-muted-foreground">
+            C&apos;est ton activité : les candidatures apparaîtront ici.
+          </p>
+        ) : (
+          <Button
+            className="h-11 w-full text-base"
+            disabled={!isOpen}
+            // TODO (étape 5) : créer la candidature.
+            onClick={() => toast.info("La candidature arrive à l'étape 5.")}
+          >
+            {isOpen ? "Postuler" : "Plus de place disponible"}
+          </Button>
+        )}
       </DrawerFooter>
     </div>
   );

@@ -36,3 +36,11 @@ export const userLocationIcon = divIcon({
   iconSize: [24, 24],
   iconAnchor: [12, 12],
 });
+
+/** Épingle du lieu en cours de choix (création d'activité), déplaçable. */
+export const draftLocationIcon = divIcon({
+  className: "",
+  html: `<div class="map-marker-draft"><span class="map-marker-draft__head"></span><span class="map-marker-draft__shadow"></span></div>`,
+  iconSize: [36, 48],
+  iconAnchor: [18, 46],
+});

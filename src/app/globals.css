@@ -299,3 +299,55 @@
   overflow: hidden;
   box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
 }
+
+/* Épingle du lieu en cours de choix (création d'activité). */
+.map-marker-draft {
+  position: relative;
+  width: 36px;
+  height: 48px;
+  cursor: grab;
+  animation: map-draft-drop 250ms ease-out;
+}
+
+.map-marker-draft__head {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--primary);
+  border: 3px solid white;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.3);
+  transform: rotate(-45deg);
+}
+
+.map-marker-draft__head::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 9999px;
+  background: white;
+}
+
+.map-marker-draft__shadow {
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  width: 12px;
+  height: 5px;
+  border-radius: 9999px;
+  background: rgb(0 0 0 / 0.25);
+}
+
+@keyframes map-draft-drop {
+  from {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+}
+
+/* Mode « choix du lieu » : curseur de visée sur la carte. */
+.map-picking .leaflet-container {
+  cursor: crosshair;
+}
