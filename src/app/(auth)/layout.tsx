@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description:
     "Trouve des partenaires de sport près de chez toi : rejoins une séance ou lance la tienne, tous niveaux, gratuitement.",
   openGraph: {
-    title: "SportLink · Trouve des partenaires de sport près de chez toi",
+    title: "SportMates · Trouve des partenaires de sport près de chez toi",
     description: "Foot, tennis, running, padel… Rejoins une séance ou lance la tienne. Tous niveaux, 100 % gratuit.",
     images: [{ url: "/images/hero-friends-sunset.jpg", width: 960, height: 540 }],
     locale: "fr_FR",

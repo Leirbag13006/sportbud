@@ -79,7 +79,7 @@ export function ProductPreview() {
   return (
     <div
       role="img"
-      aria-label="Aperçu de SportLink : liste d'activités près de chez toi avec photo, niveau, horaire, distance et bouton Rejoindre"
+      aria-label="Aperçu de SportMates : liste d'activités près de chez toi avec photo, niveau, horaire, distance et bouton Rejoindre"
       className="overflow-hidden rounded-block bg-night-950 shadow-lg ring-1 ring-white/10"
     >
       {/* Barre de navigateur */}
@@ -91,7 +91,7 @@ export function ProductPreview() {
         </span>
         <span className="mx-auto flex h-7 w-full max-w-xs items-center justify-center gap-1.5 rounded-md bg-night-800 text-xs text-white/60">
           <Lock className="size-3" />
-          sportlink.app
+          sportmates.vercel.app
         </span>
         <span className="w-12" />
       </div>

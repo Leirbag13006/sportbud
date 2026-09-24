@@ -31,14 +31,14 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "SportLink · Bouge. Rencontre. Partage.",
-    template: "%s · SportLink",
+    default: "SportMates · Bouge. Rencontre. Partage.",
+    template: "%s · SportMates",
   },
   description: "Le sport nous rapproche, partout. Trouve des partenaires sportifs près de chez toi.",
-  applicationName: "SportLink",
+  applicationName: "SportMates",
   appleWebApp: {
     capable: true,
-    title: "SportLink",
+    title: "SportMates",
     statusBarStyle: "black-translucent",
   },
 };

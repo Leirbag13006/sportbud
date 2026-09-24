@@ -508,7 +508,7 @@ export function LandingFooter() {
             ))}
           </ul>
         </nav>
-        <p>© {new Date().getFullYear()} SportLink</p>
+        <p>© {new Date().getFullYear()} SportMates</p>
       </Container>
     </footer>
   );

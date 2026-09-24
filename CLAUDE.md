@@ -1,6 +1,8 @@
 @AGENTS.md
 
-# Direction artistique — SportLink
+# Direction artistique — SportMates
+
+- La marque s'appelle **SportMates** (logo « Sport**Mates** », signature « Bouge. Rencontre. Partage. »). Le kit `design-system/` a été livré sous le nom provisoire « SportLink » : n'utiliser ce nom nulle part dans l'interface.
 
 - La DA est définie dans `design-system/DESIGN.md` : **le lire avant toute création ou modification d'UI** et le respecter strictement. Référence visuelle : `design-system/reference/prototype.jpg`.
 - Les valeurs (couleurs, typos, rayons, ombres) viennent uniquement des tokens, déclarés dans `src/app/globals.css` (`@theme`, repris de `design-system/theme.css`) : classes `night-*`, `mint-*`, `sand-*`, `ink`, `gray-400/600`, `sunset-*`, `rounded-card`, `shadow-md/lg/glow`, `bg-hero`… **Aucune couleur hexadécimale en dur dans les composants.**

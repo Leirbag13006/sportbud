@@ -15,10 +15,13 @@ export async function fetcher<T>(url: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-/** Intervalles de rafraîchissement automatique (ms). */
+/**
+ * Intervalles de rafraîchissement automatique (ms). Calibrés pour ~20 utilisateurs sur les offres
+ * gratuites Vercel / Turso ; le rafraîchissement s'arrête quand l'onglet est masqué.
+ */
 export const POLL_INTERVALS = {
   /** Conversation ouverte : quasi temps réel. */
-  chat: 2000,
+  chat: 3000,
   /** Liste des conversations et badges. */
-  background: 5000,
+  background: 10_000,
 } as const;

@@ -24,7 +24,7 @@ const COLORS: Record<LogoVariant, { base: string; accent: string; hole: string; 
   },
 };
 
-/** Pictogramme SportLink : deux silhouettes autour d'un pin, posées sur un terrain. */
+/** Pictogramme SportMates : deux silhouettes autour d'un pin, posées sur un terrain. */
 export function LogoIcon({ variant = "dark", className }: { variant?: LogoVariant; className?: string }) {
   const { base, accent, hole } = COLORS[variant];
 
@@ -65,7 +65,7 @@ interface LogoProps {
   className?: string;
 }
 
-/** Logo complet SportLink : pictogramme + « Sport » + « Link » (Montserrat Black Italic). */
+/** Logo complet SportMates : pictogramme + « Sport » + « Mates » (Montserrat Black Italic). */
 export function Logo({ variant = "dark", size = "sm", withTagline = false, href = "/", className }: LogoProps) {
   const sizes = SIZES[size];
   const content = (
@@ -73,7 +73,7 @@ export function Logo({ variant = "dark", size = "sm", withTagline = false, href 
       <LogoIcon variant={variant} className={cn("shrink-0", sizes.icon)} />
       <span className="flex flex-col">
         <span className={cn("font-display leading-none font-black tracking-tight italic", sizes.word, COLORS[variant].word)}>
-          Sport<span className={variant === "dark" ? "text-mint-500" : "text-mint-600"}>Link</span>
+          Sport<span className={variant === "dark" ? "text-mint-500" : "text-mint-600"}>Mates</span>
         </span>
         {withTagline && (
           <span
@@ -96,7 +96,7 @@ export function Logo({ variant = "dark", size = "sm", withTagline = false, href 
   return (
     <Link
       href={href}
-      aria-label="SportLink, accueil"
+      aria-label="SportMates, accueil"
       className={cn(classes, "rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring")}
     >
       {content}

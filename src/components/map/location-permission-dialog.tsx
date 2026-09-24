@@ -35,7 +35,7 @@ export function LocationPermissionDialog({ variant, onAllow, onClose }: Location
               </span>
               <DialogTitle className="text-lg">Localisation bloquée</DialogTitle>
               <DialogDescription>
-                Ton navigateur empêche SportLink d&apos;accéder à ta position. Pour la réactiver :
+                Ton navigateur empêche SportMates d&apos;accéder à ta position. Pour la réactiver :
               </DialogDescription>
             </DialogHeader>
             <ol className="list-decimal space-y-1.5 rounded-lg bg-muted/60 py-3 pr-3 pl-8 text-sm">
@@ -62,7 +62,7 @@ export function LocationPermissionDialog({ variant, onAllow, onClose }: Location
               </span>
               <DialogTitle className="text-lg">Trouve des partenaires près de toi</DialogTitle>
               <DialogDescription>
-                SportLink utilise ta position pour centrer la carte sur toi et t&apos;afficher les activités à
+                SportMates utilise ta position pour centrer la carte sur toi et t&apos;afficher les activités à
                 proximité.
               </DialogDescription>
             </DialogHeader>

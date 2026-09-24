@@ -45,7 +45,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Toutes les routes sauf les fichiers statiques et les images.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // Toutes les routes sauf l'API (qui vérifie elle-même la session), les fichiers statiques et les images.
+    "/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

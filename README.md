@@ -1,4 +1,4 @@
-# SportLink
+# SportMates
 
 *Bouge. Rencontre. Partage.* — Web app de mise en relation de partenaires de sport (liste d'activités et carte interactive).
 
@@ -46,7 +46,7 @@ src/
 
 ## Design system
 
-La direction artistique SportLink est dans `design-system/` (`DESIGN.md`, tokens, logos, prototype de référence).
+La direction artistique est dans `design-system/` (kit livré sous le nom provisoire « SportLink ») (`DESIGN.md`, tokens, logos, prototype de référence).
 Les tokens sont intégrés à Tailwind dans `src/app/globals.css` ; les consignes pour l'IA sont dans `CLAUDE.md`.
 
 ## Écran Explorer
@@ -70,9 +70,9 @@ Le temps réel repose sur un rafraîchissement périodique (SWR) de routes API J
 
 | Donnée | Route | Fréquence |
 |---|---|---|
-| Conversation ouverte | `GET /api/conversations/[id]/messages` | 2 s |
-| Liste des conversations | `GET /api/conversations` | 5 s |
-| Badges + toasts (messages non lus, candidatures) | `GET /api/notifications` | 5 s |
+| Conversation ouverte | `GET /api/conversations/[id]/messages` | 3 s |
+| Liste des conversations | `GET /api/conversations` | 10 s |
+| Badges + toasts (messages non lus, candidatures) | `GET /api/notifications` | 10 s |
 
 Ce choix fonctionne partout (serveur local comme hébergement serverless), contrairement à une
 connexion push en mémoire. Le rafraîchissement se met en pause quand l'onglet est masqué et
@@ -81,7 +81,9 @@ reprend immédiatement au retour. L'envoi d'un message est optimiste (affichage 
 ## Mise en ligne
 
 Le site est déployé sur **Vercel** (offre gratuite Hobby) avec une base **Turso** (SQLite hébergé, région
-`aws-eu-west-1`) : https://sportlink-weld.vercel.app
+`aws-eu-west-1`) : **https://sport-mates.vercel.app**
+
+Chaque `git push` sur `main` redéploie automatiquement le site (dépôt GitHub relié au projet Vercel).
 
 - Variables d'environnement (Vercel → Settings → Environment Variables, Production) :
   `DATABASE_URL` et `DATABASE_AUTH_TOKEN` (jeton : `turso db tokens create sportlink`).
