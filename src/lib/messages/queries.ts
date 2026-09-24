@@ -19,7 +19,7 @@ import type {
 /** Nombre maximum de messages chargés par conversation. */
 const MESSAGES_LIMIT = 300;
 
-const userColumns = { id: true, fullName: true, avatarUrl: true, sportLevel: true } as const;
+const userColumns = { id: true, username: true, avatarUrl: true, sportLevel: true } as const;
 
 /**
  * Condition : candidature acceptée dont l'utilisateur est le participant ou le créateur de l'activité.
@@ -168,7 +168,7 @@ export async function getNotifications(userId: string): Promise<NotificationsDTO
     db.select({ value: count() }).from(messages).where(unreadWhere),
     db.query.messages.findFirst({
       columns: { id: true, applicationId: true, content: true },
-      with: { sender: { columns: { fullName: true } } },
+      with: { sender: { columns: { username: true } } },
       where: unreadWhere,
       orderBy: [desc(messages.createdAt)],
     }),
@@ -186,7 +186,7 @@ export async function getNotifications(userId: string): Promise<NotificationsDTO
       ? {
           id: latest.id,
           conversationId: latest.applicationId,
-          senderName: latest.sender.fullName,
+          senderName: latest.sender.username,
           preview: latest.content.length > 80 ? `${latest.content.slice(0, 80)}…` : latest.content,
         }
       : null,

@@ -31,7 +31,7 @@ function BlockedUserRow({ user }: { user: BlockedUser }) {
   const unblock = () =>
     startTransition(async () => {
       const result = await unblockUser(user.id);
-      if (result.ok) toast.success(`${user.fullName.split(" ")[0]} est débloqué·e.`);
+      if (result.ok) toast.success(`${user.username} est débloqué·e.`);
       else setError(result.error ?? "Impossible de débloquer ce membre.");
     });
 
@@ -39,7 +39,7 @@ function BlockedUserRow({ user }: { user: BlockedUser }) {
     <li className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
       <UserAvatar user={user} className="size-9 text-xs" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-ink">{user.fullName}</p>
+        <p className="truncate text-sm font-semibold text-ink">{user.username}</p>
         <p className="text-xs text-gray-400">Bloqué·e le {dateFormatter.format(user.blockedAt)}</p>
         {error && <p className="text-xs text-destructive">{error}</p>}
       </div>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
+import { AudienceBadge } from "@/components/activities/audience-badge";
 import { AchievementMedal } from "@/components/achievements/achievements-grid";
 import { UserAvatar } from "@/components/applications/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -87,6 +88,7 @@ export function ActivityCard({
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
+        <AudienceBadge audience={activity.audience} className="mb-1 self-start" />
         <h3 className="truncate text-[15px] leading-tight font-bold">
           {/* Lien étiré : rend toute la carte cliquable sans imbriquer de boutons. */}
           <button type="button" onClick={onOpen} data-card-link className="text-left outline-none after:absolute after:inset-0 after:rounded-card">
@@ -220,7 +222,7 @@ const ratingFormatter = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 
 /** Organisateur, sa note moyenne et ses meilleurs badges : de quoi donner confiance d'un coup d'œil. */
 function OrganizerLine({ activity }: { activity: ExploreActivity }) {
   const { creatorRating: rating, creatorBadges: badges } = activity;
-  const firstName = activity.creator.fullName.split(" ")[0];
+  const firstName = activity.creator.username;
 
   return (
     <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-400">

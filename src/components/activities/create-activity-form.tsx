@@ -13,8 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { SPORT_LEVELS } from "@/config/sport-levels";
 import { SPORTS } from "@/config/sports";
-import type { SportType } from "@/db/schema";
-import { createActivity } from "@/lib/activities/actions";
+import { AUDIENCE_OPTIONS, canJoinAudience } from "@/config/audience";
+import type { Audience, Gender, SportType } from "@/db/schema";
+import { createActivity, updateActivity } from "@/lib/activities/actions";
+import type { ActivityWithCreator } from "@/lib/activities/types";
 import { formatDuration } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { MAX_SPOTS } from "@/lib/validations/activity";
@@ -37,6 +39,7 @@ const FIELD_ERROR_KEYS: Record<keyof ActivityFormValues, string> = {
   price: "price",
   equipment: "equipmentRequired",
   equipmentNote: "equipmentNote",
+  audience: "audience",
   address: "address",
   locationName: "locationName",
   description: "description",
@@ -62,6 +65,8 @@ export interface ActivityFormValues {
   /** Matériel fourni par l'organisateur (ou rien à apporter) / à apporter par chacun. */
   equipment: "provided" | "bring";
   equipmentNote: string;
+  /** Public : tout le monde, entre femmes, entre hommes. */
+  audience: Audience;
   /** Adresse exacte : remplie automatiquement quand l'épingle est placée, modifiable. */
   address: string;
   locationName: string;
@@ -83,9 +88,31 @@ export function createDefaultFormValues(): ActivityFormValues {
     price: "",
     equipment: "provided",
     equipmentNote: "",
+    audience: "all",
     address: "",
     locationName: "",
     description: "",
+  };
+}
+
+/** Valeurs du formulaire pré-remplies depuis une activité existante (modification). */
+export function formValuesFromActivity(activity: ActivityWithCreator): ActivityFormValues {
+  const start = activity.startsAt;
+  return {
+    sportType: activity.sportType,
+    date: toDateInputValue(start),
+    time: `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`,
+    duration: String(activity.durationMinutes),
+    spots: activity.spotsTotal,
+    level: activity.requiredLevel ?? "any",
+    pricing: activity.priceCents > 0 ? "paid" : "free",
+    price: activity.priceCents > 0 ? String(activity.priceCents / 100).replace(".", ",") : "",
+    equipment: activity.equipmentRequired ? "bring" : "provided",
+    equipmentNote: activity.equipmentNote ?? "",
+    audience: activity.audience,
+    address: activity.address ?? "",
+    locationName: activity.locationName ?? "",
+    description: activity.description ?? "",
   };
 }
 
@@ -94,19 +121,41 @@ interface CreateActivityFormProps {
   values: ActivityFormValues;
   onValuesChange: (values: ActivityFormValues) => void;
   onEditLocation: () => void;
+  /** Appelé après publication (création) ou enregistrement (modification). */
   onCreated: (activityId: string) => void;
+  /** Genre de l'organisateur : conditionne les séances entre femmes / entre hommes. */
+  creatorGender: Gender | null;
+  /** Activité modifiée ; absent = création. */
+  editingActivityId?: string | null;
 }
 
-/** Formulaire de création d'activité. Le lieu a été choisi au préalable sur la carte. */
+/** Formulaire de création (ou de modification) d'activité. Le lieu est choisi sur la carte. */
 export function CreateActivityForm({
   location,
   values,
   onValuesChange,
   onEditLocation,
   onCreated,
+  creatorGender,
+  editingActivityId = null,
 }: CreateActivityFormProps) {
-  const { sportType, date, time, duration, spots, level, pricing, price, equipment, equipmentNote, address, locationName, description } =
-    values;
+  const {
+    sportType,
+    date,
+    time,
+    duration,
+    spots,
+    level,
+    pricing,
+    price,
+    equipment,
+    equipmentNote,
+    audience,
+    address,
+    locationName,
+    description,
+  } = values;
+  const isEditing = editingActivityId !== null;
   const [errors, setErrors] = useState<Record<string, string[] | undefined>>({});
   const [formError, setFormError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -132,6 +181,7 @@ export function CreateActivityForm({
     formData.set("price", pricing === "paid" ? price : "0");
     formData.set("equipmentRequired", equipment === "bring" ? "yes" : "no");
     formData.set("equipmentNote", equipment === "bring" ? equipmentNote : "");
+    formData.set("audience", audience);
     formData.set("address", address);
     formData.set("locationName", locationName);
     formData.set("description", description);
@@ -139,9 +189,15 @@ export function CreateActivityForm({
     formData.set("lng", String(location[1]));
 
     startTransition(async () => {
-      const result = await createActivity(formData);
+      const result = editingActivityId
+        ? await updateActivity(editingActivityId, formData).then((r) => (r.ok ? { ...r, activityId: editingActivityId } : r))
+        : await createActivity(formData);
       if (result.ok) {
-        toast.success("Activité publiée !", { description: "Elle est maintenant visible sur la carte." });
+        if (isEditing) {
+          toast.success("Modifications enregistrées !", { description: "Les participants sont prévenus des changements." });
+        } else {
+          toast.success("Activité publiée !", { description: "Elle est maintenant visible sur la carte." });
+        }
         onCreated(result.activityId);
       } else {
         setErrors(result.fieldErrors ?? {});
@@ -344,6 +400,36 @@ export function CreateActivityForm({
           )}
         </fieldset>
 
+        {/* Public : séances entre femmes / entre hommes, réservées au genre correspondant */}
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium">Ouvert à</legend>
+          <div className="grid grid-cols-3 gap-2">
+            {AUDIENCE_OPTIONS.map((option) => (
+              <ChoiceCard
+                key={option.value}
+                name="audience"
+                checked={audience === option.value}
+                disabled={!canJoinAudience(option.value, creatorGender)}
+                onChange={() => update("audience", option.value)}
+              >
+                {option.label}
+              </ChoiceCard>
+            ))}
+          </div>
+          {errors.audience ? (
+            <p className="text-sm text-destructive" role="alert">
+              {errors.audience[0]}
+            </p>
+          ) : (
+            creatorGender !== "female" &&
+            creatorGender !== "male" && (
+              <p className="text-sm text-muted-foreground">
+                Pour une séance entre femmes ou entre hommes, indique ton genre dans ton profil (jamais affiché).
+              </p>
+            )
+          )}
+        </fieldset>
+
         <FormField
           id="locationName"
           label="Nom du lieu (facultatif)"
@@ -378,8 +464,10 @@ export function CreateActivityForm({
           {pending ? (
             <>
               <Loader2 className="animate-spin" aria-hidden />
-              Publication…
+              {isEditing ? "Enregistrement…" : "Publication…"}
             </>
+          ) : isEditing ? (
+            "Enregistrer les modifications"
           ) : (
             "Publier l'activité"
           )}
@@ -434,20 +522,22 @@ function SpotsStepper({ value, onChange }: SpotsStepperProps) {
 interface ChoiceCardProps {
   name: string;
   checked: boolean;
+  disabled?: boolean;
   onChange: () => void;
   children: React.ReactNode;
 }
 
 /** Choix exclusif en carte (bouton radio natif stylé, accessible au clavier). */
-function ChoiceCard({ name, checked, onChange, children }: ChoiceCardProps) {
+function ChoiceCard({ name, checked, disabled, onChange, children }: ChoiceCardProps) {
   return (
     <label
       className={cn(
         "flex min-h-11 cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-center text-sm transition-colors hover:bg-muted has-focus-visible:ring-3 has-focus-visible:ring-ring",
         checked && "border-mint-500 bg-mint-100 font-semibold text-mint-700 hover:bg-mint-100",
+        disabled && "cursor-not-allowed opacity-45 hover:bg-transparent",
       )}
     >
-      <input type="radio" name={name} checked={checked} onChange={onChange} className="sr-only" />
+      <input type="radio" name={name} checked={checked} disabled={disabled} onChange={onChange} className="sr-only" />
       {children}
     </label>
   );

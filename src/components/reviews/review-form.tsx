@@ -40,7 +40,7 @@ export function ReviewForm({ activityId, participant, revieweeRole = "participan
   const [comment, setComment] = useState(review?.comment ?? "");
   const [errors, setErrors] = useState<Record<string, string[] | undefined>>({});
   const [isPending, startTransition] = useTransition();
-  const firstName = user.fullName.split(" ")[0];
+  const firstName = user.username;
 
   const addTag = (tag: string) => {
     setComment((current) => (current.includes(tag) ? current : current ? `${current.trim()} · ${tag}` : tag));
@@ -72,13 +72,13 @@ export function ReviewForm({ activityId, participant, revieweeRole = "participan
       <div className="flex items-center gap-3">
         <UserAvatar user={user} />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-sm font-bold text-ink">{user.fullName}</p>
+          <p className="truncate font-display text-sm font-bold text-ink">{user.username}</p>
           <p className="text-xs text-gray-400">
             {revieweeRole === "organizer" ? "Organisateur·rice" : getSportLevelLabel(user.sportLevel)}
           </p>
         </div>
         {!editing && (
-          <Button variant="ghost" size="sm" onClick={() => setEditing(true)} aria-label={`Modifier l'avis sur ${user.fullName}`}>
+          <Button variant="ghost" size="sm" onClick={() => setEditing(true)} aria-label={`Modifier l'avis sur ${user.username}`}>
             <Pencil aria-hidden />
             Modifier
           </Button>
@@ -113,7 +113,7 @@ export function ReviewForm({ activityId, participant, revieweeRole = "participan
 
           <div>
             <label htmlFor={`comment-${user.id}`} className="sr-only">
-              Commentaire sur {user.fullName}
+              Commentaire sur {user.username}
             </label>
             <Textarea
               id={`comment-${user.id}`}

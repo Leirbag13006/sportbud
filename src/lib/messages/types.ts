@@ -7,7 +7,7 @@ import type { BlockStatus } from "@/lib/safety/types";
  * Une conversation correspond à une candidature acceptée, entre le créateur et le participant.
  */
 
-export type ConversationUser = Pick<PublicUser, "id" | "fullName" | "avatarUrl" | "sportLevel">;
+export type ConversationUser = Pick<PublicUser, "id" | "username" | "avatarUrl" | "sportLevel">;
 
 export interface ConversationActivity {
   id: string;

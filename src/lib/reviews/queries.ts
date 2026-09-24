@@ -35,7 +35,7 @@ export async function getRatingSummary(userId: string): Promise<RatingSummary> {
 const REVIEW_ITEM_QUERY = {
   columns: { id: true, rating: true, comment: true, createdAt: true, revieweeId: true },
   with: {
-    reviewer: { columns: { id: true, fullName: true, avatarUrl: true } },
+    reviewer: { columns: { id: true, username: true, avatarUrl: true } },
     activity: { columns: { sportType: true, creatorId: true } },
   },
 } as const;
@@ -99,7 +99,7 @@ export async function getActivitiesToReview(userId: string): Promise<ActivityToR
         applications: {
           columns: {},
           where: eq(applications.status, "accepted"),
-          with: { applicant: { columns: { id: true, fullName: true, avatarUrl: true, sportLevel: true } } },
+          with: { applicant: { columns: { id: true, username: true, avatarUrl: true, sportLevel: true } } },
         },
         reviews: { columns: { revieweeId: true, rating: true, comment: true }, where: eq(reviews.reviewerId, userId) },
       },
@@ -108,7 +108,7 @@ export async function getActivitiesToReview(userId: string): Promise<ActivityToR
     db.query.activities.findMany({
       columns: { id: true, sportType: true, startsAt: true },
       with: {
-        creator: { columns: { id: true, fullName: true, avatarUrl: true, sportLevel: true } },
+        creator: { columns: { id: true, username: true, avatarUrl: true, sportLevel: true } },
         reviews: { columns: { revieweeId: true, rating: true, comment: true }, where: eq(reviews.reviewerId, userId) },
       },
       where: and(

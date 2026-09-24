@@ -61,6 +61,7 @@ export function ExploreView({
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const [focusId, setFocusId] = useState<string | null>(initialSelectedId ?? null);
   const [createRequest, setCreateRequest] = useState(0);
+  const [editRequest, setEditRequest] = useState<{ token: number; activity: ExploreActivity } | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const items = useMemo(
@@ -103,6 +104,13 @@ export function ExploreView({
   useEffect(() => {
     if (createToken) window.history.replaceState(null, "", "/?view=map");
   }, [createToken]);
+
+  /** Modification depuis la fiche : bascule sur la carte, qui ouvre le formulaire pré-rempli. */
+  const startEditing = (activity: ExploreActivity) => {
+    setSelectedId(null);
+    changeView("map");
+    setEditRequest((previous) => ({ token: (previous?.token ?? 0) + 1, activity }));
+  };
 
   const handleCreated = useCallback((activityId: string) => {
     setSelectedId(activityId);
@@ -153,6 +161,8 @@ export function ExploreView({
           createRequest={createRequest}
           onCreatingChange={setIsCreating}
           onCreated={handleCreated}
+          creatorGender={preferences.gender}
+          editRequest={editRequest}
         />
       )}
 
@@ -172,6 +182,8 @@ export function ExploreView({
             : undefined
         }
         onClose={() => setSelectedId(null)}
+        onEdit={startEditing}
+        viewerGender={preferences.gender}
       />
 
       <FiltersSheet
@@ -181,6 +193,7 @@ export function ExploreView({
         onChange={setFilters}
         resultCount={items.length}
         hasPosition={referencePosition !== null}
+        gender={preferences.gender}
         onRequestLocation={() => {
           setFiltersOpen(false);
           location.ensureLocation();

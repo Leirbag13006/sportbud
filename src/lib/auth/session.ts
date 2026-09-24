@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
@@ -84,6 +84,16 @@ export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/session-expired");
   return user;
+}
+
+/** Vrai si le pseudo est déjà pris (sans tenir compte de la casse), hors compte `exceptUserId`. */
+export async function isUsernameTaken(username: string, exceptUserId?: string) {
+  const [row] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(sql`lower(${users.username}) = lower(${username})`)
+    .limit(1);
+  return Boolean(row && row.id !== exceptUserId);
 }
 
 /** Recherche un utilisateur par email (connexion / inscription). */

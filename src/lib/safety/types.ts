@@ -4,7 +4,7 @@ import type { PublicUser, ReportReason } from "@/db/schema";
 export type BlockStatus = "by-me" | "by-them" | null;
 
 /** Membre bloqué, affiché dans les réglages du profil. */
-export type BlockedUser = Pick<PublicUser, "id" | "fullName" | "avatarUrl"> & { blockedAt: Date };
+export type BlockedUser = Pick<PublicUser, "id" | "username" | "avatarUrl"> & { blockedAt: Date };
 
 /** Motifs de signalement, dans l'ordre d'affichage. */
 export const REPORT_REASONS: { value: ReportReason; label: string; description: string }[] = [

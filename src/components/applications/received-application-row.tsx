@@ -30,7 +30,7 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
   const [pendingDecision, setPendingDecision] = useState<"accepted" | "rejected" | null>(null);
   const [, startTransition] = useTransition();
   const { applicant } = application;
-  const firstName = applicant.fullName.split(" ")[0];
+  const firstName = applicant.username;
 
   const respond = (decision: "accepted" | "rejected") => {
     setPendingDecision(decision);
@@ -62,7 +62,7 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
         size="sm"
         onClick={() => respond("rejected")}
         disabled={busy}
-        aria-label={`Refuser la candidature de ${applicant.fullName}`}
+        aria-label={`Refuser la candidature de ${applicant.username}`}
       >
         {pendingDecision === "rejected" ? <Loader2 className="animate-spin" /> : <X />}
         Refuser
@@ -72,7 +72,7 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
         onClick={() => respond("accepted")}
         disabled={busy || isFull}
         title={isFull ? "Plus de place disponible" : undefined}
-        aria-label={`Accepter la candidature de ${applicant.fullName}`}
+        aria-label={`Accepter la candidature de ${applicant.username}`}
       >
         {pendingDecision === "accepted" ? <Loader2 className="animate-spin" /> : <Check />}
         Accepter
@@ -86,11 +86,11 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
         type="button"
         onClick={() => setShowProfile(true)}
         className="flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        aria-label={`Voir le profil de ${applicant.fullName}`}
+        aria-label={`Voir le profil de ${applicant.username}`}
       >
         <UserAvatar user={applicant} />
         <span className="min-w-0">
-          <span className="block truncate font-display text-sm font-bold text-ink">{applicant.fullName}</span>
+          <span className="block truncate font-display text-sm font-bold text-ink">{applicant.username}</span>
           <span className="block truncate text-xs text-muted-foreground">
             {context ?? getSportLevelLabel(applicant.sportLevel)} · Voir le profil
           </span>
@@ -107,7 +107,7 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
             <Button
               variant="outline"
               size="icon-sm"
-              aria-label={`Discuter avec ${applicant.fullName}`}
+              aria-label={`Discuter avec ${applicant.username}`}
               title="Discuter"
               nativeButton={false}
               render={<Link href={`/messages/${application.id}`} />}

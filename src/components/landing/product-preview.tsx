@@ -4,7 +4,7 @@ import { Lock } from "lucide-react";
 
 import { ActivityCard } from "@/components/explore/activity-card";
 import { ExploreToolbar } from "@/components/explore/explore-toolbar";
-import type { SportLevel, SportType } from "@/db/schema";
+import type { Audience, SportLevel, SportType } from "@/db/schema";
 import { toEarnedBadge, type EarnedBadge } from "@/lib/achievements/definitions";
 import type { ExploreActivity } from "@/lib/activities/types";
 import type { RatingSummary } from "@/lib/reviews/types";
@@ -30,20 +30,21 @@ type DemoSeed = {
   participants: string[];
   priceCents: number;
   equipmentRequired: boolean;
+  audience?: Audience;
   rating: RatingSummary;
   badges: EarnedBadge[];
 };
 
 /** Annonces d'exemple (illustration de l'interface, pas des données réelles). */
 const SEEDS: DemoSeed[] = [
-  { sportType: "football", spots: 2, level: "intermediate", day: 0, hour: 19, distanceKm: 1.2, organizer: "Karim B.", participants: ["Léa M.", "Hugo R."], priceCents: 800, equipmentRequired: false, rating: { average: 4.8, count: 12 }, badges: [badge("organisateur", 3), badge("fiable", 2)] },
-  { sportType: "tennis", spots: 1, level: "beginner", day: 1, hour: 18, distanceKm: 2.8, organizer: "Julie M.", participants: [], priceCents: 0, equipmentRequired: true, rating: { average: 4.6, count: 5 }, badges: [badge("joueur", 2)] },
-  { sportType: "running", spots: 4, level: null, day: 3, hour: 9, distanceKm: 3.5, organizer: "Thomas N.", participants: ["Inès F.", "Nora K.", "Sam D.", "Lou P."], priceCents: 0, equipmentRequired: false, rating: { average: 5, count: 21 }, badges: [badge("sociable", 3), badge("en-feu", 2)] },
-  { sportType: "padel", spots: 2, level: "intermediate", day: 2, hour: 20, distanceKm: 4.1, organizer: "Lucas G.", participants: ["Emma T."], priceCents: 1000, equipmentRequired: false, rating: { average: null, count: 0 }, badges: [badge("organisateur", 1)] },
+  { sportType: "football", spots: 2, level: "intermediate", day: 0, hour: 19, distanceKm: 1.2, organizer: "karim_five", participants: ["lea.m", "hugo13"], priceCents: 800, equipmentRequired: false, rating: { average: 4.8, count: 12 }, badges: [badge("organisateur", 3), badge("fiable", 2)] },
+  { sportType: "tennis", spots: 1, level: "beginner", day: 1, hour: 18, distanceKm: 2.8, organizer: "juju.tennis", participants: [], priceCents: 0, equipmentRequired: true, audience: "women", rating: { average: 4.6, count: 5 }, badges: [badge("joueur", 2)] },
+  { sportType: "running", spots: 4, level: null, day: 3, hour: 9, distanceKm: 3.5, organizer: "thomas_run", participants: ["ines.f", "nora_k", "samdu13", "lou.p"], priceCents: 0, equipmentRequired: false, rating: { average: 5, count: 21 }, badges: [badge("sociable", 3), badge("en-feu", 2)] },
+  { sportType: "padel", spots: 2, level: "intermediate", day: 2, hour: 20, distanceKm: 4.1, organizer: "lucas.padel", participants: ["emma_t"], priceCents: 1000, equipmentRequired: false, rating: { average: null, count: 0 }, badges: [badge("organisateur", 1)] },
 ];
 
 function toActivity(seed: DemoSeed, index: number): ExploreActivity {
-  const person = (fullName: string, i: number) => ({ id: `demo-${index}-${i}`, fullName, avatarUrl: null });
+  const person = (username: string, i: number) => ({ id: `demo-${index}-${i}`, username, avatarUrl: null });
   return {
     id: `demo-${index}`,
     creatorId: `demo-${index}-0`,
@@ -57,6 +58,7 @@ function toActivity(seed: DemoSeed, index: number): ExploreActivity {
     address: null,
     priceCents: seed.priceCents,
     equipmentRequired: seed.equipmentRequired,
+    audience: seed.audience ?? "all",
     equipmentNote: null,
     lat: 0,
     lng: 0,

@@ -20,13 +20,14 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
 
   const parsed = onboardingSchema.safeParse(input);
   if (!parsed.success) return { ok: false, fieldErrors: z.flattenError(parsed.error).fieldErrors };
-  const { favoriteSports, sportLevel, city } = parsed.data;
+  const { favoriteSports, sportLevel, gender, city } = parsed.data;
 
   await db
     .update(users)
     .set({
       favoriteSports,
       sportLevel,
+      gender,
       city: city?.name ?? null,
       homeLat: city?.lat ?? null,
       homeLng: city?.lng ?? null,

@@ -3,7 +3,7 @@ import { getInitials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface UserAvatarProps {
-  user: { fullName: string; avatarUrl: string | null };
+  user: { username: string; avatarUrl: string | null };
   className?: string;
 }
 
@@ -13,7 +13,7 @@ export function UserAvatar({ user, className }: UserAvatarProps) {
     <Avatar className={cn("size-10", className)}>
       {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt="" />}
       <AvatarFallback className="bg-brand-soft font-semibold text-brand-text">
-        {getInitials(user.fullName)}
+        {getInitials(user.username)}
       </AvatarFallback>
     </Avatar>
   );

@@ -69,7 +69,7 @@ export function ConversationList({ initialConversations, selectedId, currentUser
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className={cn("truncate", unreadCount > 0 ? "font-semibold" : "font-medium")}>
-                    {conversation.otherUser.fullName}
+                    {conversation.otherUser.username}
                   </p>
                   <time dateTime={conversation.updatedAt} className="shrink-0 text-xs text-muted-foreground">
                     {formatRelativeShort(new Date(conversation.updatedAt))}

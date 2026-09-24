@@ -26,19 +26,38 @@ export function RegisterForm() {
     >
       <FormAlert message={state.error} />
 
-      <FormField id="fullName" label="Prénom et nom" errors={errors?.fullName}>
-        <Input
-          id="fullName"
-          name="fullName"
-          autoComplete="name"
-          placeholder="Camille Martin"
-          defaultValue={state.values?.fullName}
-          aria-invalid={Boolean(errors?.fullName)}
-          aria-describedby="fullName-message"
-          className="h-10"
-          required
-        />
-      </FormField>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <FormField id="username" label="Pseudo" errors={errors?.username} hint="Visible par les autres membres.">
+          <Input
+            id="username"
+            name="username"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            maxLength={20}
+            placeholder="camille_run"
+            defaultValue={state.values?.username}
+            aria-invalid={Boolean(errors?.username)}
+            aria-describedby="username-message"
+            className="h-10"
+            required
+          />
+        </FormField>
+
+        <FormField id="fullName" label="Prénom" errors={errors?.fullName} hint="Reste privé.">
+          <Input
+            id="fullName"
+            name="fullName"
+            autoComplete="given-name"
+            placeholder="Camille"
+            defaultValue={state.values?.fullName}
+            aria-invalid={Boolean(errors?.fullName)}
+            aria-describedby="fullName-message"
+            className="h-10"
+            required
+          />
+        </FormField>
+      </div>
 
       <FormField id="email" label="Email" errors={errors?.email}>
         <Input

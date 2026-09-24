@@ -12,6 +12,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import type { Gender } from "@/db/schema";
 import { CreateActivityForm, type ActivityFormValues } from "./create-activity-form";
 
 interface CreateActivitySheetProps {
@@ -23,6 +24,9 @@ interface CreateActivitySheetProps {
   onClose: () => void;
   onEditLocation: () => void;
   onCreated: (activityId: string) => void;
+  creatorGender: Gender | null;
+  /** Activité modifiée ; absent = création. */
+  editingActivityId?: string | null;
 }
 
 /**
@@ -37,6 +41,8 @@ export function CreateActivitySheet({
   onClose,
   onEditLocation,
   onCreated,
+  creatorGender,
+  editingActivityId = null,
 }: CreateActivitySheetProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -50,9 +56,13 @@ export function CreateActivitySheet({
       <DrawerContent className="md:shadow-xl md:data-[swipe-axis=x]:top-16 md:data-[swipe-axis=x]:[--drawer-content-width:28rem]">
         <DrawerHeader className="flex-row items-start justify-between gap-3 text-left">
           <div className="space-y-1">
-            <DrawerTitle className="text-lg font-semibold">Nouvelle activité</DrawerTitle>
+            <DrawerTitle className="text-lg font-semibold">
+              {editingActivityId ? "Modifier l'activité" : "Nouvelle activité"}
+            </DrawerTitle>
             <DrawerDescription className="text-left">
-              Propose une session et trouve tes partenaires.
+              {editingActivityId
+                ? "Les participants seront prévenus des changements importants."
+                : "Propose une session et trouve tes partenaires."}
             </DrawerDescription>
           </div>
           <DrawerClose render={<Button variant="ghost" size="icon-sm" aria-label="Fermer" className="-mt-1 -mr-2" />}>
@@ -67,6 +77,8 @@ export function CreateActivitySheet({
             onValuesChange={onValuesChange}
             onEditLocation={onEditLocation}
             onCreated={onCreated}
+            creatorGender={creatorGender}
+            editingActivityId={editingActivityId}
           />
         )}
       </DrawerContent>

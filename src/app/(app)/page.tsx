@@ -7,7 +7,7 @@ import { requireUser } from "@/lib/auth/session";
 export default async function ExplorePage({ searchParams }: PageProps<"/">) {
   const user = await requireUser();
   const [activities, myApplications, receivedApplications, { activity, view, create }] = await Promise.all([
-    getExploreActivities(user.id),
+    getExploreActivities(user),
     getMyApplicationSummaries(user.id),
     getReceivedApplications(user.id),
     searchParams,
@@ -17,10 +17,11 @@ export default async function ExplorePage({ searchParams }: PageProps<"/">) {
   return (
     <ExploreView
       activities={activities}
-      currentUser={{ id: user.id, fullName: user.fullName, avatarUrl: user.avatarUrl }}
+      currentUser={{ id: user.id, username: user.username, avatarUrl: user.avatarUrl }}
       preferences={{
         favoriteSports: user.favoriteSports,
         sportLevel: user.sportLevel,
+        gender: user.gender,
         home:
           user.homeLat !== null && user.homeLng !== null
             ? { city: user.city, position: [user.homeLat, user.homeLng] }

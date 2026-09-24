@@ -11,7 +11,7 @@ import type { MyApplicationSummary, ReceivedApplication, SentApplication } from 
 
 const applicantColumns = {
   id: true,
-  fullName: true,
+  username: true,
   sportLevel: true,
   avatarUrl: true,
   bio: true,
@@ -19,7 +19,7 @@ const applicantColumns = {
   favoriteSports: true,
 } as const;
 
-const creatorColumns = { id: true, fullName: true, sportLevel: true, avatarUrl: true } as const;
+const creatorColumns = { id: true, username: true, sportLevel: true, avatarUrl: true } as const;
 
 /** Condition SQL : l'activité n'est pas terminée (début + durée dans le futur). */
 const activityNotEnded = () =>

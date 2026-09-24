@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { SPORT_LEVEL_VALUES, SPORT_TYPE_VALUES } from "@/db/schema";
+import { AUDIENCE_VALUES, SPORT_LEVEL_VALUES, SPORT_TYPE_VALUES } from "@/db/schema";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Une activité peut être programmée au plus tard 60 jours à l'avance. */
@@ -60,6 +60,8 @@ export const createActivitySchema = z.object({
     .transform((euros) => Math.round(euros * 100)),
   equipmentRequired: z.enum(["yes", "no"]).transform((value) => value === "yes"),
   equipmentNote: optionalText(120, "120 caractères maximum."),
+  // Public : tout le monde (par défaut), entre femmes ou entre hommes.
+  audience: z.enum(AUDIENCE_VALUES, "Choisis à qui s'adresse la séance.").default("all"),
   lat: z.coerce.number({ error: "Place le lieu sur la carte." }).min(-90).max(90),
   lng: z.coerce.number({ error: "Place le lieu sur la carte." }).min(-180).max(180),
 });

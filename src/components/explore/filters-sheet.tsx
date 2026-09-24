@@ -13,7 +13,8 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { SPORT_LEVELS } from "@/config/sport-levels";
-import type { SportLevel } from "@/db/schema";
+import { getAudienceLabel } from "@/config/audience";
+import type { Gender, SportLevel } from "@/db/schema";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { pluralize } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,8 @@ interface FiltersSheetProps {
   resultCount: number;
   hasPosition: boolean;
   onRequestLocation: () => void;
+  /** Genre du membre : propose le filtre « entre femmes » ou « entre hommes » correspondant. */
+  gender: Gender | null;
 }
 
 /** Panneau des filtres avancés : tri, distance, date, niveau, places disponibles. */
@@ -45,7 +48,10 @@ export function FiltersSheet({
   resultCount,
   hasPosition,
   onRequestLocation,
+  gender,
 }: FiltersSheetProps) {
+  // Public restreint proposé selon le genre renseigné (aucun sans genre).
+  const restrictedAudience = gender === "female" ? "women" : gender === "male" ? "men" : null;
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const set = <K extends keyof ExploreFilters>(key: K, value: ExploreFilters[K]) => onChange({ ...filters, [key]: value });
 
@@ -143,6 +149,29 @@ export function FiltersSheet({
               </Chip>
             ))}
           </FilterGroup>
+
+          <FilterGroup legend="Ouvert à">
+            <Chip name="audience" checked={filters.audience === "any"} onChange={() => set("audience", "any")}>
+              Toutes les séances
+            </Chip>
+            <Chip name="audience" checked={filters.audience === "mixed"} onChange={() => set("audience", "mixed")}>
+              Mixtes
+            </Chip>
+            {restrictedAudience && (
+              <Chip
+                name="audience"
+                checked={filters.audience === restrictedAudience}
+                onChange={() => set("audience", restrictedAudience)}
+              >
+                {getAudienceLabel(restrictedAudience)}
+              </Chip>
+            )}
+          </FilterGroup>
+          {!restrictedAudience && (
+            <p className="-mt-3 text-xs text-gray-400">
+              Séances entre femmes / entre hommes : indique ton genre dans ton profil (jamais affiché).
+            </p>
+          )}
 
           <ToggleRow
             title="Places disponibles uniquement"

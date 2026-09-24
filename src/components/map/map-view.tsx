@@ -7,12 +7,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   createDefaultFormValues,
+  formValuesFromActivity,
   type ActivityFormValues,
 } from "@/components/activities/create-activity-form";
 import { CreateActivitySheet } from "@/components/activities/create-activity-sheet";
 import { AddressSearch } from "@/components/map/address-search";
 import { Button } from "@/components/ui/button";
 import { USER_ZOOM } from "@/config/map";
+import type { Gender } from "@/db/schema";
 import type { ActivityWithCreator } from "@/lib/activities/types";
 import { reverseGeocode, type AddressSuggestion } from "@/lib/geocoding";
 import { cn } from "@/lib/utils";
@@ -53,6 +55,10 @@ interface MapViewProps {
   createRequest: number;
   onCreatingChange: (isCreating: boolean) => void;
   onCreated: (activityId: string) => void;
+  /** Genre du membre : conditionne les séances entre femmes / entre hommes. */
+  creatorGender: Gender | null;
+  /** Demande de modification d'une activité (nouveau jeton = nouvelle demande). */
+  editRequest?: { token: number; activity: ActivityWithCreator } | null;
 }
 
 /** Vue carte de l'écran Explorer : marqueurs, recentrage et création d'activité. */
@@ -69,12 +75,16 @@ export function MapView({
   createRequest,
   onCreatingChange,
   onCreated,
+  creatorGender,
+  editRequest = null,
 }: MapViewProps) {
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [mode, setMode] = useState<Mode>("browse");
   const [draftLocation, setDraftLocation] = useState<[number, number] | null>(null);
   const [formValues, setFormValues] = useState<ActivityFormValues>(createDefaultFormValues);
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
+  /** Activité en cours de modification (null = création). */
+  const [editingId, setEditingId] = useState<string | null>(null);
   const hasCentered = useRef(false);
   const handledCreateRequest = useRef(0);
   const geocodeAbortRef = useRef<AbortController | null>(null);
@@ -169,16 +179,37 @@ export function MapView({
     startCreation();
   }, [map, createRequest, startCreation]);
 
+  // Modification demandée depuis la fiche : formulaire pré-rempli, épingle sur le lieu actuel.
+  const handledEditToken = useRef(0);
+  useEffect(() => {
+    if (!map || !editRequest || handledEditToken.current === editRequest.token) return;
+    handledEditToken.current = editRequest.token;
+    const { activity } = editRequest;
+    setEditingId(activity.id);
+    setFormValues(formValuesFromActivity(activity));
+    setDraftLocation([activity.lat, activity.lng]);
+    map.setView([activity.lat, activity.lng], Math.max(map.getZoom(), 15));
+    setMode("form");
+  }, [map, editRequest]);
+
+  /** Fin de création / modification : on repart d'un formulaire vierge pour la prochaine création. */
+  const resetEditor = () => {
+    setMode("browse");
+    setDraftLocation(null);
+    if (editingId) {
+      setEditingId(null);
+      setFormValues(createDefaultFormValues());
+    }
+  };
+
   const cancelCreation = () => {
     geocodeAbortRef.current?.abort();
     setIsResolvingAddress(false);
-    setMode("browse");
-    setDraftLocation(null);
+    resetEditor();
   };
 
   const handleCreated = (activityId: string) => {
-    setMode("browse");
-    setDraftLocation(null);
+    resetEditor();
     setFormValues(createDefaultFormValues());
     // Les données sont rafraîchies par le serveur (revalidatePath) : le parent sélectionne la nouvelle activité.
     onCreated(activityId);
@@ -220,7 +251,12 @@ export function MapView({
                   Cherche une adresse, touche la carte ou déplace l&apos;épingle.
                 </span>
               </p>
-              <Button variant="ghost" size="icon-sm" onClick={cancelCreation} aria-label="Annuler la création">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={cancelCreation}
+                aria-label={editingId ? "Annuler la modification" : "Annuler la création"}
+              >
                 <X />
               </Button>
             </div>
@@ -285,6 +321,8 @@ export function MapView({
         onClose={cancelCreation}
         onEditLocation={() => setMode("pick")}
         onCreated={handleCreated}
+        creatorGender={creatorGender}
+        editingActivityId={editingId}
       />
     </div>
   );

@@ -20,6 +20,10 @@ export const ACTIVITY_STATUS_VALUES = ["open", "full", "cancelled"] as const;
 export const APPLICATION_STATUS_VALUES = ["pending", "accepted", "rejected"] as const;
 /** text = message écrit par un membre ; system = notification automatique (ex. candidature acceptée). */
 export const MESSAGE_KIND_VALUES = ["text", "system"] as const;
+/** Genre déclaré (facultatif) : sert uniquement aux séances « entre femmes » / « entre hommes ». */
+export const GENDER_VALUES = ["female", "male", "other"] as const;
+/** Public d'une activité : tout le monde, entre femmes, entre hommes. */
+export const AUDIENCE_VALUES = ["all", "women", "men"] as const;
 /** Motifs de signalement d'un membre. */
 export const REPORT_REASON_VALUES = ["no_show", "inappropriate", "harassment", "fake_profile", "unsafe", "other"] as const;
 
@@ -45,7 +49,15 @@ export const users = sqliteTable(
     id: id(),
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
+    /** Prénom (et nom) : privé, utilisé pour s'adresser au membre (accueil, e-mails). */
     fullName: text("full_name").notNull(),
+    /**
+     * Pseudo public, unique (sans tenir compte de la casse) : seul nom affiché aux autres membres.
+     * Format validé par Zod (3 à 20 caractères : lettres, chiffres, « . », « _ », « - »).
+     */
+    username: text("username").notNull().default(""),
+    /** Genre déclaré, jamais affiché ; null = non renseigné. Valeurs validées par Zod. */
+    gender: text("gender", { enum: GENDER_VALUES }),
     bio: text("bio"),
     sportLevel: text("sport_level", { enum: SPORT_LEVEL_VALUES }).notNull().default("beginner"),
     /** Photo de profil : image WebP redimensionnée côté navigateur, stockée en data URL (~30 Ko). */
@@ -63,6 +75,7 @@ export const users = sqliteTable(
   },
   (t) => [
     uniqueIndex("users_email_unique").on(t.email),
+    uniqueIndex("users_username_unique").on(sql`lower(${t.username})`),
     check("users_sport_level_check", sql`${t.sportLevel} in ${sqlList(SPORT_LEVEL_VALUES)}`),
     check("users_full_name_length", sql`length(trim(${t.fullName})) between 2 and 80`),
     check("users_bio_length", sql`${t.bio} is null or length(${t.bio}) <= 500`),
@@ -109,6 +122,8 @@ export const activities = sqliteTable(
     equipmentRequired: integer("equipment_required", { mode: "boolean" }).notNull().default(false),
     /** Précision sur le matériel (« raquette + chaussures de salle »), 120 car. max (validé par Zod). */
     equipmentNote: text("equipment_note"),
+    /** Public : tout le monde, entre femmes ou entre hommes (valeurs validées par Zod). */
+    audience: text("audience", { enum: AUDIENCE_VALUES }).notNull().default("all"),
     lat: real("lat").notNull(),
     lng: real("lng").notNull(),
     startsAt: integer("starts_at", { mode: "timestamp_ms" }).notNull(),
@@ -379,6 +394,8 @@ export type Application = typeof applications.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type ReportReason = (typeof REPORT_REASON_VALUES)[number];
+export type Gender = (typeof GENDER_VALUES)[number];
+export type Audience = (typeof AUDIENCE_VALUES)[number];
 
 export type SportLevel = (typeof SPORT_LEVEL_VALUES)[number];
 export type SportType = (typeof SPORT_TYPE_VALUES)[number];

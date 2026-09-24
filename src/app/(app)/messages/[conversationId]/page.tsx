@@ -8,7 +8,7 @@ import { getConversation, getMessages } from "@/lib/messages/queries";
 export async function generateMetadata({ params }: PageProps<"/messages/[conversationId]">): Promise<Metadata> {
   const user = await requireUser();
   const conversation = await getConversation(user.id, (await params).conversationId);
-  return { title: conversation ? `Discussion avec ${conversation.otherUser.fullName}` : "Messages" };
+  return { title: conversation ? `Discussion avec ${conversation.otherUser.username}` : "Messages" };
 }
 
 /** Conversation ouverte, réservée à ses deux participants. */

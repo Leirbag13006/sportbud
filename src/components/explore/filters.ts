@@ -1,9 +1,12 @@
-import type { SportLevel, SportType } from "@/db/schema";
+import type { Audience, Gender, SportLevel, SportType } from "@/db/schema";
 import type { ExploreActivity } from "@/lib/activities/types";
+import { canJoinAudience } from "@/config/audience";
 import { distanceKm } from "@/lib/geo";
 
 export type WhenFilter = "all" | "today" | "tomorrow" | "weekend" | "week";
 export type SortOrder = "date" | "distance";
+/** « Ouvert à » : toutes les séances, mixtes seulement, ou un public restreint. */
+export type AudienceFilter = "any" | "mixed" | Exclude<Audience, "all">;
 
 export interface ExploreFilters {
   /** null = tous les sports. */
@@ -15,6 +18,7 @@ export interface ExploreFilters {
   level: SportLevel | null;
   onlyAvailable: boolean;
   onlyFree: boolean;
+  audience: AudienceFilter;
   sort: SortOrder;
 }
 
@@ -25,6 +29,7 @@ export const DEFAULT_FILTERS: ExploreFilters = {
   level: null,
   onlyAvailable: false,
   onlyFree: false,
+  audience: "any",
   sort: "date",
 };
 
@@ -46,6 +51,7 @@ export function countActiveFilters(filters: ExploreFilters) {
     filters.level !== null,
     filters.onlyAvailable,
     filters.onlyFree,
+    filters.audience !== "any",
   ].filter(Boolean).length;
 }
 
@@ -83,6 +89,8 @@ function matchesWhen(date: Date, when: WhenFilter, now: Date) {
 export interface ExplorePreferences {
   favoriteSports: SportType[];
   sportLevel: SportLevel;
+  /** Genre déclaré (jamais affiché) : séances entre femmes / entre hommes. */
+  gender: Gender | null;
   /** Ville choisie : position de repli si la géolocalisation n'est pas partagée. */
   home: { city: string | null; position: [number, number] } | null;
 }
@@ -104,6 +112,7 @@ export function pickRecommended(items: ExploreItem[], preferences: ExplorePrefer
         activity.status === "open" &&
         activity.creatorId !== currentUserId &&
         preferences.favoriteSports.includes(activity.sportType) &&
+        canJoinAudience(activity.audience, preferences.gender) &&
         (activity.requiredLevel === null || activity.requiredLevel === preferences.sportLevel) &&
         (distance === null || distance <= RECOMMENDED_MAX_KM),
     )
@@ -138,6 +147,8 @@ export function applyFilters(
       if (filters.sport && activity.sportType !== filters.sport) return false;
       if (filters.onlyAvailable && activity.status !== "open") return false;
       if (filters.onlyFree && activity.priceCents > 0) return false;
+      if (filters.audience === "mixed" && activity.audience !== "all") return false;
+      if ((filters.audience === "women" || filters.audience === "men") && activity.audience !== filters.audience) return false;
       if (filters.level && activity.requiredLevel && activity.requiredLevel !== filters.level) return false;
       if (filters.maxDistanceKm !== null && distance !== null && distance > filters.maxDistanceKm) return false;
       return matchesWhen(activity.startsAt, filters.when, now);

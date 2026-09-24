@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { SPORT_LEVEL_VALUES, SPORT_TYPE_VALUES } from "@/db/schema";
+import { firstNameSchema, genderSchema, usernameSchema } from "./auth";
 
 /** Taille maximale d'une photo encodée (≈ 110 Ko), largement au-dessus d'une image 320 px en WebP. */
 const MAX_AVATAR_LENGTH = 150_000;
@@ -17,11 +18,9 @@ export const citySchema = z
   .nullable();
 
 export const profileSchema = z.object({
-  fullName: z
-    .string()
-    .trim()
-    .min(2, "Ton nom doit contenir au moins 2 caractères.")
-    .max(80, "80 caractères maximum."),
+  username: usernameSchema,
+  fullName: firstNameSchema,
+  gender: genderSchema,
   bio: z
     .string()
     .trim()

@@ -42,14 +42,14 @@ export function formatDuration(minutes: number) {
   return rest === 0 ? `${hours} h` : `${hours} h ${String(rest).padStart(2, "0")}`;
 }
 
-/** Initiales pour les avatars sans photo (« Camille Martin » → « CM »). */
-export function getInitials(fullName: string) {
-  return fullName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]!.toUpperCase())
-    .join("");
+/**
+ * Initiales pour les avatars sans photo : « Camille Martin » → « CM », « camille_run » → « CR »,
+ * « bruno13 » → « BR ».
+ */
+export function getInitials(name: string) {
+  const parts = name.split(/[\s._-]+/).filter((part) => /[a-zà-ÿ]/i.test(part));
+  if (parts.length >= 2) return parts.slice(0, 2).map((part) => part[0]!.toUpperCase()).join("");
+  return (parts[0] ?? name).replace(/[^a-zà-ÿ]/gi, "").slice(0, 2).toUpperCase() || "?";
 }
 
 const wholeEuros = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });

@@ -7,7 +7,7 @@ import { getInitials } from "@/lib/format";
 
 /** Utilisateur représenté par le marqueur « Moi ». */
 export interface MapUser {
-  fullName: string;
+  username: string;
   avatarUrl: string | null;
 }
 
@@ -49,7 +49,7 @@ export function createActivityIcon(activity: ActivityWithCreator, selected: bool
 export function createUserLocationIcon(user: MapUser) {
   const content = user.avatarUrl
     ? `<img src="${escapeHtml(user.avatarUrl)}" alt="" class="map-marker-user__photo" />`
-    : `<span class="map-marker-user__initials">${escapeHtml(getInitials(user.fullName))}</span>`;
+    : `<span class="map-marker-user__initials">${escapeHtml(getInitials(user.username))}</span>`;
 
   return divIcon({
     className: "",

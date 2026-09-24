@@ -10,7 +10,7 @@ import { users } from "@/db/schema";
 import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from "@/lib/auth/password";
 import { createPasswordResetToken, resetPasswordWithToken } from "@/lib/auth/password-reset";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
-import { createSession, deleteSession, findUserByEmail, getCurrentUser } from "@/lib/auth/session";
+import { createSession, deleteSession, findUserByEmail, getCurrentUser, isUsernameTaken } from "@/lib/auth/session";
 import { sendEmail } from "@/lib/email";
 import { passwordResetEmail } from "@/lib/email/templates";
 import {
@@ -66,26 +66,30 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
 
 export async function register(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const raw = {
+    username: String(formData.get("username") ?? ""),
     fullName: String(formData.get("fullName") ?? ""),
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
     sportLevel: String(formData.get("sportLevel") ?? ""),
   };
-  const values = { fullName: raw.fullName, email: raw.email, sportLevel: raw.sportLevel };
+  const values = { username: raw.username, fullName: raw.fullName, email: raw.email, sportLevel: raw.sportLevel };
 
   const parsed = registerSchema.safeParse(raw);
   if (!parsed.success) {
     return { fieldErrors: z.flattenError(parsed.error).fieldErrors, values };
   }
 
-  const { fullName, email, password, sportLevel } = parsed.data;
+  const { username, fullName, email, password, sportLevel } = parsed.data;
   if (await findUserByEmail(email)) {
     return { fieldErrors: { email: ["Un compte existe déjà avec cet email."] }, values };
+  }
+  if (await isUsernameTaken(username)) {
+    return { fieldErrors: { username: ["Ce pseudo est déjà pris, essaie une variante."] }, values };
   }
 
   const [user] = await db
     .insert(users)
-    .values({ fullName, email, sportLevel, passwordHash: await hashPassword(password) })
+    .values({ username, fullName, email, sportLevel, passwordHash: await hashPassword(password) })
     // Filet de sécurité si deux inscriptions simultanées utilisent le même email.
     .onConflictDoNothing({ target: users.email })
     .returning({ id: users.id });

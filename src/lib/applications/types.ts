@@ -6,7 +6,7 @@ import type { RatingSummary, ReviewItem } from "@/lib/reviews/types";
 /** Profil public d'un candidat, consultable par le créateur de l'activité. */
 export type ApplicantProfile = Pick<
   PublicUser,
-  "id" | "fullName" | "sportLevel" | "avatarUrl" | "bio" | "createdAt" | "favoriteSports"
+  "id" | "username" | "sportLevel" | "avatarUrl" | "bio" | "createdAt" | "favoriteSports"
 >;
 
 /** Résumé de l'activité concernée par une candidature reçue. */

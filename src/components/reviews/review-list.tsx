@@ -18,7 +18,7 @@ export function ReviewList({ reviews, emptyMessage }: { reviews: ReviewItem[]; e
           <UserAvatar user={review.reviewer} className="size-8 text-[11px]" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              <span className="font-display text-sm font-bold text-ink">{review.reviewer.fullName}</span>
+              <span className="font-display text-sm font-bold text-ink">{review.reviewer.username}</span>
               <RatingStars value={review.rating} className="text-xs" />
               <span className="sr-only">{review.rating} sur 5</span>
             </div>

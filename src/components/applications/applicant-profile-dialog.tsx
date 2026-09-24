@@ -48,7 +48,7 @@ export function ApplicantProfileDialog({ applicant, rating, reviews, badges, onC
             <UserSafetyMenu user={applicant} onBlocked={onClose} className="absolute top-2 left-2" />
             <DialogHeader className="items-center text-center">
               <UserAvatar user={applicant} className="size-20 text-xl" />
-              <DialogTitle className="text-lg">{applicant.fullName}</DialogTitle>
+              <DialogTitle className="text-lg">{applicant.username}</DialogTitle>
               <DialogDescription className="flex flex-col items-center gap-2">
                 <Badge variant="secondary">{getSportLevelLabel(applicant.sportLevel)}</Badge>
                 <span className="flex items-center gap-1.5 text-xs">

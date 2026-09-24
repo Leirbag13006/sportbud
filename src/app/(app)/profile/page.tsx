@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarCheck, CalendarDays, ChevronRight, LogOut, Mail, Pencil } from "lucide-react";
+import { CalendarCheck, CalendarDays, ChevronRight, LogOut, Mail, Pencil, UserRound } from "lucide-react";
 import Link from "next/link";
 
 import { logout } from "@/app/(auth)/actions";
@@ -58,7 +58,7 @@ export default async function ProfilePage() {
             <UserAvatar user={user} className="size-20 text-xl ring-4 ring-mint-100" />
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex flex-col items-center gap-2 sm:flex-row">
-                <h2 className="truncate text-xl font-extrabold">{user.fullName}</h2>
+                <h2 className="truncate text-xl font-extrabold">{user.username}</h2>
                 <span className="rounded-full bg-mint-100 px-2.5 py-0.5 text-xs font-semibold text-mint-700">
                   {getSportLevelLabel(user.sportLevel)}
                 </span>
@@ -66,8 +66,12 @@ export default async function ProfilePage() {
               <RatingSummaryBadge rating={rating} />
               <ul className="space-y-1 text-sm">
                 <li className="flex items-center justify-center gap-2 sm:justify-start">
+                  <UserRound className="size-4 text-gray-400" aria-hidden />
+                  {user.fullName} <span className="text-xs text-gray-400">(privé)</span>
+                </li>
+                <li className="flex items-center justify-center gap-2 sm:justify-start">
                   <Mail className="size-4 text-gray-400" aria-hidden />
-                  {user.email}
+                  {user.email} <span className="text-xs text-gray-400">(privé)</span>
                 </li>
                 <li className="flex items-center justify-center gap-2 sm:justify-start">
                   <CalendarDays className="size-4 text-gray-400" aria-hidden />

@@ -147,7 +147,7 @@ export default async function ActivitiesPage() {
               <li key={application.id}>
                 <ActivitySummaryLink
                   activity={application.activity}
-                  details={`Organisée par ${application.activity.creator.fullName}`}
+                  details={`Organisée par ${application.activity.creator.username}`}
                   aside={<ApplicationStatusBadge status={application.status} />}
                 />
               </li>

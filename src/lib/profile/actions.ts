@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, isUsernameTaken } from "@/lib/auth/session";
 import { profileSchema, type ProfileInput } from "@/lib/validations/profile";
 
 export type ProfileActionResult =
@@ -21,6 +21,9 @@ export async function updateProfile(input: ProfileInput): Promise<ProfileActionR
   const parsed = profileSchema.safeParse(input);
   if (!parsed.success) return { ok: false, fieldErrors: z.flattenError(parsed.error).fieldErrors };
   const { avatar, city, ...fields } = parsed.data;
+  if (await isUsernameTaken(fields.username, user.id)) {
+    return { ok: false, fieldErrors: { username: ["Ce pseudo est déjà pris, essaie une variante."] } };
+  }
 
   await db
     .update(users)

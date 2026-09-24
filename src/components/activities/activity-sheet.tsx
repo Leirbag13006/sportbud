@@ -3,6 +3,7 @@
 import {
   Backpack,
   CalendarDays,
+  CalendarX,
   Check,
   Euro,
   Gauge,
@@ -11,13 +12,15 @@ import {
   MapPin,
   MessageCircle,
   Navigation,
+  Pencil,
   Timer,
+  Trash2,
   Users,
   X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge";
@@ -43,6 +46,18 @@ import type { ExploreActivity } from "@/lib/activities/types";
 import { BadgeRow } from "@/components/achievements/achievements-grid";
 import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
 import { applyToActivity, withdrawApplication } from "@/lib/applications/actions";
+import { cancelActivity, deleteActivity } from "@/lib/activities/actions";
+import { AudienceBadge } from "./audience-badge";
+import { canJoinAudience } from "@/config/audience";
+import type { Gender } from "@/db/schema";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
 import { formatDay, formatPrice, formatTimeRange, pluralize } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -58,6 +73,10 @@ interface ActivitySheetProps {
   /** Affiche l'activité sur la carte (depuis la vue liste). */
   onShowOnMap?: () => void;
   onClose: () => void;
+  /** Modification de l'activité (organisateur). */
+  onEdit: (activity: ExploreActivity) => void;
+  /** Genre du membre : séances entre femmes / entre hommes. */
+  viewerGender: Gender | null;
 }
 
 /**
@@ -71,6 +90,8 @@ export function ActivitySheet({
   receivedApplications,
   onShowOnMap,
   onClose,
+  onEdit,
+  viewerGender,
 }: ActivitySheetProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -91,6 +112,8 @@ export function ActivitySheet({
             receivedApplications={receivedApplications}
             onShowOnMap={onShowOnMap}
             onClose={onClose}
+            onEdit={() => onEdit(activity)}
+            viewerGender={viewerGender}
           />
         )}
       </DrawerContent>
@@ -105,9 +128,20 @@ interface ActivityDetailsProps {
   receivedApplications: ReceivedApplication[];
   onShowOnMap?: () => void;
   onClose: () => void;
+  onEdit: () => void;
+  viewerGender: Gender | null;
 }
 
-function ActivityDetails({ activity, isOwn, myApplication, receivedApplications, onShowOnMap, onClose }: ActivityDetailsProps) {
+function ActivityDetails({
+  activity,
+  isOwn,
+  myApplication,
+  receivedApplications,
+  onShowOnMap,
+  onClose,
+  onEdit,
+  viewerGender,
+}: ActivityDetailsProps) {
   const sport = getSport(activity.sportType);
   const isOpen = activity.status === "open";
   const takenSpots = activity.spotsTotal - activity.spotsAvailable;
@@ -128,6 +162,7 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
           <SportIcon sport={activity.sportType} className="size-5" />
           {sport.label}
         </span>
+        <AudienceBadge audience={activity.audience} className="absolute right-4 bottom-3.5 px-2.5 py-1 text-xs" />
       </div>
 
       <DrawerHeader className="flex-row items-start gap-3 pt-4 pb-4 text-left">
@@ -157,7 +192,7 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
           <UserAvatar user={activity.creator} />
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium">
-              {activity.creator.fullName}
+              {activity.creator.username}
               {isOwn && <span className="font-normal text-muted-foreground"> (toi)</span>}
             </p>
             <p className="text-xs text-muted-foreground">
@@ -265,11 +300,13 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
         {isOwn && <ReceivedApplicationsSection applications={receivedApplications} isFull={!isOpen} />}
       </div>
 
-      {!isOwn && (
-        <DrawerFooter className="border-t pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <ApplicantActions activity={activity} myApplication={myApplication} />
-        </DrawerFooter>
-      )}
+      <DrawerFooter className="border-t pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        {isOwn ? (
+          <OwnerActions activity={activity} onEdit={onEdit} onDone={onClose} />
+        ) : (
+          <ApplicantActions activity={activity} myApplication={myApplication} viewerGender={viewerGender} />
+        )}
+      </DrawerFooter>
     </div>
   );
 }
@@ -310,13 +347,93 @@ function ReceivedApplicationsSection({
   );
 }
 
+/**
+ * Actions de l'organisateur sur une séance à venir : modifier, puis annuler (participants prévenus)
+ * ou supprimer (tant que personne n'est inscrit).
+ */
+function OwnerActions({ activity, onEdit, onDone }: { activity: ExploreActivity; onEdit: () => void; onDone: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [hasStarted, setHasStarted] = useState(false);
+  const participantCount = activity.participants.length;
+  const mustCancel = participantCount > 0;
+
+  useEffect(() => {
+    const updateStartedState = () => setHasStarted(activity.startsAt.getTime() <= Date.now());
+    updateStartedState();
+    const timeout = window.setTimeout(updateStartedState, Math.max(0, activity.startsAt.getTime() - Date.now()));
+    return () => window.clearTimeout(timeout);
+  }, [activity.startsAt]);
+
+  if (hasStarted) {
+    return <p className="text-center text-sm text-muted-foreground">La séance a commencé : elle n&apos;est plus modifiable.</p>;
+  }
+
+  const confirm = () =>
+    startTransition(async () => {
+      const result = mustCancel ? await cancelActivity(activity.id) : await deleteActivity(activity.id);
+      if (result.ok) {
+        toast.success(mustCancel ? "Séance annulée. Les participants sont prévenus." : "Activité supprimée.");
+        setConfirming(false);
+        onDone();
+      } else {
+        toast.error(result.error ?? "Une erreur est survenue.");
+      }
+    });
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-2">
+        <Button variant="outline" className="h-11" onClick={onEdit}>
+          <Pencil aria-hidden />
+          Modifier
+        </Button>
+        <Button
+          variant="outline"
+          className="h-11 border-destructive/40 text-destructive hover:bg-destructive/5"
+          onClick={() => setConfirming(true)}
+        >
+          {mustCancel ? <CalendarX aria-hidden /> : <Trash2 aria-hidden />}
+          {mustCancel ? "Annuler la séance" : "Supprimer"}
+        </Button>
+      </div>
+
+      <Dialog open={confirming} onOpenChange={setConfirming}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-lg font-extrabold">
+              {mustCancel ? "Annuler la séance ?" : "Supprimer l'activité ?"}
+            </DialogTitle>
+            <DialogDescription>
+              {mustCancel
+                ? `${pluralize(participantCount, "participant inscrit", "participants inscrits")} : chacun recevra un message dans sa conversation. Les candidatures en attente seront refusées.`
+                : "Personne n'est encore inscrit. L'activité et ses candidatures en attente seront supprimées."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirming(false)} disabled={isPending}>
+              Retour
+            </Button>
+            <Button variant="destructive" onClick={confirm} disabled={isPending}>
+              {isPending && <Loader2 className="animate-spin" aria-hidden />}
+              {mustCancel ? "Annuler la séance" : "Supprimer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 /** Actions du visiteur selon l'état de sa candidature. */
 function ApplicantActions({
   activity,
   myApplication,
+  viewerGender,
 }: {
   activity: ExploreActivity;
   myApplication: MyApplicationSummary | null;
+  viewerGender: Gender | null;
 }) {
   const [isPending, startTransition] = useTransition();
   const isOpen = activity.status === "open";
@@ -328,6 +445,26 @@ function ApplicantActions({
       else toast.error(result.error);
     });
   };
+
+  // Séance entre femmes / entre hommes que le membre ne peut pas rejoindre.
+  if (!myApplication && !canJoinAudience(activity.audience, viewerGender)) {
+    return (
+      <div className="space-y-2 text-center">
+        <Button className="h-11 w-full text-base" disabled>
+          Réservée {activity.audience === "women" ? "aux femmes" : "aux hommes"}
+        </Button>
+        {viewerGender === null && (
+          <p className="text-xs text-muted-foreground">
+            C&apos;est ton cas ?{" "}
+            <Link href="/profile/edit" className="font-medium text-brand-text hover:underline">
+              Indique ton genre dans ton profil
+            </Link>{" "}
+            (jamais affiché).
+          </p>
+        )}
+      </div>
+    );
+  }
 
   if (!myApplication) {
     return (

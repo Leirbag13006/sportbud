@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SPORTS } from "@/config/sports";
-import type { PublicUser, SportLevel, SportType } from "@/db/schema";
+import { GENDER_OPTIONS } from "@/config/audience";
+import type { Gender, PublicUser, SportLevel, SportType } from "@/db/schema";
 import { resizeImageToDataUrl } from "@/lib/image";
 import { updateProfile } from "@/lib/profile/actions";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,16 @@ import { MAX_FAVORITE_SPORTS } from "@/lib/validations/profile";
 
 type EditableUser = Pick<
   PublicUser,
-  "fullName" | "bio" | "sportLevel" | "avatarUrl" | "favoriteSports" | "city" | "homeLat" | "homeLng"
+  | "username"
+  | "fullName"
+  | "gender"
+  | "bio"
+  | "sportLevel"
+  | "avatarUrl"
+  | "favoriteSports"
+  | "city"
+  | "homeLat"
+  | "homeLng"
 >;
 type City = { name: string; lat: number; lng: number };
 
@@ -31,7 +41,9 @@ type City = { name: string; lat: number; lng: number };
 export function ProfileForm({ user }: { user: EditableUser }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [username, setUsername] = useState(user.username);
   const [fullName, setFullName] = useState(user.fullName);
+  const [gender, setGender] = useState<Gender | "">(user.gender ?? "");
   const [bio, setBio] = useState(user.bio ?? "");
   const [favorites, setFavorites] = useState<SportType[]>(user.favoriteSports);
   const [city, setCity] = useState<City | null>(
@@ -80,7 +92,7 @@ export function ProfileForm({ user }: { user: EditableUser }) {
     event.preventDefault();
     const sportLevel = String(new FormData(event.currentTarget).get("sportLevel") ?? "") as SportLevel;
     startTransition(async () => {
-      const result = await updateProfile({ fullName, bio, sportLevel, favoriteSports: favorites, city, avatar });
+      const result = await updateProfile({ username, fullName, gender, bio, sportLevel, favoriteSports: favorites, city, avatar });
       if (result.ok) {
         toast.success("Profil mis à jour !");
         router.push("/profile");
@@ -98,7 +110,7 @@ export function ProfileForm({ user }: { user: EditableUser }) {
       {/* Photo */}
       <section className="flex flex-col items-center gap-4 rounded-card bg-card p-5 shadow-md sm:flex-row">
         <div className="relative">
-          <UserAvatar user={{ fullName: fullName || user.fullName, avatarUrl: previewUrl }} className="size-24 text-2xl ring-4 ring-mint-100" />
+          <UserAvatar user={{ username: username || user.username, avatarUrl: previewUrl }} className="size-24 text-2xl ring-4 ring-mint-100" />
           {isResizing && (
             <span className="absolute inset-0 flex items-center justify-center rounded-full bg-night-950/50">
               <Loader2 className="size-6 animate-spin text-white" aria-label="Traitement de la photo" />
@@ -139,16 +151,54 @@ export function ProfileForm({ user }: { user: EditableUser }) {
       </section>
 
       <section className="space-y-5 rounded-card bg-card p-5 shadow-md">
-        <FormField id="fullName" label="Prénom et nom" errors={errors.fullName}>
-          <Input
-            id="fullName"
-            value={fullName}
-            onChange={(event) => setFullName(event.target.value)}
-            autoComplete="name"
-            aria-invalid={Boolean(errors.fullName)}
-            aria-describedby="fullName-message"
-            className="h-10"
-          />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <FormField id="username" label="Pseudo" errors={errors.username} hint="Seul nom visible par les autres membres.">
+            <Input
+              id="username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              maxLength={20}
+              aria-invalid={Boolean(errors.username)}
+              aria-describedby="username-message"
+              className="h-10"
+            />
+          </FormField>
+          <FormField id="fullName" label="Prénom" errors={errors.fullName} hint="Privé : pour s'adresser à toi.">
+            <Input
+              id="fullName"
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              autoComplete="given-name"
+              aria-invalid={Boolean(errors.fullName)}
+              aria-describedby="fullName-message"
+              className="h-10"
+            />
+          </FormField>
+        </div>
+
+        <FormField
+          id="gender"
+          label="Genre (facultatif)"
+          errors={errors.gender}
+          hint="Jamais affiché. Permet de rejoindre ou d'organiser des séances entre femmes / entre hommes."
+        >
+          <select
+            id="gender"
+            value={gender}
+            onChange={(event) => setGender(event.target.value as Gender | "")}
+            aria-describedby="gender-message"
+            className="h-10 w-full rounded-lg border bg-background px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
+          >
+            <option value="">Non renseigné</option>
+            {GENDER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </FormField>
 
         <fieldset className="space-y-2">

@@ -6,19 +6,22 @@ import { db } from "@/db";
 import { activities, applications } from "@/db/schema";
 import { getEarnedBadges } from "@/lib/achievements/queries";
 import { getRatingSummaries } from "@/lib/reviews/queries";
+import { isAudienceVisible } from "@/config/audience";
+import type { PublicUser } from "@/db/schema";
 import { getBlockRelations } from "@/lib/safety/queries";
 import { NO_RATING } from "@/lib/reviews/types";
 import type { ActivityWithCreator, ExploreActivity } from "./types";
 
 /** Colonnes publiques du créateur affichées avec une activité. */
-const creatorColumns = { id: true, fullName: true, sportLevel: true, avatarUrl: true } as const;
+const creatorColumns = { id: true, username: true, sportLevel: true, avatarUrl: true } as const;
 
 /**
  * Activités de l'écran Explorer (liste et carte) : non annulées, à venir ou en cours,
  * avec leurs participants acceptés. Les activités complètes restent visibles (grisées).
- * Les activités des membres bloqués (dans un sens ou dans l'autre) sont masquées.
+ * Les activités des membres bloqués (dans un sens ou dans l'autre) sont masquées, ainsi que
+ * les séances réservées à l'autre genre (cf. isAudienceVisible).
  */
-export async function getExploreActivities(viewerId: string): Promise<ExploreActivity[]> {
+export async function getExploreActivities(viewer: Pick<PublicUser, "id" | "gender">): Promise<ExploreActivity[]> {
   const now = Date.now();
 
   const [allRows, { hidden }] = await Promise.all([db.query.activities.findMany({
@@ -28,7 +31,7 @@ export async function getExploreActivities(viewerId: string): Promise<ExploreAct
       applications: {
         columns: {},
         where: eq(applications.status, "accepted"),
-        with: { applicant: { columns: { id: true, fullName: true, avatarUrl: true } } },
+        with: { applicant: { columns: { id: true, username: true, avatarUrl: true } } },
       },
     },
     where: and(
@@ -38,8 +41,11 @@ export async function getExploreActivities(viewerId: string): Promise<ExploreAct
     ),
     orderBy: asc(activities.startsAt),
     limit: 300,
-  }), getBlockRelations(viewerId)]);
-  const rows = allRows.filter((row) => !hidden.has(row.creatorId));
+  }), getBlockRelations(viewer.id)]);
+  // Membres bloqués et séances réservées à l'autre genre : masqués.
+  const rows = allRows.filter(
+    (row) => !hidden.has(row.creatorId) && isAudienceVisible(row.audience, viewer.gender),
+  );
 
   const creatorIds = rows.map((row) => row.creatorId);
   const [ratings, badges] = await Promise.all([getRatingSummaries(creatorIds), getEarnedBadges(creatorIds, 2)]);

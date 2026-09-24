@@ -53,7 +53,7 @@ export default function ActivityMap({
   const isPicking = Boolean(onDraftLocationChange);
   const userIcon = useMemo(
     () => createUserLocationIcon(currentUser),
-    [currentUser.fullName, currentUser.avatarUrl], // eslint-disable-line react-hooks/exhaustive-deps
+    [currentUser.username, currentUser.avatarUrl], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   return (

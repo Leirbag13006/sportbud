@@ -49,7 +49,7 @@ export async function isBlockedBetween(userId: string, otherId: string) {
 export async function getBlockedUsers(userId: string): Promise<BlockedUser[]> {
   const rows = await db.query.blocks.findMany({
     columns: { createdAt: true },
-    with: { blocked: { columns: { id: true, fullName: true, avatarUrl: true } } },
+    with: { blocked: { columns: { id: true, username: true, avatarUrl: true } } },
     where: eq(blocks.blockerId, userId),
     orderBy: [desc(blocks.createdAt)],
   });

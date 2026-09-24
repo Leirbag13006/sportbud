@@ -11,7 +11,8 @@ import { AddressSearch } from "@/components/map/address-search";
 import { Button } from "@/components/ui/button";
 import { SPORT_LEVELS } from "@/config/sport-levels";
 import { SPORTS } from "@/config/sports";
-import type { SportLevel, SportType } from "@/db/schema";
+import { GENDER_OPTIONS } from "@/config/audience";
+import type { Gender, SportLevel, SportType } from "@/db/schema";
 import { reverseGeocodeCity } from "@/lib/geocoding";
 import { completeOnboarding, skipOnboarding } from "@/lib/onboarding/actions";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ export function OnboardingWizard({ firstName, initial }: OnboardingWizardProps) 
   const [step, setStep] = useState(0);
   const [sports, setSports] = useState<SportType[]>(initial.favoriteSports);
   const [level, setLevel] = useState<SportLevel | null>(null);
+  const [gender, setGender] = useState<Gender | "">("");
   const [city, setCity] = useState<City | null>(null);
   const [isPending, startTransition] = useTransition();
   const current = STEPS[step]!;
@@ -54,7 +56,12 @@ export function OnboardingWizard({ firstName, initial }: OnboardingWizardProps) 
 
   const finish = () =>
     startTransition(async () => {
-      const result = await completeOnboarding({ favoriteSports: sports, sportLevel: level ?? initial.sportLevel, city });
+      const result = await completeOnboarding({
+        favoriteSports: sports,
+        sportLevel: level ?? initial.sportLevel,
+        gender,
+        city,
+      });
       if (result.ok) {
         toast.success(`Bienvenue dans la communauté, ${firstName} !`);
         router.replace("/");
@@ -170,6 +177,31 @@ export function OnboardingWizard({ firstName, initial }: OnboardingWizardProps) 
                 </button>
               );
             })}
+          </fieldset>
+        )}
+
+        {step === 1 && (
+          <fieldset className="mt-8">
+            <legend className="font-display font-bold text-ink">Tu es… (facultatif)</legend>
+            <p className="mt-1 mb-3 text-sm">
+              Jamais affiché. Permet de rejoindre ou d&apos;organiser des séances entre femmes / entre hommes.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {GENDER_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={gender === option.value}
+                  onClick={() => setGender((current) => (current === option.value ? "" : option.value))}
+                  className={cn(
+                    "min-h-11 rounded-full border bg-card px-4 text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring",
+                    gender === option.value && "border-mint-500 bg-mint-100 font-semibold text-mint-700 hover:bg-mint-100",
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </fieldset>
         )}
 

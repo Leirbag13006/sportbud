@@ -104,7 +104,7 @@ export function ChatView({ initialData, currentUserId }: ChatViewProps) {
       {data.conversation.blockStatus ? (
         <BlockedNotice status={data.conversation.blockStatus} />
       ) : (
-        <Composer onSend={send} otherName={data.conversation.otherUser.fullName.split(" ")[0]!} />
+        <Composer onSend={send} otherName={data.conversation.otherUser.username} />
       )}
     </div>
   );
@@ -142,7 +142,7 @@ function ChatHeader({ data, onSafetyChange }: { data: ConversationWithMessagesDT
       </Button>
       <UserAvatar user={conversation.otherUser} />
       <div className="min-w-0 flex-1">
-        <h1 className="truncate font-semibold">{conversation.otherUser.fullName}</h1>
+        <h1 className="truncate font-semibold">{conversation.otherUser.username}</h1>
         <p className="truncate text-xs text-muted-foreground">
           {conversation.myRole === "creator" ? "Participant" : "Organisateur"} · {sport.label},{" "}
           {formatDay(startsAt).toLowerCase()} à {formatTime(startsAt)}
@@ -197,12 +197,12 @@ function MessageList({ messages, currentUserId, otherUser, onRetry }: MessageLis
       }}
       role="log"
       aria-live="polite"
-      aria-label={`Conversation avec ${otherUser.fullName}`}
+      aria-label={`Conversation avec ${otherUser.username}`}
       className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-muted/30 px-3 py-4 md:px-6"
     >
       {messages.length === 0 && (
         <p className="py-12 text-center text-sm text-muted-foreground">
-          Dis bonjour à {otherUser.fullName.split(" ")[0]} pour organiser votre séance 👋
+          Dis bonjour à {otherUser.username} pour organiser votre séance 👋
         </p>
       )}
 

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { activities, applications, messages } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
+import { canJoinAudience } from "@/config/audience";
 import { isBlockedBetween } from "@/lib/safety/queries";
 
 export type ApplicationActionResult = { ok: true } | { ok: false; error: string };
@@ -27,6 +28,12 @@ export async function applyToActivity(activityId: string): Promise<ApplicationAc
   if (activity.creatorId === user.id) return { ok: false, error: "Tu ne peux pas postuler à ta propre activité." };
   if (activity.startsAt.getTime() <= Date.now()) return { ok: false, error: "Cette activité a déjà commencé." };
   if (activity.status !== "open") return { ok: false, error: "Cette activité est complète." };
+  if (!canJoinAudience(activity.audience, user.gender)) {
+    return {
+      ok: false,
+      error: `Cette séance est réservée ${activity.audience === "women" ? "aux femmes" : "aux hommes"}.`,
+    };
+  }
   if (await isBlockedBetween(user.id, activity.creatorId)) {
     return { ok: false, error: "Tu ne peux pas rejoindre cette activité." };
   }

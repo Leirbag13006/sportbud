@@ -21,7 +21,7 @@ import { REPORT_REASONS, type BlockStatus } from "@/lib/safety/types";
 import { cn } from "@/lib/utils";
 
 interface UserSafetyMenuProps {
-  user: { id: string; fullName: string };
+  user: { id: string; username: string };
   /** Blocage actuel (connu dans la messagerie) ; sinon le menu propose de bloquer. */
   blockStatus?: BlockStatus;
   /** Appelé après un blocage réussi (ex. fermer la fiche de l'activité). */
@@ -35,7 +35,7 @@ interface UserSafetyMenuProps {
 export function UserSafetyMenu({ user, blockStatus = null, onBlocked, onChange, className }: UserSafetyMenuProps) {
   const [dialog, setDialog] = useState<"report" | "block" | null>(null);
   const [isPending, startTransition] = useTransition();
-  const firstName = user.fullName.split(" ")[0];
+  const firstName = user.username;
 
   const unblock = () =>
     startTransition(async () => {
@@ -53,7 +53,7 @@ export function UserSafetyMenu({ user, blockStatus = null, onBlocked, onChange, 
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="ghost" size="icon" className={className} aria-label={`Options pour ${user.fullName}`} />
+            <Button variant="ghost" size="icon" className={className} aria-label={`Options pour ${user.username}`} />
           }
         >
           {isPending ? <Loader2 className="animate-spin" aria-hidden /> : <MoreHorizontal aria-hidden />}
@@ -93,7 +93,7 @@ export function UserSafetyMenu({ user, blockStatus = null, onBlocked, onChange, 
 }
 
 interface SafetyDialogProps {
-  user: { id: string; fullName: string };
+  user: { id: string; username: string };
   open: boolean;
   onClose: () => void;
 }
@@ -133,9 +133,9 @@ function ReportDialog({ user, open, onClose }: SafetyDialogProps) {
     <Dialog open={open} onOpenChange={(next) => !next && close()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg font-extrabold">Signaler {user.fullName}</DialogTitle>
+          <DialogTitle className="font-display text-lg font-extrabold">Signaler {user.username}</DialogTitle>
           <DialogDescription>
-            Ton signalement est confidentiel : {user.fullName.split(" ")[0]} ne saura pas qu&apos;il vient de toi.
+            Ton signalement est confidentiel : {user.username} ne saura pas qu&apos;il vient de toi.
           </DialogDescription>
         </DialogHeader>
 
@@ -208,7 +208,7 @@ function ReportDialog({ user, open, onClose }: SafetyDialogProps) {
 /** Confirmation de blocage, avec ses conséquences. */
 function BlockDialog({ user, open, onClose, onBlocked }: SafetyDialogProps & { onBlocked: () => void }) {
   const [isPending, startTransition] = useTransition();
-  const firstName = user.fullName.split(" ")[0];
+  const firstName = user.username;
 
   const confirm = () =>
     startTransition(async () => {
@@ -225,7 +225,7 @@ function BlockDialog({ user, open, onClose, onBlocked }: SafetyDialogProps & { o
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg font-extrabold">Bloquer {user.fullName} ?</DialogTitle>
+          <DialogTitle className="font-display text-lg font-extrabold">Bloquer {user.username} ?</DialogTitle>
           <DialogDescription>Tu pourras le débloquer à tout moment depuis ton profil.</DialogDescription>
         </DialogHeader>
         <ul className="list-disc space-y-1.5 pl-5 text-sm">
