@@ -18,6 +18,8 @@ export const SPORT_TYPE_VALUES = [
 ] as const;
 export const ACTIVITY_STATUS_VALUES = ["open", "full", "cancelled"] as const;
 export const APPLICATION_STATUS_VALUES = ["pending", "accepted", "rejected"] as const;
+/** text = message écrit par un membre ; system = notification automatique (ex. candidature acceptée). */
+export const MESSAGE_KIND_VALUES = ["text", "system"] as const;
 
 /** Liste SQL pour les contraintes CHECK : ('a', 'b', …). */
 const sqlList = (values: readonly string[]) => sql.raw(`(${values.map((v) => `'${v}'`).join(", ")})`);
@@ -169,6 +171,7 @@ export const messages = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
+    kind: text("kind", { enum: MESSAGE_KIND_VALUES }).notNull().default("text"),
     /** null = pas encore lu par le destinataire. */
     readAt: integer("read_at", { mode: "timestamp_ms" }),
     createdAt: createdAt(),

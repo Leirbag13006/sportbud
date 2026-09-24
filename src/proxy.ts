@@ -17,6 +17,9 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith(AUTH_ROUTES_PREFIX)) return NextResponse.next();
 
   const hasSession = request.cookies.has(SESSION_COOKIE_NAME);
+
+  // API : pas de redirection HTML, les routes répondent elles-mêmes 401 si besoin.
+  if (pathname.startsWith("/api/")) return NextResponse.next();
   const isGuestOnly = GUEST_ONLY_PATHS.includes(pathname);
 
   if (!hasSession && !isGuestOnly) {

@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, Loader2, X } from "lucide-react";
+import { Check, Loader2, MessageCircle, X } from "lucide-react";
+import Link from "next/link";
 import { useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -98,7 +99,21 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
       {isPending ? (
         <div className="flex gap-2">{actions}</div>
       ) : (
-        <ApplicationStatusBadge status={application.status} />
+        <div className="flex items-center gap-2">
+          <ApplicationStatusBadge status={application.status} />
+          {application.status === "accepted" && (
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label={`Discuter avec ${applicant.fullName}`}
+              title="Discuter"
+              nativeButton={false}
+              render={<Link href={`/messages/${application.id}`} />}
+            >
+              <MessageCircle />
+            </Button>
+          )}
+        </div>
       )}
 
       <ApplicantProfileDialog

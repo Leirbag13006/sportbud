@@ -15,6 +15,13 @@
       "when": 1790258636583,
       "tag": "0001_activity_address",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790265415510,
+      "tag": "0002_message_kind",
+      "breakpoints": true
     }
   ]
 }

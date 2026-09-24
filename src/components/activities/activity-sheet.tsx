@@ -1,6 +1,7 @@
 "use client";
 
-import { CalendarDays, Check, Gauge, Loader2, MapPin, Navigation, Timer, Users, X } from "lucide-react";
+import { CalendarDays, Check, Gauge, Loader2, MapPin, MessageCircle, Navigation, Timer, Users, X } from "lucide-react";
+import Link from "next/link";
 import { useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -299,9 +300,15 @@ function ApplicantActions({
         )}
         <p className="text-sm">{status.text}</p>
       </div>
+      {myApplication.status === "accepted" && (
+        <Button className="h-11 w-full text-base" nativeButton={false} render={<Link href={`/messages/${myApplication.id}`} />}>
+          <MessageCircle aria-hidden />
+          Discuter avec l&apos;organisateur
+        </Button>
+      )}
       {status.action && (
         <Button
-          variant="outline"
+          variant={myApplication.status === "accepted" ? "ghost" : "outline"}
           className="h-10 w-full"
           disabled={isPending}
           onClick={() => run(() => withdrawApplication(myApplication.id), status.success)}

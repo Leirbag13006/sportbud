@@ -44,3 +44,24 @@ export function getInitials(fullName: string) {
 export function pluralize(count: number, singular: string, plural = `${singular}s`) {
   return `${count} ${count > 1 ? plural : singular}`;
 }
+
+const shortDateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
+
+/** Horodatage compact d'une liste : « 14:32 » aujourd'hui, « Hier », sinon « 12 sept. ». */
+export function formatRelativeShort(date: Date, now = new Date()) {
+  if (isSameDay(date, now)) return formatTime(date);
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (isSameDay(date, yesterday)) return "Hier";
+  return shortDateFormatter.format(date);
+}
+
+/** Libellé de séparateur de jour dans une conversation : « Aujourd'hui », « Hier », « Samedi 26 septembre ». */
+export function formatDaySeparator(date: Date, now = new Date()) {
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (isSameDay(date, yesterday)) return "Hier";
+  return formatDay(date, now);
+}
+
+export { isSameDay };

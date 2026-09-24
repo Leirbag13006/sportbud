@@ -4,7 +4,7 @@ import { and, eq, gt, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { activities, applications } from "@/db/schema";
+import { activities, applications, messages } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 
 export type ApplicationActionResult = { ok: true } | { ok: false; error: string };
@@ -124,6 +124,16 @@ export async function respondToApplication(
       .update(applications)
       .set({ status: decision })
       .where(and(eq(applications.id, applicationId), eq(applications.status, "pending")));
+
+    // Acceptation : la conversation s'ouvre avec un message automatique, qui notifie le participant.
+    if (decision === "accepted") {
+      await tx.insert(messages).values({
+        applicationId,
+        senderId: user.id,
+        kind: "system",
+        content: "Candidature acceptée ! Vous pouvez maintenant discuter pour vous organiser.",
+      });
+    }
     return { ok: true };
   });
 

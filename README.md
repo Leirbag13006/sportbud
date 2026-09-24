@@ -49,6 +49,21 @@ src/
 Mots de passe hachés avec bcrypt, sessions stockées en base (jeton aléatoire dans un cookie
 `httpOnly`, seul son hash SHA-256 est enregistré), durée de 30 jours prolongée à l'usage.
 
+## Messagerie et notifications « temps réel »
+
+Une conversation s'ouvre automatiquement quand une candidature est acceptée (message système).
+Le temps réel repose sur un rafraîchissement périodique (SWR) de routes API JSON :
+
+| Donnée | Route | Fréquence |
+|---|---|---|
+| Conversation ouverte | `GET /api/conversations/[id]/messages` | 2 s |
+| Liste des conversations | `GET /api/conversations` | 5 s |
+| Badges + toasts (messages non lus, candidatures) | `GET /api/notifications` | 5 s |
+
+Ce choix fonctionne partout (serveur local comme hébergement serverless), contrairement à une
+connexion push en mémoire. Le rafraîchissement se met en pause quand l'onglet est masqué et
+reprend immédiatement au retour. L'envoi d'un message est optimiste (affichage immédiat).
+
 ## Mise en ligne (optionnel)
 
 Un fichier SQLite ne fonctionne pas sur un hébergeur serverless (Vercel…). Créer une base
