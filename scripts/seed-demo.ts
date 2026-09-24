@@ -172,16 +172,6 @@ const chats: { creator: Username; applicant: Username; lines: [from: "creator" |
 
 // -----------------------------------------------------------------------------
 
-function avatarUrl(name: string, index: number) {
-  const colors = ["#2FE0A0", "#F29A3E", "#7DD3FC", "#C4B5FD", "#F9A8D4"];
-  const initials = name
-    .split(" ")
-    .map((part) => part[0])
-    .join("");
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"><rect width="160" height="160" rx="80" fill="${colors[index % colors.length]}"/><circle cx="80" cy="62" r="28" fill="#0A1A17"/><path d="M34 140c5-31 23-46 46-46s41 15 46 46" fill="#0A1A17"/><text x="80" y="153" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700" fill="#0A1A17">${initials}</text></svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-}
-
 function dateIn(days: number, time: string) {
   const [hours, minutes] = time.split(":").map(Number);
   const date = new Date(now);
@@ -278,7 +268,8 @@ async function main() {
             city: "Aix-en-Provence",
             homeLat: AIX.lat + ((index % 5) - 2) * 0.004,
             homeLng: AIX.lng + ((index % 4) - 2) * 0.005,
-            avatarUrl: avatarUrl(person.fullName, index),
+            // Portrait CC0 (public/avatars, crédits dans public/avatars/CREDITS.md), du genre du profil.
+            avatarUrl: `/avatars/${person.username}.webp`,
             onboardedAt: joinedAt,
             createdAt: joinedAt,
           };

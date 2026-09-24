@@ -125,5 +125,145 @@ export const PHOTO_CREDITS = [
     "author": "inconnu",
     "source": "rawpixel",
     "url": "https://www.rawpixel.com/image/9677561/image-person-public-domain-kid"
+  },
+  {
+    "file": "/avatars/camille.run.webp",
+    "title": "Beauty Woman",
+    "author": "Authentic Stock",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/beauty-woman-44UZZC8IRN"
+  },
+  {
+    "file": "/avatars/ines.volley.webp",
+    "title": "Woman Portrait",
+    "author": "Matt Moloney",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/woman-portrait-J2PTEFNZTE"
+  },
+  {
+    "file": "/avatars/nora.fitness.webp",
+    "title": "Girl Portrait",
+    "author": "Kristin Hardwick",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/girl-portrait-J5WDVQRQ6Y"
+  },
+  {
+    "file": "/avatars/sarah.climb.webp",
+    "title": "Girl Portrait",
+    "author": "Maxwell Davis",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/girl-portrait-3DNRJ6YUPD"
+  },
+  {
+    "file": "/avatars/zoe.cycling.webp",
+    "title": "Woman Portrait",
+    "author": "Matt Moloney",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/woman-portrait-FL7B8THF3Q"
+  },
+  {
+    "file": "/avatars/lina.foot.webp",
+    "title": "Smiling Woman",
+    "author": "Matt Moloney",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/smiling-woman-W6GFOSFAXA"
+  },
+  {
+    "file": "/avatars/emma.padel.webp",
+    "title": "Girl Portrait",
+    "author": "Candace McDaniel",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/girl-portrait-OUHVBODVCO"
+  },
+  {
+    "file": "/avatars/manon.tennis.webp",
+    "title": "Woman Smartphone",
+    "author": "Icons8 team",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/woman-smartphone-MLEPUKHYUU"
+  },
+  {
+    "file": "/avatars/clara.volley.webp",
+    "title": "Female Fitness",
+    "author": "Matt Moloney",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/female-fitness-EJEVZOGS4W"
+  },
+  {
+    "file": "/avatars/julie.bad.webp",
+    "title": "Woman Portrait",
+    "author": "Matt Moloney",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/woman-portrait-XKNXHW017D"
+  },
+  {
+    "file": "/avatars/hugo.padel.webp",
+    "title": "Smiling Man",
+    "author": "Matt Moloney",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/smiling-man-3LMPSCJQGQ"
+  },
+  {
+    "file": "/avatars/thomas.five.webp",
+    "title": "Male Fitness",
+    "author": "Direct Media",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/male-fitness-XLGET53CAN"
+  },
+  {
+    "file": "/avatars/leo.tennis.webp",
+    "title": "Male Portrait",
+    "author": "Matt Moloney",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/male-portrait-LHZMZE0JL0"
+  },
+  {
+    "file": "/avatars/mathis.basket.webp",
+    "title": "Man Celebrating",
+    "author": "Bruce Mars",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/man-celebrating-RMOCSAQNUG"
+  },
+  {
+    "file": "/avatars/arthur.bad.webp",
+    "title": "Business Man",
+    "author": "Direct Media",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/business-man-IVZBYWKEFM"
+  },
+  {
+    "file": "/avatars/maxime.swim.webp",
+    "title": "Man Smiling",
+    "author": "Burst",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/man-smiling-X6BW9YMWXV"
+  },
+  {
+    "file": "/avatars/jules.run.webp",
+    "title": "Person Teenage",
+    "author": "Candace McDaniel",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/person-teenage-ERHZDPCTUN"
+  },
+  {
+    "file": "/avatars/rayan.fitness.webp",
+    "title": "Business Man",
+    "author": "Direct Media",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/business-man-7BQNRHB6EX"
+  },
+  {
+    "file": "/avatars/baptiste.cycling.webp",
+    "title": "Male Model",
+    "author": "Candace McDaniel",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/male-model-6KOCQ5VD8H"
+  },
+  {
+    "file": "/avatars/antoine.football.webp",
+    "title": "Man Thumbsup",
+    "author": "YesManPro",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/man-thumbsup-JEANSWX3A6"
   }
 ] as const;
