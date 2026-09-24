@@ -1,6 +1,8 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { useState, type ReactNode } from "react";
 import useSWR from "swr";
 
 import { UserAvatar } from "@/components/applications/user-avatar";
@@ -19,7 +21,10 @@ interface ConversationListProps {
   currentUserId: string;
 }
 
-/** Liste des conversations, rafraîchie automatiquement (derniers messages, non lus). */
+/**
+ * Liste des conversations, rafraîchie automatiquement (derniers messages, non lus).
+ * Les séances à venir d'abord ; celles déjà terminées sont repliées (sauf message non lu ou conversation ouverte).
+ */
 export function ConversationList({ initialConversations, selectedId, currentUserId }: ConversationListProps) {
   const { data: conversations = initialConversations } = useSWR<ConversationSummaryDTO[]>(
     CONVERSATIONS_KEY,
@@ -36,15 +41,21 @@ export function ConversationList({ initialConversations, selectedId, currentUser
     );
   }
 
-  return (
+  const upcoming = conversations.filter((conversation) => !conversation.activity.ended);
+  const past = conversations.filter((conversation) => conversation.activity.ended);
+  const pastNeedsAttention = past.some((conversation) => conversation.unreadCount > 0 || conversation.id === selectedId);
+
+  const rows = (items: ConversationSummaryDTO[]) => (
     <ul className="divide-y">
-      {conversations.map((conversation) => {
+      {items.map((conversation) => {
         const sport = getSport(conversation.activity.sportType);
         const { lastMessage, unreadCount } = conversation;
         const isSelected = conversation.id === selectedId;
-        const preview = lastMessage
-          ? `${lastMessage.senderId === currentUserId && lastMessage.kind === "text" ? "Toi : " : ""}${lastMessage.content}`
-          : "Aucun message pour l'instant";
+        // Seul le message automatique d'acceptation : on invite à lancer la discussion.
+        const isNew = !lastMessage || lastMessage.kind === "system";
+        const preview = isNew
+          ? "Nouvelle discussion : dis bonjour 👋"
+          : `${lastMessage.senderId === currentUserId ? "Toi : " : ""}${lastMessage.content}`;
 
         return (
           <li key={conversation.id}>
@@ -83,6 +94,7 @@ export function ConversationList({ initialConversations, selectedId, currentUser
                     className={cn(
                       "truncate text-sm",
                       unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground",
+                      isNew && unreadCount === 0 && "text-brand-text",
                     )}
                   >
                     {preview}
@@ -100,5 +112,38 @@ export function ConversationList({ initialConversations, selectedId, currentUser
         );
       })}
     </ul>
+  );
+
+  return (
+    <div>
+      {upcoming.length > 0 && (
+        <section aria-labelledby="conversations-upcoming">
+          <h2 id="conversations-upcoming" className="px-4 pt-3 pb-1 font-display text-xs font-bold tracking-eyebrow text-gray-400 uppercase">
+            Séances à venir
+          </h2>
+          {rows(upcoming)}
+        </section>
+      )}
+      {past.length > 0 && <PastConversations count={past.length} defaultOpen={upcoming.length === 0 || pastNeedsAttention}>{rows(past)}</PastConversations>}
+    </div>
+  );
+}
+
+/** Groupe repliable des conversations de séances terminées. */
+function PastConversations({ count, defaultOpen, children }: { count: number; defaultOpen: boolean; children: ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="border-t">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className="flex min-h-11 w-full items-center justify-between gap-2 px-4 py-2 font-display text-xs font-bold tracking-eyebrow text-gray-400 uppercase outline-none hover:text-ink focus-visible:bg-muted"
+      >
+        Séances terminées ({count})
+        <ChevronDown className={cn("size-4 transition-transform motion-reduce:transition-none", open && "rotate-180")} aria-hidden />
+      </button>
+      {open && children}
+    </section>
   );
 }

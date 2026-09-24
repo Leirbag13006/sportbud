@@ -46,7 +46,7 @@ function findConversationRows(userId: string, applicationId?: string) {
     with: {
       applicant: { columns: userColumns },
       activity: {
-        columns: { id: true, sportType: true, startsAt: true, locationName: true, address: true, creatorId: true },
+        columns: { id: true, sportType: true, startsAt: true, durationMinutes: true, locationName: true, address: true, creatorId: true },
         with: { creator: { columns: userColumns } },
       },
     },
@@ -70,6 +70,7 @@ function toConversationDTO(
       id: activity.id,
       sportType: activity.sportType,
       startsAt: activity.startsAt.toISOString(),
+      ended: activity.startsAt.getTime() + activity.durationMinutes * 60_000 < Date.now(),
       locationName: activity.locationName,
       address: activity.address,
     },

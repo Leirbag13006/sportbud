@@ -13,6 +13,8 @@ export interface ConversationActivity {
   id: string;
   sportType: SportType;
   startsAt: string;
+  /** Séance terminée (début + durée dépassés), calculé côté serveur. */
+  ended: boolean;
   locationName: string | null;
   address: string | null;
 }
