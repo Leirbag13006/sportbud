@@ -1,4 +1,5 @@
 import type { Message, PublicUser, SportType } from "@/db/schema";
+import type { EarnedBadge } from "@/lib/achievements/definitions";
 
 /**
  * Types échangés avec le navigateur (API JSON) : les dates sont des chaînes ISO.
@@ -51,6 +52,8 @@ export interface NotificationsDTO {
   pendingApplications: number;
   /** Participants de séances terminées que l'utilisateur n'a pas encore notés. */
   reviewsToWrite: number;
+  /** Succès débloqués dont la notification n'a pas encore été vue. */
+  newAchievements: EarnedBadge[];
   /** Dernier message non lu, pour la notification toast. */
   latestUnread: { id: string; conversationId: string; senderName: string; preview: string } | null;
 }

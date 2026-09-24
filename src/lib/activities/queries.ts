@@ -4,6 +4,9 @@ import { and, asc, eq, gt, ne, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { activities, applications } from "@/db/schema";
+import { getEarnedBadges } from "@/lib/achievements/queries";
+import { getRatingSummaries } from "@/lib/reviews/queries";
+import { NO_RATING } from "@/lib/reviews/types";
 import type { ActivityWithCreator, ExploreActivity } from "./types";
 
 /** Colonnes publiques du créateur affichées avec une activité. */
@@ -35,9 +38,14 @@ export async function getExploreActivities(): Promise<ExploreActivity[]> {
     limit: 300,
   });
 
+  const creatorIds = rows.map((row) => row.creatorId);
+  const [ratings, badges] = await Promise.all([getRatingSummaries(creatorIds), getEarnedBadges(creatorIds, 2)]);
+
   return rows.map(({ applications: accepted, ...activity }) => ({
     ...activity,
     participants: accepted.map(({ applicant }) => applicant),
+    creatorRating: ratings[activity.creatorId] ?? NO_RATING,
+    creatorBadges: badges[activity.creatorId] ?? [],
   }));
 }
 

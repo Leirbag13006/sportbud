@@ -5,7 +5,7 @@
  * Les dates sont stockées en millisecondes (entiers) et manipulées comme des objets Date.
  */
 import { relations, sql } from "drizzle-orm";
-import { check, index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { check, index, integer, primaryKey, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 // -----------------------------------------------------------------------------
 // Valeurs énumérées (partagées avec l'interface et la validation)
@@ -196,6 +196,30 @@ export const reviews = sqliteTable(
     check("reviews_rating_range", sql`${t.rating} between 1 and 5`),
     check("reviews_comment_length", sql`${t.comment} is null or length(${t.comment}) <= 500`),
     check("reviews_not_self", sql`${t.reviewerId} <> ${t.revieweeId}`),
+  ],
+);
+
+// -----------------------------------------------------------------------------
+// Succès débloqués (un enregistrement par palier atteint : 1 bronze, 2 argent, 3 or)
+// Les succès sont calculés à partir de l'activité ; cette table mémorise quand ils ont été
+// débloqués et si le membre a vu la notification.
+// -----------------------------------------------------------------------------
+
+export const userAchievements = sqliteTable(
+  "user_achievements",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    achievementId: text("achievement_id").notNull(),
+    tier: integer("tier").notNull(),
+    unlockedAt: integer("unlocked_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+    /** null = notification pas encore vue. */
+    seenAt: integer("seen_at", { mode: "timestamp_ms" }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.achievementId, t.tier] }),
+    check("user_achievements_tier_range", sql`${t.tier} between 1 and 3`),
   ],
 );
 

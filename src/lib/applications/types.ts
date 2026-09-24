@@ -1,6 +1,6 @@
 import type { Activity, Application, PublicUser } from "@/db/schema";
 import type { ActivityWithCreator } from "@/lib/activities/types";
-import type { AchievementState } from "@/lib/achievements/definitions";
+import type { EarnedBadge } from "@/lib/achievements/definitions";
 import type { RatingSummary, ReviewItem } from "@/lib/reviews/types";
 
 /** Profil public d'un candidat, consultable par le créateur de l'activité. */
@@ -23,7 +23,7 @@ export type ReceivedApplication = Pick<
   applicantRating: RatingSummary;
   applicantReviews: ReviewItem[];
   /** Badges débloqués par le candidat. */
-  applicantBadges: AchievementState[];
+  applicantBadges: EarnedBadge[];
 };
 
 /** Candidature envoyée par l'utilisateur, avec l'activité concernée. */

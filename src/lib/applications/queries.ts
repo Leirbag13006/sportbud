@@ -4,7 +4,7 @@ import { and, asc, count, desc, eq, inArray, ne, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { activities, applications } from "@/db/schema";
-import { getUnlockedAchievementsByUser } from "@/lib/achievements/queries";
+import { getEarnedBadges } from "@/lib/achievements/queries";
 import { getRatingSummaries, getRecentReviewsByUser } from "@/lib/reviews/queries";
 import { NO_RATING } from "@/lib/reviews/types";
 import type { MyApplicationSummary, ReceivedApplication, SentApplication } from "./types";
@@ -59,7 +59,7 @@ export async function getReceivedApplications(userId: string): Promise<ReceivedA
   const [ratings, recentReviews, badges] = await Promise.all([
     getRatingSummaries(applicantIds),
     getRecentReviewsByUser(applicantIds),
-    getUnlockedAchievementsByUser(applicantIds),
+    getEarnedBadges(applicantIds),
   ]);
 
   const order = { pending: 0, accepted: 1, rejected: 2 } as const;

@@ -1,11 +1,11 @@
 import "server-only";
 
-import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, max, ne, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { activities, applications, users } from "@/db/schema";
+import { activities, applications, userAchievements, users } from "@/db/schema";
 import { getRatingSummaries } from "@/lib/reviews/queries";
-import { evaluateAchievements, type AchievementState, type MemberStats } from "./definitions";
+import { evaluateAchievements, toEarnedBadge, type AchievementState, type EarnedBadge, type MemberStats } from "./definitions";
 
 const WEEK_MS = 7 * 24 * 3600 * 1000;
 const ended = () => sql`${activities.startsAt} + ${activities.durationMinutes} * 60000 <= ${Date.now()}`;
@@ -90,16 +90,65 @@ export async function getMemberStats(userIds: string[]): Promise<Record<string, 
   );
 }
 
-/** Succès (débloqués ou non) d'un membre. */
+/** Succès (débloqués ou non) d'un membre, avec leur palier. */
 export async function getAchievements(userId: string): Promise<AchievementState[]> {
   const stats = (await getMemberStats([userId]))[userId]!;
   return evaluateAchievements(stats);
 }
 
-/** Succès débloqués de plusieurs membres (fiches candidats). */
-export async function getUnlockedAchievementsByUser(userIds: string[]): Promise<Record<string, AchievementState[]>> {
-  const stats = await getMemberStats(userIds);
-  return Object.fromEntries(
-    Object.entries(stats).map(([userId, value]) => [userId, evaluateAchievements(value).filter((item) => item.unlocked)]),
+/** Dernière synchronisation par membre (limite le recalcul lors des rafraîchissements fréquents). */
+const lastSync = new Map<string, number>();
+const SYNC_INTERVAL_MS = 30_000;
+
+/**
+ * Enregistre les paliers nouvellement atteints par un membre (non vus par défaut).
+ * Appelée lors du rafraîchissement des notifications ; recalcul au plus toutes les 30 s.
+ */
+export async function syncAchievements(userId: string, { force = false } = {}) {
+  const now = Date.now();
+  if (!force && now - (lastSync.get(userId) ?? 0) < SYNC_INTERVAL_MS) return;
+  lastSync.set(userId, now);
+
+  const achievements = await getAchievements(userId);
+  const reached = achievements.flatMap((achievement) =>
+    Array.from({ length: achievement.tier }, (_, index) => ({ userId, achievementId: achievement.id, tier: index + 1 })),
   );
+  if (reached.length === 0) return;
+  await db.insert(userAchievements).values(reached).onConflictDoNothing();
+}
+
+/** Succès débloqués dont le membre n'a pas encore vu la notification. */
+export async function getUnseenAchievements(userId: string): Promise<EarnedBadge[]> {
+  const rows = await db
+    .select({ achievementId: userAchievements.achievementId, tier: userAchievements.tier })
+    .from(userAchievements)
+    .where(and(eq(userAchievements.userId, userId), isNull(userAchievements.seenAt)))
+    .orderBy(asc(userAchievements.unlockedAt));
+
+  // Un seul palier par succès : le plus élevé.
+  const best = new Map<string, number>();
+  for (const row of rows) best.set(row.achievementId, Math.max(best.get(row.achievementId) ?? 0, row.tier));
+  return [...best].map(([id, tier]) => toEarnedBadge(id, tier)).filter((badge) => badge !== null);
+}
+
+/** Meilleurs badges enregistrés de plusieurs membres (cartes, fiches), du plus prestigieux au moins. */
+export async function getEarnedBadges(userIds: string[], limit = 3): Promise<Record<string, EarnedBadge[]>> {
+  const ids = [...new Set(userIds)];
+  if (ids.length === 0) return {};
+  const rows = await db
+    .select({ userId: userAchievements.userId, achievementId: userAchievements.achievementId, tier: max(userAchievements.tier) })
+    .from(userAchievements)
+    .where(inArray(userAchievements.userId, ids))
+    .groupBy(userAchievements.userId, userAchievements.achievementId);
+
+  const byUser: Record<string, EarnedBadge[]> = {};
+  for (const row of rows) {
+    const badge = toEarnedBadge(row.achievementId, row.tier ?? 1);
+    if (badge) (byUser[row.userId] ??= []).push(badge);
+  }
+  for (const badges of Object.values(byUser)) {
+    badges.sort((a, b) => b.tier - a.tier);
+    badges.splice(limit);
+  }
+  return byUser;
 }

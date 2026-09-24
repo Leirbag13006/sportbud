@@ -17,7 +17,7 @@ import { BadgeRow } from "@/components/achievements/achievements-grid";
 import { SportIcon } from "@/components/brand/sport-icon";
 import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
 import { getSport } from "@/config/sports";
-import type { AchievementState } from "@/lib/achievements/definitions";
+import type { EarnedBadge } from "@/lib/achievements/definitions";
 import { ReviewList } from "@/components/reviews/review-list";
 import type { ApplicantProfile } from "@/lib/applications/types";
 import type { RatingSummary, ReviewItem } from "@/lib/reviews/types";
@@ -30,7 +30,7 @@ interface ApplicantProfileDialogProps {
   /** Réputation : moyenne et derniers avis des précédents organisateurs. */
   rating: RatingSummary;
   reviews: ReviewItem[];
-  badges: AchievementState[];
+  badges: EarnedBadge[];
   onClose: () => void;
   /** Boutons d'action affichés en bas (Accepter / Refuser). */
   actions?: ReactNode;
@@ -59,7 +59,7 @@ export function ApplicantProfileDialog({ applicant, rating, reviews, badges, onC
               <RatingSummaryBadge rating={rating} />
             </div>
 
-            <BadgeRow achievements={badges} />
+            <BadgeRow badges={badges} />
 
             {applicant.favoriteSports.length > 0 && (
               <ul className="flex flex-wrap justify-center gap-1.5" aria-label="Sports favoris">

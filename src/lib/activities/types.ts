@@ -1,4 +1,6 @@
 import type { Activity, PublicUser } from "@/db/schema";
+import type { EarnedBadge } from "@/lib/achievements/definitions";
+import type { RatingSummary } from "@/lib/reviews/types";
 
 /** Créateur tel qu'affiché publiquement sur une activité. */
 export type ActivityCreator = Pick<PublicUser, "id" | "fullName" | "sportLevel" | "avatarUrl">;
@@ -11,5 +13,9 @@ export type ActivityWithCreator = Omit<Activity, "createdAt" | "updatedAt"> & {
 /** Participant accepté, affiché en avatar sur les cartes d'activité. */
 export type ActivityParticipant = Pick<PublicUser, "id" | "fullName" | "avatarUrl">;
 
-/** Activité de l'écran Explorer : créateur + participants acceptés. */
-export type ExploreActivity = ActivityWithCreator & { participants: ActivityParticipant[] };
+/** Activité de l'écran Explorer : créateur (avec sa réputation et ses badges) + participants acceptés. */
+export type ExploreActivity = ActivityWithCreator & {
+  participants: ActivityParticipant[];
+  creatorRating: RatingSummary;
+  creatorBadges: EarnedBadge[];
+};

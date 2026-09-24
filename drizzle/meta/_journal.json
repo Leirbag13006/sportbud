@@ -36,6 +36,13 @@
       "when": 1790271047364,
       "tag": "0004_profile_favorite_sports",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1790271496193,
+      "tag": "0005_user_achievements",
+      "breakpoints": true
     }
   ]
 }

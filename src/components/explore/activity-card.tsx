@@ -1,11 +1,12 @@
 "use client";
 
-import { Check, Clock, Loader2, MapPin, MessageCircle, Settings2 } from "lucide-react";
+import { Check, Clock, Loader2, MapPin, MessageCircle, Settings2, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
+import { AchievementMedal } from "@/components/achievements/achievements-grid";
 import { UserAvatar } from "@/components/applications/user-avatar";
 import { Button } from "@/components/ui/button";
 import { getSportLevelLabel } from "@/config/sport-levels";
@@ -98,6 +99,7 @@ export function ActivityCard({
         <p className="truncate text-xs text-gray-400">
           {formatDay(activity.startsAt)} • {formatHour(activity.startsAt)}
         </p>
+        <OrganizerLine activity={activity} />
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <div className="flex min-w-0 items-center gap-2">
@@ -209,5 +211,41 @@ function CardAction({
       {isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Check aria-hidden />}
       Rejoindre
     </Button>
+  );
+}
+
+const ratingFormatter = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+/** Organisateur, sa note moyenne et ses meilleurs badges : de quoi donner confiance d'un coup d'œil. */
+function OrganizerLine({ activity }: { activity: ExploreActivity }) {
+  const { creatorRating: rating, creatorBadges: badges } = activity;
+  const firstName = activity.creator.fullName.split(" ")[0];
+
+  return (
+    <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-400">
+      <span className="truncate">Par {firstName}</span>
+      {rating.average !== null && (
+        <span
+          className="flex shrink-0 items-center gap-0.5 font-semibold text-ink"
+          aria-label={`note ${ratingFormatter.format(rating.average)} sur 5, ${rating.count} avis`}
+        >
+          <Star className="size-3 text-sunset-500" fill="currentColor" strokeWidth={0} aria-hidden />
+          {ratingFormatter.format(rating.average)}
+        </span>
+      )}
+      {badges.length > 0 && (
+        <span className="flex shrink-0 items-center gap-0.5">
+          {badges.map((badge) => (
+            <span key={badge.id} title={badge.tierLabel ? `${badge.title} · ${badge.tierLabel}` : badge.title}>
+              <AchievementMedal emoji={badge.emoji} tier={badge.tier} hasTiers={badge.tierLabel !== null} size="xs" />
+              <span className="sr-only">
+                Badge {badge.title}
+                {badge.tierLabel && ` ${badge.tierLabel}`}
+              </span>
+            </span>
+          ))}
+        </span>
+      )}
+    </p>
   );
 }

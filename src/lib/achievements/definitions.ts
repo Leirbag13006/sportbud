@@ -17,105 +17,151 @@ export interface MemberStats {
   profileComplete: boolean;
 }
 
+/** Paliers : 1 = bronze, 2 = argent, 3 = or. */
+export type Tier = 1 | 2 | 3;
+
+export const TIERS: Record<Tier, { label: string; emoji: EmojiName }> = {
+  1: { label: "Bronze", emoji: "medal-bronze" },
+  2: { label: "Argent", emoji: "medal-silver" },
+  3: { label: "Or", emoji: "medal-gold" },
+};
+
 export interface AchievementDefinition {
   id: string;
   title: string;
-  description: string;
   emoji: EmojiName;
-  goal: number;
-  /** Progression actuelle (plafonnée à `goal` à l'affichage). */
-  progress: (stats: MemberStats) => number;
+  /** Objectifs croissants de chaque palier (1 seul objectif = succès sans palier). */
+  goals: number[];
+  /** Objectif à atteindre, en toutes lettres. */
+  describe: (goal: number) => string;
+  /** Valeur mesurée pour ce succès. */
+  metric: (stats: MemberStats) => number;
 }
 
 /** Succès à débloquer (gamification) : encouragent à jouer, organiser, être fiable. */
 export const ACHIEVEMENTS: AchievementDefinition[] = [
   {
-    id: "premiers-pas",
-    title: "Premier pas",
-    description: "Participe à ta première séance.",
-    emoji: "party",
-    goal: 1,
-    progress: (s) => s.sessionsPlayed,
-  },
-  {
-    id: "habitue",
-    title: "Habitué·e",
-    description: "Participe à 10 séances.",
+    id: "joueur",
+    title: "Joueur·se",
     emoji: "shoe",
-    goal: 10,
-    progress: (s) => s.sessionsPlayed,
+    goals: [1, 10, 25],
+    describe: (goal) => (goal === 1 ? "Participe à ta première séance." : `Participe à ${goal} séances.`),
+    metric: (s) => s.sessionsPlayed,
   },
   {
     id: "organisateur",
     title: "Organisateur",
-    description: "Organise une séance avec au moins un participant.",
     emoji: "calendar",
-    goal: 1,
-    progress: (s) => s.sessionsOrganized,
-  },
-  {
-    id: "meneur",
-    title: "Meneur de jeu",
-    description: "Organise 10 séances.",
-    emoji: "trophy",
-    goal: 10,
-    progress: (s) => s.sessionsOrganized,
+    goals: [1, 5, 15],
+    describe: (goal) =>
+      goal === 1 ? "Organise une séance avec au moins un participant." : `Organise ${goal} séances avec des participants.`,
+    metric: (s) => s.sessionsOrganized,
   },
   {
     id: "touche-a-tout",
     title: "Touche-à-tout",
-    description: "Pratique 3 sports différents.",
     emoji: "compass",
-    goal: 3,
-    progress: (s) => s.distinctSports,
+    goals: [2, 3, 5],
+    describe: (goal) => `Pratique ${goal} sports différents.`,
+    metric: (s) => s.distinctSports,
   },
   {
     id: "sociable",
     title: "Sociable",
-    description: "Rencontre 10 partenaires différents.",
     emoji: "people",
-    goal: 10,
-    progress: (s) => s.distinctPartners,
+    goals: [3, 10, 25],
+    describe: (goal) => `Rencontre ${goal} partenaires différents.`,
+    metric: (s) => s.distinctPartners,
   },
   {
     id: "fiable",
     title: "Fiable",
-    description: "Obtiens une moyenne d'au moins 4,5 sur 3 avis ou plus.",
     emoji: "star",
-    goal: 3,
-    progress: (s) => ((s.ratingAverage ?? 0) >= 4.5 ? s.ratingCount : 0),
+    goals: [3, 10, 25],
+    describe: (goal) => `Garde une moyenne d'au moins 4,5 sur ${goal} avis.`,
+    metric: (s) => ((s.ratingAverage ?? 0) >= 4.5 ? s.ratingCount : 0),
   },
   {
     id: "en-feu",
     title: "En feu",
-    description: "Enchaîne 3 séances en 7 jours.",
     emoji: "fire",
-    goal: 3,
-    progress: (s) => s.bestWeek,
+    goals: [2, 3, 5],
+    describe: (goal) => `Enchaîne ${goal} séances en 7 jours.`,
+    metric: (s) => s.bestWeek,
   },
   {
     id: "profil-complet",
     title: "Profil au top",
-    description: "Ajoute une photo, une bio et tes sports favoris.",
     emoji: "camera",
-    goal: 1,
-    progress: (s) => (s.profileComplete ? 1 : 0),
+    goals: [1],
+    describe: () => "Ajoute une photo, une bio et tes sports favoris.",
+    metric: (s) => (s.profileComplete ? 1 : 0),
   },
 ];
+
+const ACHIEVEMENTS_BY_ID = new Map(ACHIEVEMENTS.map((achievement) => [achievement.id, achievement]));
+
+export function getAchievementDefinition(id: string) {
+  return ACHIEVEMENTS_BY_ID.get(id);
+}
+
+/** Succès sans paliers (un seul objectif) : affiché comme simplement « débloqué ». */
+export function hasTiers(definition: Pick<AchievementDefinition, "goals">) {
+  return definition.goals.length > 1;
+}
 
 export interface AchievementState {
   id: string;
   title: string;
-  description: string;
   emoji: EmojiName;
-  goal: number;
-  progress: number;
+  /** Palier atteint (0 = pas encore débloqué). */
+  tier: number;
+  maxTier: number;
+  /** Valeur actuelle et objectif du palier suivant (null si tout est débloqué). */
+  value: number;
+  nextGoal: number | null;
+  /** Description de l'objectif en cours (ou du dernier palier atteint). */
+  description: string;
   unlocked: boolean;
 }
 
 export function evaluateAchievements(stats: MemberStats): AchievementState[] {
-  return ACHIEVEMENTS.map(({ progress, ...definition }) => {
-    const value = Math.min(progress(stats), definition.goal);
-    return { ...definition, progress: value, unlocked: value >= definition.goal };
+  return ACHIEVEMENTS.map((definition) => {
+    const value = definition.metric(stats);
+    const tier = definition.goals.filter((goal) => value >= goal).length;
+    const nextGoal = definition.goals[tier] ?? null;
+    return {
+      id: definition.id,
+      title: definition.title,
+      emoji: definition.emoji,
+      tier,
+      maxTier: definition.goals.length,
+      value,
+      nextGoal,
+      description: definition.describe(nextGoal ?? definition.goals[definition.goals.length - 1]!),
+      unlocked: tier > 0,
+    };
   });
+}
+
+/** Badge affiché sur une fiche ou une carte : succès et palier atteint. */
+export interface EarnedBadge {
+  id: string;
+  title: string;
+  emoji: EmojiName;
+  tier: number;
+  /** Libellé du palier (« Or ») ou null pour un succès sans palier. */
+  tierLabel: string | null;
+}
+
+export function toEarnedBadge(achievementId: string, tier: number): EarnedBadge | null {
+  const definition = getAchievementDefinition(achievementId);
+  if (!definition) return null;
+  return {
+    id: definition.id,
+    title: definition.title,
+    emoji: definition.emoji,
+    tier,
+    tierLabel: hasTiers(definition) ? TIERS[tier as Tier].label : null,
+  };
 }

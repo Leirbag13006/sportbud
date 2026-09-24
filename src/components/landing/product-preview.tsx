@@ -5,7 +5,11 @@ import { Lock } from "lucide-react";
 import { ActivityCard } from "@/components/explore/activity-card";
 import { ExploreToolbar } from "@/components/explore/explore-toolbar";
 import type { SportLevel, SportType } from "@/db/schema";
+import { toEarnedBadge, type EarnedBadge } from "@/lib/achievements/definitions";
 import type { ExploreActivity } from "@/lib/activities/types";
+import type { RatingSummary } from "@/lib/reviews/types";
+
+const badge = (id: string, tier: number) => toEarnedBadge(id, tier)!;
 
 /** Crée une date du jour (ou de J+n) à l'heure donnée, en heure locale. */
 function at(daysFromToday: number, hour: number) {
@@ -26,14 +30,16 @@ type DemoSeed = {
   participants: string[];
   priceCents: number;
   equipmentRequired: boolean;
+  rating: RatingSummary;
+  badges: EarnedBadge[];
 };
 
 /** Annonces d'exemple (illustration de l'interface, pas des données réelles). */
 const SEEDS: DemoSeed[] = [
-  { sportType: "football", spots: 2, level: "intermediate", day: 0, hour: 19, distanceKm: 1.2, organizer: "Karim B.", participants: ["Léa M.", "Hugo R."], priceCents: 800, equipmentRequired: false },
-  { sportType: "tennis", spots: 1, level: "beginner", day: 1, hour: 18, distanceKm: 2.8, organizer: "Julie M.", participants: [], priceCents: 0, equipmentRequired: true },
-  { sportType: "running", spots: 4, level: null, day: 3, hour: 9, distanceKm: 3.5, organizer: "Thomas N.", participants: ["Inès F.", "Nora K.", "Sam D.", "Lou P."], priceCents: 0, equipmentRequired: false },
-  { sportType: "padel", spots: 2, level: "intermediate", day: 2, hour: 20, distanceKm: 4.1, organizer: "Lucas G.", participants: ["Emma T."], priceCents: 1000, equipmentRequired: false },
+  { sportType: "football", spots: 2, level: "intermediate", day: 0, hour: 19, distanceKm: 1.2, organizer: "Karim B.", participants: ["Léa M.", "Hugo R."], priceCents: 800, equipmentRequired: false, rating: { average: 4.8, count: 12 }, badges: [badge("organisateur", 3), badge("fiable", 2)] },
+  { sportType: "tennis", spots: 1, level: "beginner", day: 1, hour: 18, distanceKm: 2.8, organizer: "Julie M.", participants: [], priceCents: 0, equipmentRequired: true, rating: { average: 4.6, count: 5 }, badges: [badge("joueur", 2)] },
+  { sportType: "running", spots: 4, level: null, day: 3, hour: 9, distanceKm: 3.5, organizer: "Thomas N.", participants: ["Inès F.", "Nora K.", "Sam D.", "Lou P."], priceCents: 0, equipmentRequired: false, rating: { average: 5, count: 21 }, badges: [badge("sociable", 3), badge("en-feu", 2)] },
+  { sportType: "padel", spots: 2, level: "intermediate", day: 2, hour: 20, distanceKm: 4.1, organizer: "Lucas G.", participants: ["Emma T."], priceCents: 1000, equipmentRequired: false, rating: { average: null, count: 0 }, badges: [badge("organisateur", 1)] },
 ];
 
 function toActivity(seed: DemoSeed, index: number): ExploreActivity {
@@ -43,6 +49,8 @@ function toActivity(seed: DemoSeed, index: number): ExploreActivity {
     creatorId: `demo-${index}-0`,
     creator: { ...person(seed.organizer, 0), sportLevel: "intermediate" },
     participants: seed.participants.map((name, i) => person(name, i + 1)),
+    creatorRating: seed.rating,
+    creatorBadges: seed.badges,
     sportType: seed.sportType,
     description: null,
     locationName: null,

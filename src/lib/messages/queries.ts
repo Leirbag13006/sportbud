@@ -5,6 +5,7 @@ import { and, count, desc, eq, inArray, isNull, ne, or } from "drizzle-orm";
 import { db } from "@/db";
 import { activities, applications, messages, type Message } from "@/db/schema";
 import { countPendingReceivedApplications } from "@/lib/applications/queries";
+import { getUnseenAchievements, syncAchievements } from "@/lib/achievements/queries";
 import { countReviewsToWrite } from "@/lib/reviews/queries";
 import type {
   ConversationDTO,
@@ -148,7 +149,10 @@ export async function getNotifications(userId: string): Promise<NotificationsDTO
     inArray(messages.applicationId, db.select({ id: applications.id }).from(applications).where(conversationAccess(userId))),
   );
 
-  const [[unread], latest, pendingApplications, reviewsToWrite] = await Promise.all([
+  // Enregistre les succès nouvellement atteints (au plus toutes les 30 s par membre).
+  await syncAchievements(userId);
+
+  const [[unread], latest, pendingApplications, reviewsToWrite, newAchievements] = await Promise.all([
     db.select({ value: count() }).from(messages).where(unreadWhere),
     db.query.messages.findFirst({
       columns: { id: true, applicationId: true, content: true },
@@ -158,12 +162,14 @@ export async function getNotifications(userId: string): Promise<NotificationsDTO
     }),
     countPendingReceivedApplications(userId),
     countReviewsToWrite(userId),
+    getUnseenAchievements(userId),
   ]);
 
   return {
     unreadMessages: unread?.value ?? 0,
     pendingApplications,
     reviewsToWrite,
+    newAchievements,
     latestUnread: latest
       ? {
           id: latest.id,

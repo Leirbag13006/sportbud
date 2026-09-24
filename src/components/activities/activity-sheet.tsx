@@ -38,14 +38,16 @@ import {
 import { getSportLevelLabel } from "@/config/sport-levels";
 import { getActivityTitle, getSport } from "@/config/sports";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import type { ActivityWithCreator } from "@/lib/activities/types";
+import type { ExploreActivity } from "@/lib/activities/types";
+import { BadgeRow } from "@/components/achievements/achievements-grid";
+import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
 import { applyToActivity, withdrawApplication } from "@/lib/applications/actions";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
 import { formatDay, formatDuration, formatPrice, formatTime, pluralize } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface ActivitySheetProps {
-  activity: ActivityWithCreator | null;
+  activity: ExploreActivity | null;
   /** Pour distinguer ses propres activités (pas de candidature possible). */
   currentUserId: string;
   /** Candidature de l'utilisateur sur cette activité, s'il a postulé. */
@@ -95,7 +97,7 @@ export function ActivitySheet({
 }
 
 interface ActivityDetailsProps {
-  activity: ActivityWithCreator;
+  activity: ExploreActivity;
   isOwn: boolean;
   myApplication: MyApplicationSummary | null;
   receivedApplications: ReceivedApplication[];
@@ -158,8 +160,10 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
             <p className="text-xs text-muted-foreground">
               Organisateur · {getSportLevelLabel(activity.creator.sportLevel)}
             </p>
+            <RatingSummaryBadge rating={activity.creatorRating} className="mt-1" />
           </div>
         </div>
+        {activity.creatorBadges.length > 0 && <BadgeRow badges={activity.creatorBadges} className="-mt-2 justify-start" />}
 
         {/* Informations pratiques */}
         <dl className="grid grid-cols-2 gap-3">
@@ -306,7 +310,7 @@ function ApplicantActions({
   activity,
   myApplication,
 }: {
-  activity: ActivityWithCreator;
+  activity: ExploreActivity;
   myApplication: MyApplicationSummary | null;
 }) {
   const [isPending, startTransition] = useTransition();

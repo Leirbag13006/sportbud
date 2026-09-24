@@ -14,6 +14,8 @@ export type EmojiName =
   | "speech"
   | "trophy"
   | "medal-gold"
+  | "medal-silver"
+  | "medal-bronze"
   | "star"
   | "fire"
   | "target"

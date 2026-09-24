@@ -30,6 +30,10 @@
   --color-sunset-300: #ffc98a;
   --color-sunset-500: #f29a3e;
   --color-danger: #f0506e;
+  /* Paliers des succès (gamification) */
+  --color-tier-1: #c8814a;
+  --color-tier-2: #9aa7ae;
+  --color-tier-3: #f2b53a;
   --color-info: #4fb3ff;
 
   --tracking-tagline: 0.32em;
