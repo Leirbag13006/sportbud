@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { AUDIENCE_BORDER_CLASSES, AudienceBadge } from "@/components/activities/audience-badge";
 import { Emoji, getEmojiSrc, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
@@ -236,7 +237,39 @@ export function FeaturesSection() {
             </BentoCard>
           </Reveal>
 
-          <Reveal delay={100} className="md:col-span-2">
+          <Reveal className="md:col-span-3">
+            <BentoCard
+              className="h-full"
+              title="Entre femmes ou entre hommes, si tu veux"
+              text="Organise ou rejoins une séance réservée aux femmes ou aux hommes. Ton genre n'est jamais affiché, et les séances mixtes restent la règle."
+            >
+              <div className="sl-light w-full max-w-xs space-y-2">
+                {(
+                  [
+                    { audience: "women", sport: "volleyball", label: "Volley • Sam. 19:00", spots: "3 places" },
+                    { audience: "men", sport: "basketball", label: "Basket 3x3 • Dim. 18:30", spots: "4 places" },
+                  ] as const
+                ).map((item) => (
+                  <div
+                    key={item.audience}
+                    className={`flex items-center gap-2.5 rounded-card bg-card p-2.5 shadow-md ${AUDIENCE_BORDER_CLASSES[item.audience]}`}
+                  >
+                    <SportIcon sport={item.sport} className="size-8" />
+                    <span className="min-w-0 flex-1">
+                      <AudienceBadge audience={item.audience} />
+                      <span className="mt-0.5 block truncate font-display text-sm font-bold text-ink">{item.label}</span>
+                    </span>
+                    <span className="text-xs font-semibold text-gray-400">{item.spots}</span>
+                  </div>
+                ))}
+                <span className="flex items-center justify-center gap-1.5 pt-1 text-xs text-white/75">
+                  <ShieldCheck className="size-3.5 text-mint-500" /> Ton genre reste privé
+                </span>
+              </div>
+            </BentoCard>
+          </Reveal>
+
+          <Reveal delay={100} className="md:col-span-3">
             <BentoCard className="h-full" title="Tu choisis avec qui tu joues" text="Tu consultes chaque profil avant d'accepter. Personne ne débarque sans ton accord.">
               <div className="sl-light w-full max-w-xs space-y-2">
                 {[
@@ -271,7 +304,7 @@ export function FeaturesSection() {
             </BentoCard>
           </Reveal>
 
-          <Reveal delay={150} className="md:col-span-2">
+          <Reveal delay={150} className="md:col-span-3">
             <BentoCard className="h-full" title="La discussion s'ouvre toute seule" text="Candidature acceptée ? Une conversation privée démarre pour caler l'heure et le lieu.">
               <div className="flex w-full max-w-xs flex-col gap-1.5 text-sm">
                 <span className="self-center rounded-lg bg-mint-500/15 px-3 py-1 text-xs text-mint-500">Candidature acceptée !</span>
@@ -282,7 +315,7 @@ export function FeaturesSection() {
             </BentoCard>
           </Reveal>
 
-          <Reveal delay={200} className="md:col-span-2">
+          <Reveal delay={200} className="md:col-span-3">
             <BentoCard className="h-full" title="Organise en 30 secondes" text="Sport, date, nombre de places, adresse trouvée automatiquement : ta séance est en ligne.">
               <div className="sl-light w-full max-w-xs space-y-2 rounded-card bg-card p-3 shadow-md">
                 <div className="flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm text-ink">
@@ -435,6 +468,11 @@ const FAQ = [
     question: "Je débute, est-ce que j'ai ma place ?",
     answer:
       "Évidemment. Chaque séance indique le niveau attendu, et beaucoup sont ouvertes à tous. Filtre par niveau pour trouver des partenaires qui jouent comme toi.",
+  },
+  {
+    question: "C'est quoi une séance entre femmes ou entre hommes ?",
+    answer:
+      "Quand tu organises, tu peux réserver ta séance aux femmes ou aux hommes. Elle apparaît alors en rose (entre femmes) ou en bleu (entre hommes), et seules les personnes concernées peuvent la rejoindre. Ton genre sert uniquement à ça : il n'est jamais affiché sur ton profil.",
   },
   {
     question: "Qui peut rejoindre la séance que j'organise ?",
