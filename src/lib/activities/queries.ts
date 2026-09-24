@@ -43,3 +43,17 @@ export async function countUpcomingActivitiesByCreator(creatorId: string) {
     );
   return row?.count ?? 0;
 }
+
+/** Activités à venir ou en cours organisées par l'utilisateur (tableau de bord du profil). */
+export async function getMyOrganizedActivities(creatorId: string): Promise<ActivityWithCreator[]> {
+  return db.query.activities.findMany({
+    columns: { createdAt: false, updatedAt: false },
+    with: { creator: { columns: creatorColumns } },
+    where: and(
+      eq(activities.creatorId, creatorId),
+      ne(activities.status, "cancelled"),
+      sql`${activities.startsAt} + ${activities.durationMinutes} * 60000 > ${Date.now()}`,
+    ),
+    orderBy: asc(activities.startsAt),
+  });
+}

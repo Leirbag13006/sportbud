@@ -32,6 +32,7 @@ const FIELD_ERROR_KEYS: Record<keyof ActivityFormValues, string> = {
   duration: "durationMinutes",
   spots: "spotsTotal",
   level: "requiredLevel",
+  address: "address",
   locationName: "locationName",
   description: "description",
 };
@@ -50,6 +51,8 @@ export interface ActivityFormValues {
   duration: string;
   spots: number;
   level: string;
+  /** Adresse exacte : remplie automatiquement quand l'épingle est placée, modifiable. */
+  address: string;
   locationName: string;
   description: string;
 }
@@ -65,6 +68,7 @@ export function createDefaultFormValues(): ActivityFormValues {
     duration: "60",
     spots: 1,
     level: "any",
+    address: "",
     locationName: "",
     description: "",
   };
@@ -86,7 +90,7 @@ export function CreateActivityForm({
   onEditLocation,
   onCreated,
 }: CreateActivityFormProps) {
-  const { sportType, date, time, duration, spots, level, locationName, description } = values;
+  const { sportType, date, time, duration, spots, level, address, locationName, description } = values;
   const [errors, setErrors] = useState<Record<string, string[] | undefined>>({});
   const [formError, setFormError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -109,6 +113,7 @@ export function CreateActivityForm({
     formData.set("durationMinutes", duration);
     formData.set("spotsTotal", String(spots));
     formData.set("requiredLevel", level);
+    formData.set("address", address);
     formData.set("locationName", locationName);
     formData.set("description", description);
     formData.set("lat", String(location[0]));
@@ -133,15 +138,30 @@ export function CreateActivityForm({
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pt-2 pb-4">
         <FormAlert message={formError} />
 
-        {/* Lieu choisi sur la carte */}
-        <div className="flex items-center gap-3 rounded-xl border bg-brand-soft/60 p-3">
-          <MapPin className="size-5 shrink-0 text-primary" aria-hidden />
-          <p className="flex-1 text-sm font-medium">Lieu placé sur la carte</p>
-          <Button type="button" variant="outline" size="sm" onClick={onEditLocation}>
-            Modifier
-          </Button>
-        </div>
-        {errors.lat && <p className="-mt-3 text-sm text-destructive">{errors.lat[0]}</p>}
+        {/* Lieu : épingle posée sur la carte + adresse exacte (pré-remplie, modifiable) */}
+        <FormField
+          id="address"
+          label="Adresse exacte"
+          errors={errors.address ?? errors.lat}
+          hint="Remplie automatiquement depuis l'épingle. Tu peux la préciser."
+          labelAction={
+            <Button type="button" variant="link" size="sm" className="h-auto p-0" onClick={onEditLocation}>
+              <MapPin aria-hidden />
+              Modifier sur la carte
+            </Button>
+          }
+        >
+          <Input
+            id="address"
+            value={address}
+            onChange={(event) => update("address", event.target.value)}
+            maxLength={200}
+            autoComplete="off"
+            placeholder="Ex. 10 Rue Paradis, 13001 Marseille"
+            aria-describedby="address-message"
+            className="h-10"
+          />
+        </FormField>
 
         <FormField id="sportType" label="Sport" errors={errors.sportType}>
           <Select

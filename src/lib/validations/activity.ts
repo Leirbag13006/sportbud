@@ -42,6 +42,7 @@ export const createActivitySchema = z.object({
     .enum([...SPORT_LEVEL_VALUES, "any"], "Choisis un niveau.")
     .transform((level) => (level === "any" ? null : level)),
   locationName: optionalText(120, "120 caractères maximum."),
+  address: optionalText(200, "200 caractères maximum."),
   description: optionalText(500, "500 caractères maximum."),
   lat: z.coerce.number({ error: "Place le lieu sur la carte." }).min(-90).max(90),
   lng: z.coerce.number({ error: "Place le lieu sur la carte." }).min(-180).max(180),

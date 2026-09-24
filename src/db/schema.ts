@@ -86,7 +86,10 @@ export const activities = sqliteTable(
       .references(() => users.id, { onDelete: "cascade" }),
     sportType: text("sport_type", { enum: SPORT_TYPE_VALUES }).notNull(),
     description: text("description"),
+    /** Nom libre du lieu (« City stade du parc »). */
     locationName: text("location_name"),
+    /** Adresse postale, issue du géocodage ou saisie par le créateur (200 car. max, validé par Zod). */
+    address: text("address"),
     lat: real("lat").notNull(),
     lng: real("lng").notNull(),
     startsAt: integer("starts_at", { mode: "timestamp_ms" }).notNull(),

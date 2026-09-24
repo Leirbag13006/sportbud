@@ -13,10 +13,13 @@ import {
   type ActivityFormValues,
 } from "@/components/activities/create-activity-form";
 import { CreateActivitySheet } from "@/components/activities/create-activity-sheet";
+import { AddressSearch } from "@/components/map/address-search";
 import { Button } from "@/components/ui/button";
 import { USER_ZOOM } from "@/config/map";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import type { ActivityWithCreator } from "@/lib/activities/types";
+import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
+import { reverseGeocode, type AddressSuggestion } from "@/lib/geocoding";
 import { cn } from "@/lib/utils";
 
 // Leaflet a besoin de `window` : la carte n'est rendue que dans le navigateur.
@@ -40,21 +43,44 @@ type Mode = "browse" | "pick" | "form";
 interface MapViewProps {
   activities: ActivityWithCreator[];
   currentUserId: string;
+  /** Candidatures de l'utilisateur, par activité. */
+  myApplications: Record<string, MyApplicationSummary>;
+  /** Candidatures reçues sur les activités de l'utilisateur. */
+  receivedApplications: ReceivedApplication[];
+  /** Activité à ouvrir au chargement (lien « Voir sur la carte »). */
+  initialSelectedId?: string;
 }
 
 /** Écran carte : géolocalisation, marqueurs, détail d'activité et création. */
-export function MapView({ activities, currentUserId }: MapViewProps) {
+export function MapView({
+  activities,
+  currentUserId,
+  myApplications,
+  receivedApplications,
+  initialSelectedId,
+}: MapViewProps) {
   const geolocation = useGeolocation();
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [mode, setMode] = useState<Mode>("browse");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const [draftLocation, setDraftLocation] = useState<[number, number] | null>(null);
   const [formValues, setFormValues] = useState<ActivityFormValues>(createDefaultFormValues);
+  const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const hasCenteredOnUser = useRef(false);
+  const geocodeAbortRef = useRef<AbortController | null>(null);
 
   const userPosition = geolocation.position;
   // Dérivé des données serveur : se met à jour quand la carte est rafraîchie.
   const selected = activities.find((activity) => activity.id === selectedId) ?? null;
+
+  // Activité demandée dans l'URL : la carte s'ouvre dessus plutôt que sur l'utilisateur.
+  useEffect(() => {
+    if (!map || !initialSelectedId || hasCenteredOnUser.current) return;
+    const target = activities.find((activity) => activity.id === initialSelectedId);
+    if (!target) return;
+    hasCenteredOnUser.current = true;
+    map.setView([target.lat, target.lng], 15);
+  }, [map, initialSelectedId, activities]);
 
   // Premier centrage automatique sur l'utilisateur dès que sa position est connue.
   useEffect(() => {
@@ -93,17 +119,51 @@ export function MapView({ activities, currentUserId }: MapViewProps) {
     [map],
   );
 
+  /**
+   * Déplace l'épingle et retrouve l'adresse correspondante (géocodage inverse).
+   * Une nouvelle position annule la recherche précédente encore en cours.
+   */
+  const moveDraftTo = useCallback((location: [number, number]) => {
+    setDraftLocation(location);
+    geocodeAbortRef.current?.abort();
+    const controller = new AbortController();
+    geocodeAbortRef.current = controller;
+    setIsResolvingAddress(true);
+
+    reverseGeocode(location, { signal: controller.signal })
+      .then((address) => {
+        if (!controller.signal.aborted) setFormValues((values) => ({ ...values, address: address ?? "" }));
+      })
+      .catch(() => {
+        // Service indisponible : l'utilisateur pourra saisir l'adresse lui-même dans le formulaire.
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsResolvingAddress(false);
+      });
+  }, []);
+
+  /** Adresse choisie dans la recherche : épingle posée dessus, adresse reprise telle quelle. */
+  const handleAddressSelect = (suggestion: AddressSuggestion) => {
+    geocodeAbortRef.current?.abort();
+    setIsResolvingAddress(false);
+    setDraftLocation(suggestion.position);
+    setFormValues((values) => ({ ...values, address: suggestion.label }));
+    map?.flyTo(suggestion.position, Math.max(map.getZoom(), 17), { duration: 0.8 });
+  };
+
   /** FAB « + » : passe en mode choix du lieu, épingle pré-placée au centre de la carte. */
   const startCreation = () => {
     setSelectedId(null);
     if (!draftLocation && map) {
       const center = map.getCenter();
-      setDraftLocation([center.lat, center.lng]);
+      moveDraftTo([center.lat, center.lng]);
     }
     setMode("pick");
   };
 
   const cancelCreation = () => {
+    geocodeAbortRef.current?.abort();
+    setIsResolvingAddress(false);
     setMode("browse");
     setDraftLocation(null);
   };
@@ -128,7 +188,7 @@ export function MapView({ activities, currentUserId }: MapViewProps) {
           selectedId={selectedId}
           onSelect={handleSelect}
           draftLocation={mode === "browse" ? null : draftLocation}
-          onDraftLocationChange={mode === "pick" ? setDraftLocation : undefined}
+          onDraftLocationChange={mode === "pick" ? moveDraftTo : undefined}
           onReady={setMap}
         />
       </div>
@@ -141,22 +201,47 @@ export function MapView({ activities, currentUserId }: MapViewProps) {
 
       {mode === "pick" && (
         <>
-          <div
-            role="status"
-            className="absolute inset-x-4 top-4 z-10 mx-auto flex max-w-md items-center gap-3 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur"
-          >
-            <MapPin className="size-5 shrink-0 text-primary" aria-hidden />
-            <p className="flex-1 text-sm">
-              <span className="font-medium">Où se passe l&apos;activité ?</span>
-              <br />
-              <span className="text-muted-foreground">Touche la carte ou déplace l&apos;épingle.</span>
-            </p>
-            <Button variant="ghost" size="icon-sm" onClick={cancelCreation} aria-label="Annuler la création">
-              <X />
-            </Button>
+          <div className="absolute inset-x-4 top-4 z-10 mx-auto max-w-md space-y-2.5 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur">
+            <div className="flex items-center gap-3">
+              <MapPin className="size-5 shrink-0 text-primary" aria-hidden />
+              <p className="flex-1 text-sm">
+                <span className="font-medium">Où se passe l&apos;activité ?</span>
+                <br />
+                <span className="text-muted-foreground">
+                  Cherche une adresse, touche la carte ou déplace l&apos;épingle.
+                </span>
+              </p>
+              <Button variant="ghost" size="icon-sm" onClick={cancelCreation} aria-label="Annuler la création">
+                <X />
+              </Button>
+            </div>
+            <AddressSearch
+              near={() => {
+                const center = map?.getCenter();
+                return center ? [center.lat, center.lng] : undefined;
+              }}
+              onSelect={handleAddressSelect}
+            />
           </div>
 
-          <div className="absolute inset-x-4 bottom-4 z-10 mx-auto max-w-md md:bottom-6">
+          <div className="absolute inset-x-4 bottom-4 z-10 mx-auto max-w-md space-y-2 md:bottom-6">
+            <p
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-2 rounded-lg border bg-background/95 px-3 py-2 text-sm shadow-md backdrop-blur"
+            >
+              {isResolvingAddress ? (
+                <>
+                  <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />
+                  <span className="text-muted-foreground">Recherche de l&apos;adresse…</span>
+                </>
+              ) : (
+                <>
+                  <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
+                  <span className="truncate">{formValues.address || "Adresse inconnue : tu pourras la saisir"}</span>
+                </>
+              )}
+            </p>
             <Button
               className="h-12 w-full text-base shadow-lg shadow-primary/30"
               disabled={!draftLocation}
@@ -187,6 +272,10 @@ export function MapView({ activities, currentUserId }: MapViewProps) {
       <ActivitySheet
         activity={mode === "browse" ? selected : null}
         currentUserId={currentUserId}
+        myApplication={selected ? (myApplications[selected.id] ?? null) : null}
+        receivedApplications={
+          selected ? receivedApplications.filter((application) => application.activityId === selected.id) : []
+        }
         onClose={() => setSelectedId(null)}
       />
 

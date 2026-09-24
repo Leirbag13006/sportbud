@@ -1,9 +1,9 @@
 import { MapPin, MessageCircle, User, type LucideIcon } from "lucide-react";
 
 /** Clés des onglets pouvant afficher un badge de notification. */
-export type NavBadgeKey = "messages";
+export type NavBadgeKey = "messages" | "profile";
 
-/** Compteurs de notifications par onglet (branchés sur Supabase Realtime à l'étape 6). */
+/** Compteurs de notifications par onglet (calculés côté serveur dans le layout). */
 export type NavBadges = Partial<Record<NavBadgeKey, number>>;
 
 export interface NavItem {
@@ -18,7 +18,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Carte", icon: MapPin },
   { href: "/messages", label: "Messages", icon: MessageCircle, badgeKey: "messages" },
-  { href: "/profile", label: "Profil", icon: User },
+  { href: "/profile", label: "Profil", icon: User, badgeKey: "profile" },
 ];
 
 /** Une entrée est active sur sa route exacte ou sur l'une de ses sous-routes. */
