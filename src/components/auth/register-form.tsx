@@ -1,6 +1,5 @@
 "use client";
 
-import { MailCheck } from "lucide-react";
 import Link from "next/link";
 import { useActionState } from "react";
 
@@ -14,31 +13,17 @@ import { Input } from "@/components/ui/input";
 
 export function RegisterForm() {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(register, {});
-
-  // Confirmation d'email activée : on remplace le formulaire par un message clair.
-  if (state.confirmationSentTo) {
-    return (
-      <div className="space-y-4 text-center">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-brand-soft text-primary">
-          <MailCheck className="size-7" aria-hidden />
-        </div>
-        <h2 className="text-lg font-semibold">Vérifie ta boîte mail</h2>
-        <p className="text-sm text-muted-foreground">
-          Un lien de confirmation a été envoyé à{" "}
-          <span className="font-medium text-foreground">{state.confirmationSentTo}</span>. Clique
-          dessus pour activer ton compte.
-        </p>
-        <Link href="/login" className="inline-block text-sm font-medium text-primary hover:underline">
-          Retour à la connexion
-        </Link>
-      </div>
-    );
-  }
-
   const errors = state.fieldErrors;
 
   return (
-    <form action={action} noValidate className="space-y-5">
+    <form
+      action={action}
+      noValidate
+      className="space-y-5"
+      // React réinitialise le formulaire après chaque envoi : on remonte les champs
+      // pour qu'ils repartent des valeurs renvoyées par le serveur (defaultValue).
+      key={JSON.stringify(state.values ?? {})}
+    >
       <FormAlert message={state.error} />
 
       <FormField id="fullName" label="Prénom et nom" errors={errors?.fullName}>

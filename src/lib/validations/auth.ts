@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { SPORT_LEVEL_VALUES } from "@/config/sport-levels";
+import { SPORT_LEVEL_VALUES } from "@/db/schema";
 
 const email = z
   .string()

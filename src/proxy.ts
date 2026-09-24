@@ -1,10 +1,35 @@
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-import { updateSession } from "@/lib/supabase/proxy";
+import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 
-/** Exécuté avant chaque requête : rafraîchit la session et protège les routes privées. */
-export async function proxy(request: NextRequest) {
-  return updateSession(request);
+/** Pages accessibles uniquement aux visiteurs non connectés. */
+const GUEST_ONLY_PATHS = ["/login", "/register"];
+/** Routes techniques d'authentification, accessibles dans tous les cas. */
+const AUTH_ROUTES_PREFIX = "/auth/";
+
+/**
+ * Vérification rapide, avant le rendu, basée sur la présence du cookie de session.
+ * Ce n'est qu'un premier filtre : la validité réelle de la session est contrôlée
+ * côté serveur (requireUser) dans chaque page et action protégée.
+ */
+export function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  if (pathname.startsWith(AUTH_ROUTES_PREFIX)) return NextResponse.next();
+
+  const hasSession = request.cookies.has(SESSION_COOKIE_NAME);
+  const isGuestOnly = GUEST_ONLY_PATHS.includes(pathname);
+
+  if (!hasSession && !isGuestOnly) {
+    const loginUrl = new URL("/login", request.url);
+    if (pathname !== "/") loginUrl.searchParams.set("next", `${pathname}${search}`);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (hasSession && isGuestOnly) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {

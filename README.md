@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SportBud
 
-## Getting Started
+Web app de mise en relation de partenaires de sport autour d'une carte interactive.
 
-First, run the development server:
+**Stack** : Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui · SQLite (Drizzle ORM + libSQL)
+
+## Lancer le projet
+
+Prérequis : Node.js 20 ou plus récent.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Puis ouvrir http://localhost:3000 et créer un compte.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+La base de données est un simple fichier `local.db` créé automatiquement à la racine
+(les migrations sont appliquées à chaque `npm run dev`). Aucune configuration n'est nécessaire.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Base de données
 
-## Learn More
+| Commande | Rôle |
+|---|---|
+| `npm run db:studio` | Explorer et modifier les données dans le navigateur (Drizzle Studio) |
+| `npm run db:reset` | Supprimer toutes les données et repartir d'une base vide |
+| `npm run db:generate` | Générer une migration SQL après une modification de `src/db/schema.ts` |
+| `npm run db:migrate` | Appliquer les migrations en attente |
 
-To learn more about Next.js, take a look at the following resources:
+Le schéma est défini dans `src/db/schema.ts`, les migrations SQL générées sont dans `drizzle/`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── (app)/          # Pages connectées : carte, messages, profil (+ navigation)
+│   ├── (auth)/         # Connexion, inscription et leurs Server Actions
+│   └── auth/           # Routes techniques (session expirée)
+├── components/         # Composants UI (ui/ = shadcn), formulaires, layout
+├── config/             # Navigation, niveaux sportifs…
+├── db/                 # Schéma Drizzle et connexion à la base
+├── lib/                # Authentification (sessions, mots de passe), validation Zod
+└── proxy.ts            # Redirections selon l'état de connexion
+```
 
-## Deploy on Vercel
+## Authentification
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Mots de passe hachés avec bcrypt, sessions stockées en base (jeton aléatoire dans un cookie
+`httpOnly`, seul son hash SHA-256 est enregistré), durée de 30 jours prolongée à l'usage.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Mise en ligne (optionnel)
+
+Un fichier SQLite ne fonctionne pas sur un hébergeur serverless (Vercel…). Créer une base
+[Turso](https://turso.tech) (gratuite) puis définir `DATABASE_URL` et `DATABASE_AUTH_TOKEN`
+(voir `.env.example`) : le code fonctionne sans modification.

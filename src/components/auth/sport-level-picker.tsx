@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SPORT_LEVELS } from "@/config/sport-levels";
-import type { SportLevel } from "@/types/database";
+import type { SportLevel } from "@/db/schema";
 
 interface SportLevelPickerProps {
   name: string;
