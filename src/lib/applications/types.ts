@@ -1,11 +1,12 @@
 import type { Activity, Application, PublicUser } from "@/db/schema";
 import type { ActivityWithCreator } from "@/lib/activities/types";
+import type { AchievementState } from "@/lib/achievements/definitions";
 import type { RatingSummary, ReviewItem } from "@/lib/reviews/types";
 
 /** Profil public d'un candidat, consultable par le créateur de l'activité. */
 export type ApplicantProfile = Pick<
   PublicUser,
-  "id" | "fullName" | "sportLevel" | "avatarUrl" | "bio" | "createdAt"
+  "id" | "fullName" | "sportLevel" | "avatarUrl" | "bio" | "createdAt" | "favoriteSports"
 >;
 
 /** Résumé de l'activité concernée par une candidature reçue. */
@@ -21,6 +22,8 @@ export type ReceivedApplication = Pick<
   /** Réputation du candidat (avis laissés par ses précédents organisateurs). */
   applicantRating: RatingSummary;
   applicantReviews: ReviewItem[];
+  /** Badges débloqués par le candidat. */
+  applicantBadges: AchievementState[];
 };
 
 /** Candidature envoyée par l'utilisateur, avec l'activité concernée. */

@@ -60,9 +60,9 @@ export function ConversationList({ initialConversations, selectedId, currentUser
                 <UserAvatar user={conversation.otherUser} className="size-12" />
                 <span
                   aria-hidden
-                  className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full bg-night-900 text-mint-500 ring-2 ring-background"
+                  className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full bg-card shadow-sm ring-2 ring-background"
                 >
-                  <SportIcon sport={conversation.activity.sportType} className="size-3.5" />
+                  <SportIcon sport={conversation.activity.sportType} className="size-4" />
                 </span>
               </div>
 

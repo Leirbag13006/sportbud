@@ -1,6 +1,6 @@
 import { divIcon } from "leaflet";
 
-import { SPORT_ICON_MARKUP, SPORT_ICON_SVG_ATTRS } from "@/components/brand/sport-icon";
+import { getEmojiSrc } from "@/components/brand/sport-icon";
 
 import type { ActivityWithCreator } from "@/lib/activities/types";
 import { getInitials } from "@/lib/format";
@@ -23,7 +23,7 @@ function escapeHtml(value: string) {
 
 /** Marqueur d'activité : pastille avec l'icône du sport et un badge du nombre de places restantes. */
 export function createActivityIcon(activity: ActivityWithCreator, selected: boolean) {
-  const icon = `<svg ${SPORT_ICON_SVG_ATTRS}>${SPORT_ICON_MARKUP[activity.sportType]}</svg>`;
+  const icon = `<img src="${getEmojiSrc(activity.sportType)}" alt="" width="26" height="26" draggable="false" />`;
   const isFull = activity.status !== "open";
   const badge = isFull ? "Complet" : String(activity.spotsAvailable);
 

@@ -29,6 +29,13 @@
       "when": 1790270070860,
       "tag": "0003_price_equipment_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790271047364,
+      "tag": "0004_profile_favorite_sports",
+      "breakpoints": true
     }
   ]
 }

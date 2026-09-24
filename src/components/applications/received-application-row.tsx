@@ -122,6 +122,7 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
         applicant={showProfile ? applicant : null}
         rating={application.applicantRating}
         reviews={application.applicantReviews}
+        badges={application.applicantBadges}
         onClose={() => setShowProfile(false)}
         actions={actions || undefined}
       />

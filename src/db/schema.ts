@@ -46,7 +46,10 @@ export const users = sqliteTable(
     fullName: text("full_name").notNull(),
     bio: text("bio"),
     sportLevel: text("sport_level", { enum: SPORT_LEVEL_VALUES }).notNull().default("beginner"),
+    /** Photo de profil : image WebP redimensionnée côté navigateur, stockée en data URL (~30 Ko). */
     avatarUrl: text("avatar_url"),
+    /** Sports favoris (5 max), affichés sur le profil. */
+    favoriteSports: text("favorite_sports", { mode: "json" }).$type<SportType[]>().notNull().default(sql`'[]'`),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

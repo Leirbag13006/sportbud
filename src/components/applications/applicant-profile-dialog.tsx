@@ -13,7 +13,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getSportLevelLabel } from "@/config/sport-levels";
+import { BadgeRow } from "@/components/achievements/achievements-grid";
+import { SportIcon } from "@/components/brand/sport-icon";
 import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
+import { getSport } from "@/config/sports";
+import type { AchievementState } from "@/lib/achievements/definitions";
 import { ReviewList } from "@/components/reviews/review-list";
 import type { ApplicantProfile } from "@/lib/applications/types";
 import type { RatingSummary, ReviewItem } from "@/lib/reviews/types";
@@ -26,13 +30,14 @@ interface ApplicantProfileDialogProps {
   /** Réputation : moyenne et derniers avis des précédents organisateurs. */
   rating: RatingSummary;
   reviews: ReviewItem[];
+  badges: AchievementState[];
   onClose: () => void;
   /** Boutons d'action affichés en bas (Accepter / Refuser). */
   actions?: ReactNode;
 }
 
 /** Profil public d'un candidat, consulté par le créateur avant de répondre. */
-export function ApplicantProfileDialog({ applicant, rating, reviews, onClose, actions }: ApplicantProfileDialogProps) {
+export function ApplicantProfileDialog({ applicant, rating, reviews, badges, onClose, actions }: ApplicantProfileDialogProps) {
   return (
     <Dialog open={applicant !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-sm">
@@ -53,6 +58,19 @@ export function ApplicantProfileDialog({ applicant, rating, reviews, onClose, ac
             <div className="flex justify-center">
               <RatingSummaryBadge rating={rating} />
             </div>
+
+            <BadgeRow achievements={badges} />
+
+            {applicant.favoriteSports.length > 0 && (
+              <ul className="flex flex-wrap justify-center gap-1.5" aria-label="Sports favoris">
+                {applicant.favoriteSports.map((sport) => (
+                  <li key={sport} className="flex items-center gap-1 rounded-full bg-muted py-0.5 pr-2.5 pl-1 text-xs font-medium text-ink">
+                    <SportIcon sport={sport} className="size-5" />
+                    {getSport(sport).label}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className="rounded-lg bg-muted/60 p-3">
               <p className="text-xs font-medium text-muted-foreground">Bio</p>

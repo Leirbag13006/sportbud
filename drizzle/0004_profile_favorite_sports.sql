@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `favorite_sports` text DEFAULT '[]' NOT NULL;

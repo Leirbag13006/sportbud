@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarCheck, CalendarDays, ChevronRight, LogOut, Mail } from "lucide-react";
+import { CalendarCheck, CalendarDays, ChevronRight, LogOut, Mail, Pencil } from "lucide-react";
 import Link from "next/link";
 
 import { logout } from "@/app/(auth)/actions";
@@ -7,6 +7,10 @@ import { UserAvatar } from "@/components/applications/user-avatar";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { getSportLevelLabel } from "@/config/sport-levels";
+import { AchievementsGrid } from "@/components/achievements/achievements-grid";
+import { SportIcon } from "@/components/brand/sport-icon";
+import { getSport } from "@/config/sports";
+import { getAchievements } from "@/lib/achievements/queries";
 import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
 import { ReviewList } from "@/components/reviews/review-list";
 import { requireUser } from "@/lib/auth/session";
@@ -19,7 +23,12 @@ const memberSince = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "num
 /** Profil de l'utilisateur connecté. */
 export default async function ProfilePage() {
   const user = await requireUser();
-  const [rating, reviews] = await Promise.all([getRatingSummary(user.id), getUserReviews(user.id)]);
+  const [rating, reviews, achievements] = await Promise.all([
+    getRatingSummary(user.id),
+    getUserReviews(user.id),
+    getAchievements(user.id),
+  ]);
+  const unlockedCount = achievements.filter((achievement) => achievement.unlocked).length;
 
   return (
     <>
@@ -28,6 +37,13 @@ export default async function ProfilePage() {
         accent="profil."
         description="Ce que les autres membres voient de toi."
         image="/images/friends-laughing.jpg"
+        action={
+          <Button variant="outline" className="shrink-0 text-mint-500" nativeButton={false} render={<Link href="/profile/edit" />}>
+            <Pencil aria-hidden />
+            <span className="hidden sm:inline">Modifier</span>
+            <span className="sr-only sm:hidden">Modifier mon profil</span>
+          </Button>
+        }
       />
 
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8 md:px-6">
@@ -56,11 +72,37 @@ export default async function ProfilePage() {
             </div>
           </div>
 
+          {user.favoriteSports.length > 0 && (
+            <ul className="mt-5 flex flex-wrap gap-2" aria-label="Sports favoris">
+              {user.favoriteSports.map((sport) => (
+                <li key={sport} className="flex items-center gap-1.5 rounded-full bg-sand-50 py-1 pr-3 pl-1.5 text-sm font-medium text-ink">
+                  <SportIcon sport={sport} className="size-5" />
+                  {getSport(sport).label}
+                </li>
+              ))}
+            </ul>
+          )}
+
           <div className="mt-5 border-t pt-4">
             <h3 className="text-sm font-bold">Bio</h3>
             <p className="mt-1 text-sm">
               {user.bio || "Pas encore de bio. Présente-toi pour rassurer tes futurs partenaires !"}
             </p>
+          </div>
+        </section>
+
+        {/* Succès (gamification) */}
+        <section aria-labelledby="achievements-title" className="rounded-card bg-card p-5 shadow-md">
+          <div className="flex items-end justify-between gap-4">
+            <h2 id="achievements-title" className="sl-bar text-lg font-extrabold">
+              Mes succès
+            </h2>
+            <p className="text-sm">
+              <span className="font-display font-bold text-ink">{unlockedCount}</span>/{achievements.length} débloqués
+            </p>
+          </div>
+          <div className="mt-5">
+            <AchievementsGrid achievements={achievements} />
           </div>
         </section>
 

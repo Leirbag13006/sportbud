@@ -199,7 +199,7 @@ export function CreateActivityForm({
             <SelectContent>
               {SPORTS.map((sport) => (
                 <SelectItem key={sport.value} value={sport.value}>
-                  <SportIcon sport={sport.value} className="size-4 text-mint-700" />
+                  <SportIcon sport={sport.value} className="size-5" />
                   {sport.label}
                 </SelectItem>
               ))}

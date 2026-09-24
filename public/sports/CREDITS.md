@@ -17,3 +17,7 @@ trouvées via [Openverse](https://openverse.org). Recadrées en 800×600.
 | climbing | Rock Climbing | Tommy Lisbin | [stocksnap](https://stocksnap.io/photo/rock-climbing-E6D29J6TG3) |
 | fitness | Man Workout | Bruce Mars | [stocksnap](https://stocksnap.io/photo/man-workout-KZROPA98J8) |
 | other | Athlete People | Keit Trysh | [stocksnap](https://stocksnap.io/photo/athlete-people-QD7UVUNUEK) |
+
+## Pictogrammes 3D
+
+Les pictogrammes de `public/emoji/` sont les [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) de Microsoft (licence MIT), redimensionnés en WebP 160 px.

@@ -120,7 +120,7 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
         />
         <div aria-hidden className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
         <span className="absolute bottom-3 left-4 flex items-center gap-1.5 rounded-full bg-night-950/80 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm">
-          <SportIcon sport={activity.sportType} className="size-4 text-mint-500" />
+          <SportIcon sport={activity.sportType} className="size-5" />
           {sport.label}
         </span>
       </div>

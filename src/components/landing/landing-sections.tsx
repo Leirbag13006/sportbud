@@ -3,18 +3,15 @@ import {
   Check,
   ChevronDown,
   Clock,
-  MessageCircle,
-  Search,
   ShieldCheck,
   Sparkles,
-  UserCheck,
   X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { SPORT_ICON_MARKUP, SPORT_ICON_SVG_ATTRS, SportIcon } from "@/components/brand/sport-icon";
+import { Emoji, getEmojiSrc, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { SPORTS } from "@/config/sports";
@@ -94,17 +91,17 @@ export function ShowcaseSection() {
 
 const STEPS = [
   {
-    icon: Search,
+    icon: "search" as const,
     title: "Trouve ta séance",
     text: "En liste ou sur la carte, filtre par sport, niveau, distance et date, puis trie par horaire ou par proximité.",
   },
   {
-    icon: UserCheck,
+    icon: "handshake" as const,
     title: "Rejoins en un clic",
     text: "L'organisateur valide ta demande. Dès que c'est bon, une discussion s'ouvre entre vous.",
   },
   {
-    icon: MessageCircle,
+    icon: "speech" as const,
     title: "Retrouvez-vous sur le terrain",
     text: "Calez les derniers détails, prends tes baskets… et profite. La suite se joue souvent autour d'un verre.",
   },
@@ -119,11 +116,11 @@ export function StepsSection() {
         </Reveal>
         <ol className="relative mt-14 grid gap-6 md:grid-cols-3">
           {/* Ligne menthe qui relie les étapes (desktop) */}
-          <span aria-hidden className="absolute top-8 right-[16%] left-[16%] hidden h-0.5 bg-mint-500/40 md:block" />
-          {STEPS.map(({ icon: Icon, title, text }, index) => (
+          <span aria-hidden className="absolute top-10 right-[16%] left-[16%] hidden h-0.5 bg-mint-500/40 md:block" />
+          {STEPS.map(({ icon, title, text }, index) => (
             <Reveal as="li" key={title} delay={index * 120} className="relative text-center">
-              <span className="relative mx-auto flex size-16 items-center justify-center rounded-full bg-night-900 text-mint-500 shadow-md ring-8 ring-sand-50">
-                <Icon className="size-7" strokeWidth={1.75} aria-hidden />
+              <span className="relative mx-auto flex size-20 items-center justify-center rounded-full bg-card shadow-md ring-8 ring-sand-50">
+                <Emoji name={icon} className="size-11" />
                 <span className="absolute -top-1 -right-1 flex size-6 items-center justify-center rounded-full bg-mint-500 font-display text-xs font-extrabold text-night-950">
                   {index + 1}
                 </span>
@@ -161,10 +158,10 @@ function MapMarker({ sport, spots, className }: { sport: SportType; spots: numbe
   return (
     <div className={`absolute ${className}`}>
       <div className="map-marker-activity">
-        <span
-          className="map-marker-activity__icon"
-          dangerouslySetInnerHTML={{ __html: `<svg ${SPORT_ICON_SVG_ATTRS}>${SPORT_ICON_MARKUP[sport]}</svg>` }}
-        />
+        <span className="map-marker-activity__icon">
+          {/* eslint-disable-next-line @next/next/no-img-element -- identique au marqueur HTML de Leaflet */}
+          <img src={getEmojiSrc(sport)} alt="" width={26} height={26} />
+        </span>
         <span className="map-marker-activity__badge">{spots}</span>
       </div>
     </div>
@@ -288,7 +285,7 @@ export function FeaturesSection() {
             <BentoCard className="h-full" title="Organise en 30 secondes" text="Sport, date, nombre de places, adresse trouvée automatiquement : ta séance est en ligne.">
               <div className="sl-light w-full max-w-xs space-y-2 rounded-card bg-card p-3 shadow-md">
                 <div className="flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm text-ink">
-                  <SportIcon sport="padel" className="size-4 text-mint-700" /> Padel
+                  <SportIcon sport="padel" className="size-5" /> Padel
                 </div>
                 <div className="flex gap-2">
                   <span className="flex flex-1 items-center gap-1.5 rounded-lg border border-input px-3 py-2 text-sm text-ink">
@@ -341,7 +338,9 @@ export function SportsSection() {
                 />
                 <div aria-hidden className="absolute inset-0 bg-linear-to-t from-night-950/90 via-night-950/10 to-transparent" />
                 <div className="absolute inset-x-3 bottom-3 flex items-center gap-2">
-                  <SportIcon sport={sport.value} className="size-5 text-mint-500" />
+                  <span className="flex size-9 items-center justify-center rounded-full bg-night-950/60 backdrop-blur-sm">
+                    <SportIcon sport={sport.value} className="size-6" />
+                  </span>
                   <span className="font-display text-sm font-bold text-white">{sport.label}</span>
                 </div>
               </div>

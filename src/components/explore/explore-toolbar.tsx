@@ -1,9 +1,9 @@
 "use client";
 
-import { LayoutGrid, List, Loader2, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
+import { List, Loader2, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { SportIcon } from "@/components/brand/sport-icon";
+import { Emoji, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
 import { SPORTS } from "@/config/sports";
 import type { SportType } from "@/db/schema";
@@ -118,14 +118,14 @@ export function ExploreToolbar({
           </div>
         </div>
 
-        {/* Pastilles de sports : cercles 48 px à contour menthe, l'actif est plein. */}
+        {/* Pastilles de sports : pictogramme 3D dans un cercle translucide, contour menthe + halo si actif. */}
         <div
           role="group"
           aria-label="Filtrer par sport"
           className="flex gap-4 overflow-x-auto px-4 pt-1 pb-1 [scrollbar-width:none] md:px-6 [&::-webkit-scrollbar]:hidden"
         >
           <SportChip label="Tous" selected={sport === null} onClick={() => onSportChange(null)}>
-            <LayoutGrid className="size-5" aria-hidden />
+            <Emoji name="sparkles" className="size-7" />
           </SportChip>
           {SPORTS.map((option) => (
             <SportChip
@@ -134,7 +134,7 @@ export function ExploreToolbar({
               selected={sport === option.value}
               onClick={() => onSportChange(sport === option.value ? null : option.value)}
             >
-              <SportIcon sport={option.value} className="size-5" />
+              <SportIcon sport={option.value} className="size-7" />
             </SportChip>
           ))}
         </div>
@@ -156,14 +156,14 @@ function SportChip({ label, selected, onClick, children }: SportChipProps) {
       type="button"
       aria-pressed={selected}
       onClick={onClick}
-      className="group flex w-14 shrink-0 flex-col items-center gap-1.5 outline-none"
+      className="group flex w-16 shrink-0 flex-col items-center gap-1.5 outline-none"
     >
       <span
         className={cn(
-          "flex size-12 items-center justify-center rounded-full border-2 border-mint-500 backdrop-blur-sm transition-all duration-150 ease-brand group-focus-visible:ring-3 group-focus-visible:ring-ring",
+          "flex size-14 items-center justify-center rounded-full border-2 backdrop-blur-sm transition-all duration-150 ease-brand group-focus-visible:ring-3 group-focus-visible:ring-ring [&>img]:transition-transform [&>img]:duration-150",
           selected
-            ? "bg-mint-500 text-night-950 shadow-glow"
-            : "bg-night-950/55 text-white group-hover:bg-night-800",
+            ? "border-mint-500 bg-mint-500/20 shadow-glow [&>img]:scale-110"
+            : "border-white/15 bg-white/[0.06] group-hover:border-white/35 group-hover:[&>img]:scale-110",
         )}
       >
         {children}
