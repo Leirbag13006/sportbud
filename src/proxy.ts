@@ -28,8 +28,11 @@ export function proxy(request: NextRequest) {
   const isGuestOnly = GUEST_ONLY_PATHS.includes(pathname);
 
   if (!hasSession && !isGuestOnly) {
+    // Visiteur sur l'accueil : landing orientée inscription.
+    if (pathname === "/") return NextResponse.redirect(new URL("/register", request.url));
+    // Lien vers une page précise (session expirée, lien partagé) : connexion puis retour.
     const loginUrl = new URL("/login", request.url);
-    if (pathname !== "/") loginUrl.searchParams.set("next", `${pathname}${search}`);
+    loginUrl.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
   }
 
