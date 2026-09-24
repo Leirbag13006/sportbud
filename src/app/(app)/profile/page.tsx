@@ -19,7 +19,12 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <PageHeader title="Mon" accent="profil." description="Ce que les autres membres voient de toi." />
+      <PageHeader
+        title="Mon"
+        accent="profil."
+        description="Ce que les autres membres voient de toi."
+        image="/images/friends-laughing.jpg"
+      />
 
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8 md:px-6">
         {/* Identité */}

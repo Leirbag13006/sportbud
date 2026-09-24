@@ -6,14 +6,12 @@ export const metadata: Metadata = { title: "Inscription" };
 
 export default function RegisterPage() {
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <h1 className="sl-bar text-3xl font-extrabold">
+    <div className="space-y-6">
+      <div className="space-y-1.5">
+        <h2 className="sl-bar text-2xl font-extrabold">
           Rejoins la <span className="text-brand-text">communauté.</span>
-        </h1>
-        <p className="text-sm">
-          Crée ton compte et trouve des partenaires près de chez toi.
-        </p>
+        </h2>
+        <p className="pt-1 text-sm">Crée ton compte gratuitement en une minute.</p>
       </div>
       <RegisterForm />
     </div>

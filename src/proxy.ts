@@ -4,6 +4,8 @@ import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 
 /** Pages accessibles uniquement aux visiteurs non connectés. */
 const GUEST_ONLY_PATHS = ["/login", "/register"];
+/** Pages publiques (accessibles connecté ou non). */
+const PUBLIC_PATHS = ["/credits"];
 /** Routes techniques d'authentification, accessibles dans tous les cas. */
 const AUTH_ROUTES_PREFIX = "/auth/";
 
@@ -20,6 +22,9 @@ export function proxy(request: NextRequest) {
 
   // API : pas de redirection HTML, les routes répondent elles-mêmes 401 si besoin.
   if (pathname.startsWith("/api/")) return NextResponse.next();
+
+  // Pages publiques, accessibles connecté ou non.
+  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
   const isGuestOnly = GUEST_ONLY_PATHS.includes(pathname);
 
   if (!hasSession && !isGuestOnly) {

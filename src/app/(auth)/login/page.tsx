@@ -10,12 +10,12 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const safeNext = getSafeRedirectPath(next, "");
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <h1 className="sl-bar text-3xl font-extrabold">
+    <div className="space-y-6">
+      <div className="space-y-1.5">
+        <h2 className="sl-bar text-2xl font-extrabold">
           Content de te <span className="text-brand-text">revoir.</span>
-        </h1>
-        <p className="text-sm">Connecte-toi pour retrouver tes activités.</p>
+        </h2>
+        <p className="pt-1 text-sm">Connecte-toi pour retrouver tes séances et tes partenaires.</p>
       </div>
       <LoginForm next={safeNext || undefined} />
     </div>

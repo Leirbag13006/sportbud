@@ -160,6 +160,14 @@
   .sl-dark :is(h1, h2, h3, h4) {
     color: #fff;
   }
+
+  /* Bloc clair posé dans une section sombre (carte de formulaire…) : couleurs du fond clair. */
+  .sl-light {
+    color: var(--color-gray-600);
+  }
+  .sl-dark .sl-light :is(h1, h2, h3, h4) {
+    color: var(--color-ink);
+  }
 }
 
 /* -----------------------------------------------------------------------------
@@ -430,4 +438,30 @@
 /* Mode « choix du lieu » : curseur de visée sur la carte. */
 .map-picking .leaflet-container {
   cursor: crosshair;
+}
+
+/* -----------------------------------------------------------------------------
+   Apparition au défilement (landing) : fondu + translation 16 px, léger décalage.
+   Désactivée si l'utilisateur préfère réduire les animations.
+   -------------------------------------------------------------------------- */
+.sl-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 600ms var(--ease-brand),
+    transform 600ms var(--ease-brand);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.sl-reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

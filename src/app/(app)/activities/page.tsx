@@ -31,6 +31,7 @@ export default async function ActivitiesPage() {
         title="Mes"
         accent="activités."
         description="Tes séances, tes partenaires et les candidatures à traiter."
+        image="/images/team-huddle.jpg"
       />
 
       <div className="mx-auto w-full max-w-3xl space-y-10 px-4 py-8 md:px-6">
