@@ -144,23 +144,18 @@ export function FiltersSheet({
             ))}
           </FilterGroup>
 
-          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border p-3">
-            <span className="text-sm">
-              <span className="font-medium">Places disponibles uniquement</span>
-              <span className="block text-muted-foreground">Masquer les activités complètes</span>
-            </span>
-            <input
-              type="checkbox"
-              checked={filters.onlyAvailable}
-              onChange={(event) => set("onlyAvailable", event.target.checked)}
-              className="peer sr-only"
-            />
-            {/* Interrupteur visuel, piloté par la case à cocher native (accessible au clavier). */}
-            <span
-              aria-hidden
-              className="relative h-6 w-11 shrink-0 rounded-full bg-muted-foreground/30 transition-colors peer-checked:bg-primary peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50 after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5"
-            />
-          </label>
+          <ToggleRow
+            title="Places disponibles uniquement"
+            description="Masquer les activités complètes"
+            checked={filters.onlyAvailable}
+            onChange={(checked) => set("onlyAvailable", checked)}
+          />
+          <ToggleRow
+            title="Gratuites uniquement"
+            description="Masquer les séances payantes (terrain, court…)"
+            checked={filters.onlyFree}
+            onChange={(checked) => set("onlyFree", checked)}
+          />
         </div>
 
         <DrawerFooter className="flex-row gap-2 border-t pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -205,6 +200,30 @@ function Chip({ name, checked, disabled, onChange, children }: ChipProps) {
     >
       <input type="radio" name={name} checked={checked} disabled={disabled} onChange={onChange} className="sr-only" />
       {children}
+    </label>
+  );
+}
+
+interface ToggleRowProps {
+  title: string;
+  description: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}
+
+/** Interrupteur on / off piloté par une case à cocher native (accessible au clavier). */
+function ToggleRow({ title, description, checked, onChange }: ToggleRowProps) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-card border p-3">
+      <span className="text-sm">
+        <span className="font-medium text-ink">{title}</span>
+        <span className="block">{description}</span>
+      </span>
+      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="peer sr-only" />
+      <span
+        aria-hidden
+        className="relative h-6 w-11 shrink-0 rounded-full bg-gray-400/40 transition-colors peer-checked:bg-mint-500 peer-focus-visible:ring-3 peer-focus-visible:ring-ring after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5"
+      />
     </label>
   );
 }

@@ -24,14 +24,16 @@ type DemoSeed = {
   distanceKm: number;
   organizer: string;
   participants: string[];
+  priceCents: number;
+  equipmentRequired: boolean;
 };
 
 /** Annonces d'exemple (illustration de l'interface, pas des données réelles). */
 const SEEDS: DemoSeed[] = [
-  { sportType: "football", spots: 2, level: "intermediate", day: 0, hour: 19, distanceKm: 1.2, organizer: "Karim B.", participants: ["Léa M.", "Hugo R."] },
-  { sportType: "tennis", spots: 1, level: "beginner", day: 1, hour: 18, distanceKm: 2.8, organizer: "Julie M.", participants: [] },
-  { sportType: "running", spots: 4, level: null, day: 3, hour: 9, distanceKm: 3.5, organizer: "Thomas N.", participants: ["Inès F.", "Nora K.", "Sam D.", "Lou P."] },
-  { sportType: "padel", spots: 2, level: "intermediate", day: 2, hour: 20, distanceKm: 4.1, organizer: "Lucas G.", participants: ["Emma T."] },
+  { sportType: "football", spots: 2, level: "intermediate", day: 0, hour: 19, distanceKm: 1.2, organizer: "Karim B.", participants: ["Léa M.", "Hugo R."], priceCents: 800, equipmentRequired: false },
+  { sportType: "tennis", spots: 1, level: "beginner", day: 1, hour: 18, distanceKm: 2.8, organizer: "Julie M.", participants: [], priceCents: 0, equipmentRequired: true },
+  { sportType: "running", spots: 4, level: null, day: 3, hour: 9, distanceKm: 3.5, organizer: "Thomas N.", participants: ["Inès F.", "Nora K.", "Sam D.", "Lou P."], priceCents: 0, equipmentRequired: false },
+  { sportType: "padel", spots: 2, level: "intermediate", day: 2, hour: 20, distanceKm: 4.1, organizer: "Lucas G.", participants: ["Emma T."], priceCents: 1000, equipmentRequired: false },
 ];
 
 function toActivity(seed: DemoSeed, index: number): ExploreActivity {
@@ -45,6 +47,9 @@ function toActivity(seed: DemoSeed, index: number): ExploreActivity {
     description: null,
     locationName: null,
     address: null,
+    priceCents: seed.priceCents,
+    equipmentRequired: seed.equipmentRequired,
+    equipmentNote: null,
     lat: 0,
     lng: 0,
     startsAt: at(seed.day, seed.hour),

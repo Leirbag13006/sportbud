@@ -14,6 +14,7 @@ export interface ExploreFilters {
   /** Activités accessibles à ce niveau (niveau requis identique ou « tous niveaux »). */
   level: SportLevel | null;
   onlyAvailable: boolean;
+  onlyFree: boolean;
   sort: SortOrder;
 }
 
@@ -23,6 +24,7 @@ export const DEFAULT_FILTERS: ExploreFilters = {
   when: "all",
   level: null,
   onlyAvailable: false,
+  onlyFree: false,
   sort: "date",
 };
 
@@ -43,6 +45,7 @@ export function countActiveFilters(filters: ExploreFilters) {
     filters.when !== "all",
     filters.level !== null,
     filters.onlyAvailable,
+    filters.onlyFree,
   ].filter(Boolean).length;
 }
 
@@ -97,6 +100,7 @@ export function applyFilters(
     .filter(({ activity, distanceKm: distance }) => {
       if (filters.sport && activity.sportType !== filters.sport) return false;
       if (filters.onlyAvailable && activity.status !== "open") return false;
+      if (filters.onlyFree && activity.priceCents > 0) return false;
       if (filters.level && activity.requiredLevel && activity.requiredLevel !== filters.level) return false;
       if (filters.maxDistanceKm !== null && distance !== null && distance > filters.maxDistanceKm) return false;
       return matchesWhen(activity.startsAt, filters.when, now);

@@ -5,6 +5,7 @@ import { and, count, desc, eq, inArray, isNull, ne, or } from "drizzle-orm";
 import { db } from "@/db";
 import { activities, applications, messages, type Message } from "@/db/schema";
 import { countPendingReceivedApplications } from "@/lib/applications/queries";
+import { countReviewsToWrite } from "@/lib/reviews/queries";
 import type {
   ConversationDTO,
   ConversationSummaryDTO,
@@ -147,7 +148,7 @@ export async function getNotifications(userId: string): Promise<NotificationsDTO
     inArray(messages.applicationId, db.select({ id: applications.id }).from(applications).where(conversationAccess(userId))),
   );
 
-  const [[unread], latest, pendingApplications] = await Promise.all([
+  const [[unread], latest, pendingApplications, reviewsToWrite] = await Promise.all([
     db.select({ value: count() }).from(messages).where(unreadWhere),
     db.query.messages.findFirst({
       columns: { id: true, applicationId: true, content: true },
@@ -156,11 +157,13 @@ export async function getNotifications(userId: string): Promise<NotificationsDTO
       orderBy: [desc(messages.createdAt)],
     }),
     countPendingReceivedApplications(userId),
+    countReviewsToWrite(userId),
   ]);
 
   return {
     unreadMessages: unread?.value ?? 0,
     pendingApplications,
+    reviewsToWrite,
     latestUnread: latest
       ? {
           id: latest.id,

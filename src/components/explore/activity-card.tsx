@@ -13,7 +13,7 @@ import { getActivityTitle, getSport } from "@/config/sports";
 import type { ExploreActivity } from "@/lib/activities/types";
 import { applyToActivity } from "@/lib/applications/actions";
 import type { MyApplicationSummary } from "@/lib/applications/types";
-import { formatDay, formatHour } from "@/lib/format";
+import { formatDay, formatHour, formatPrice } from "@/lib/format";
 import { formatDistance } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +68,15 @@ export function ActivityCard({
           priority={priority}
           className={cn("object-cover transition-transform duration-300 group-hover:scale-105", isFull && "grayscale")}
         />
+        {/* Prix par personne, lisible d'un coup d'œil */}
+        <span
+          className={cn(
+            "absolute top-1.5 left-1.5 rounded-md px-1.5 py-0.5 font-display text-[11px] font-extrabold shadow-sm",
+            activity.priceCents > 0 ? "bg-night-950/85 text-white" : "bg-mint-500 text-night-950",
+          )}
+        >
+          {formatPrice(activity.priceCents)}
+        </span>
         {isFull && (
           <span className="absolute inset-x-0 bottom-0 bg-night-950/75 py-0.5 text-center font-display text-[11px] font-bold text-white">
             Complet

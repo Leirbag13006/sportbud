@@ -1,6 +1,20 @@
 "use client";
 
-import { CalendarDays, Check, Gauge, Loader2, Map as MapIcon, MapPin, MessageCircle, Navigation, Timer, Users, X } from "lucide-react";
+import {
+  Backpack,
+  CalendarDays,
+  Check,
+  Euro,
+  Gauge,
+  Loader2,
+  Map as MapIcon,
+  MapPin,
+  MessageCircle,
+  Navigation,
+  Timer,
+  Users,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTransition, type ReactNode } from "react";
@@ -27,7 +41,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import type { ActivityWithCreator } from "@/lib/activities/types";
 import { applyToActivity, withdrawApplication } from "@/lib/applications/actions";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
-import { formatDay, formatDuration, formatTime, pluralize } from "@/lib/format";
+import { formatDay, formatDuration, formatPrice, formatTime, pluralize } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface ActivitySheetProps {
@@ -160,6 +174,28 @@ function ActivityDetails({ activity, isOwn, myApplication, receivedApplications,
           </DetailItem>
           <DetailItem icon={Users} label="Places">
             {isOpen ? `${pluralize(activity.spotsAvailable, "restante")} / ${activity.spotsTotal}` : "Complet"}
+          </DetailItem>
+          <DetailItem icon={Euro} label="Prix par personne">
+            {activity.priceCents > 0 ? (
+              <>
+                {formatPrice(activity.priceCents)}
+                <span className="block text-xs font-normal text-gray-400">À régler sur place</span>
+              </>
+            ) : (
+              "Gratuit"
+            )}
+          </DetailItem>
+          <DetailItem icon={Backpack} label="Matériel">
+            {activity.equipmentRequired ? (
+              <>
+                À apporter
+                {activity.equipmentNote && (
+                  <span className="block text-xs font-normal text-gray-400">{activity.equipmentNote}</span>
+                )}
+              </>
+            ) : (
+              "Fourni / rien à apporter"
+            )}
           </DetailItem>
         </dl>
 

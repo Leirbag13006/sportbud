@@ -1,5 +1,6 @@
 import type { Activity, Application, PublicUser } from "@/db/schema";
 import type { ActivityWithCreator } from "@/lib/activities/types";
+import type { RatingSummary, ReviewItem } from "@/lib/reviews/types";
 
 /** Profil public d'un candidat, consultable par le créateur de l'activité. */
 export type ApplicantProfile = Pick<
@@ -14,7 +15,13 @@ export type ActivitySummary = Pick<Activity, "id" | "sportType" | "startsAt" | "
 export type ReceivedApplication = Pick<
   Application,
   "id" | "activityId" | "status" | "message" | "createdAt"
-> & { applicant: ApplicantProfile; activity: ActivitySummary };
+> & {
+  applicant: ApplicantProfile;
+  activity: ActivitySummary;
+  /** Réputation du candidat (avis laissés par ses précédents organisateurs). */
+  applicantRating: RatingSummary;
+  applicantReviews: ReviewItem[];
+};
 
 /** Candidature envoyée par l'utilisateur, avec l'activité concernée. */
 export type SentApplication = Pick<Application, "id" | "activityId" | "status" | "createdAt"> & {

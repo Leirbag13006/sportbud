@@ -46,6 +46,15 @@ export function getInitials(fullName: string) {
     .join("");
 }
 
+const wholeEuros = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const centsEuros = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2 });
+
+/** « Gratuit », « 8 € », « 7,50 € ». */
+export function formatPrice(cents: number) {
+  if (cents <= 0) return "Gratuit";
+  return cents % 100 === 0 ? wholeEuros.format(cents / 100) : centsEuros.format(cents / 100);
+}
+
 /** « 1 place », « 3 places ». */
 export function pluralize(count: number, singular: string, plural = `${singular}s`) {
   return `${count} ${count > 1 ? plural : singular}`;

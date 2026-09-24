@@ -61,7 +61,8 @@ export function AppNavigation({ initialNotifications, children }: AppNavigationP
     }
   }, [data, pathname, router]);
 
-  const badges = { messages: data.unreadMessages, activities: data.pendingApplications };
+  // Activités : candidatures à traiter + participants à noter.
+  const badges = { messages: data.unreadMessages, activities: data.pendingApplications + (data.reviewsToWrite ?? 0) };
 
   return (
     <div className="flex h-dvh flex-col bg-background">

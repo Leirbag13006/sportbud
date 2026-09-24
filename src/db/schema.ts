@@ -92,6 +92,12 @@ export const activities = sqliteTable(
     locationName: text("location_name"),
     /** Adresse postale, issue du géocodage ou saisie par le créateur (200 car. max, validé par Zod). */
     address: text("address"),
+    /** Prix par personne en centimes (0 = gratuit). Réglé directement à l'organisateur. */
+    priceCents: integer("price_cents").notNull().default(0),
+    /** Vrai si chaque participant doit apporter son matériel. */
+    equipmentRequired: integer("equipment_required", { mode: "boolean" }).notNull().default(false),
+    /** Précision sur le matériel (« raquette + chaussures de salle »), 120 car. max (validé par Zod). */
+    equipmentNote: text("equipment_note"),
     lat: real("lat").notNull(),
     lng: real("lng").notNull(),
     startsAt: integer("starts_at", { mode: "timestamp_ms" }).notNull(),
@@ -157,6 +163,40 @@ export const applications = sqliteTable(
 );
 
 // -----------------------------------------------------------------------------
+// Avis : l'organisateur note chaque participant après la séance (1 à 5 étoiles + commentaire)
+// -----------------------------------------------------------------------------
+
+export const reviews = sqliteTable(
+  "reviews",
+  {
+    id: id(),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activities.id, { onDelete: "cascade" }),
+    /** Auteur de l'avis (l'organisateur). */
+    reviewerId: text("reviewer_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** Membre noté (un participant accepté). */
+    revieweeId: text("reviewee_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    rating: integer("rating").notNull(),
+    comment: text("comment"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    // Un seul avis par participant et par séance.
+    uniqueIndex("reviews_activity_reviewee_unique").on(t.activityId, t.revieweeId),
+    index("reviews_reviewee_id_idx").on(t.revieweeId),
+    check("reviews_rating_range", sql`${t.rating} between 1 and 5`),
+    check("reviews_comment_length", sql`${t.comment} is null or length(${t.comment}) <= 500`),
+    check("reviews_not_self", sql`${t.reviewerId} <> ${t.revieweeId}`),
+  ],
+);
+
+// -----------------------------------------------------------------------------
 // Messages (une conversation = une candidature acceptée, entre créateur et candidat)
 // -----------------------------------------------------------------------------
 
@@ -190,6 +230,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   activities: many(activities),
   applications: many(applications),
   sessions: many(sessions),
+  reviewsReceived: many(reviews, { relationName: "reviewee" }),
+  reviewsWritten: many(reviews, { relationName: "reviewer" }),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  activity: one(activities, { fields: [reviews.activityId], references: [activities.id] }),
+  reviewer: one(users, { fields: [reviews.reviewerId], references: [users.id], relationName: "reviewer" }),
+  reviewee: one(users, { fields: [reviews.revieweeId], references: [users.id], relationName: "reviewee" }),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -199,6 +247,7 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 export const activitiesRelations = relations(activities, ({ one, many }) => ({
   creator: one(users, { fields: [activities.creatorId], references: [users.id] }),
   applications: many(applications),
+  reviews: many(reviews),
 }));
 
 export const applicationsRelations = relations(applications, ({ one, many }) => ({
@@ -222,6 +271,7 @@ export type PublicUser = Omit<User, "passwordHash">;
 export type Activity = typeof activities.$inferSelect;
 export type Application = typeof applications.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type Review = typeof reviews.$inferSelect;
 
 export type SportLevel = (typeof SPORT_LEVEL_VALUES)[number];
 export type SportType = (typeof SPORT_TYPE_VALUES)[number];

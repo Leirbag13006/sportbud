@@ -4,6 +4,8 @@ import { and, asc, count, desc, eq, inArray, ne, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { activities, applications } from "@/db/schema";
+import { getRatingSummaries, getRecentReviewsByUser } from "@/lib/reviews/queries";
+import { NO_RATING } from "@/lib/reviews/types";
 import type { MyApplicationSummary, ReceivedApplication, SentApplication } from "./types";
 
 const applicantColumns = {
@@ -51,8 +53,20 @@ export async function getReceivedApplications(userId: string): Promise<ReceivedA
     orderBy: [asc(applications.createdAt)],
   });
 
+  const applicantIds = rows.map((row) => row.applicant.id);
+  const [ratings, recentReviews] = await Promise.all([
+    getRatingSummaries(applicantIds),
+    getRecentReviewsByUser(applicantIds),
+  ]);
+
   const order = { pending: 0, accepted: 1, rejected: 2 } as const;
-  return rows.sort((a, b) => order[a.status] - order[b.status]);
+  return rows
+    .map((row) => ({
+      ...row,
+      applicantRating: ratings[row.applicant.id] ?? NO_RATING,
+      applicantReviews: recentReviews[row.applicant.id] ?? [],
+    }))
+    .sort((a, b) => order[a.status] - order[b.status]);
 }
 
 /** Nombre de candidatures en attente de réponse (badge de navigation). */

@@ -49,6 +49,8 @@ export interface ConversationWithMessagesDTO {
 export interface NotificationsDTO {
   unreadMessages: number;
   pendingApplications: number;
+  /** Participants de séances terminées que l'utilisateur n'a pas encore notés. */
+  reviewsToWrite: number;
   /** Dernier message non lu, pour la notification toast. */
   latestUnread: { id: string; conversationId: string; senderName: string; preview: string } | null;
 }

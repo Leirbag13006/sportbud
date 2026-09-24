@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getSportLevelLabel } from "@/config/sport-levels";
 import { respondToApplication } from "@/lib/applications/actions";
 import type { ReceivedApplication } from "@/lib/applications/types";
+import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
 import { ApplicantProfileDialog } from "./applicant-profile-dialog";
 import { ApplicationStatusBadge } from "./application-status-badge";
 import { UserAvatar } from "./user-avatar";
@@ -93,6 +94,7 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
           <span className="block truncate text-xs text-muted-foreground">
             {context ?? getSportLevelLabel(applicant.sportLevel)} · Voir le profil
           </span>
+          <RatingSummaryBadge rating={application.applicantRating} className="mt-0.5" />
         </span>
       </button>
 
@@ -118,6 +120,8 @@ export function ReceivedApplicationRow({ application, isFull, context }: Receive
 
       <ApplicantProfileDialog
         applicant={showProfile ? applicant : null}
+        rating={application.applicantRating}
+        reviews={application.applicantReviews}
         onClose={() => setShowProfile(false)}
         actions={actions || undefined}
       />

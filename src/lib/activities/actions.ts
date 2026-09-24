@@ -33,7 +33,7 @@ export async function createActivity(formData: FormData): Promise<CreateActivity
     };
   }
 
-  const { lat, lng, spotsTotal, ...rest } = parsed.data;
+  const { lat, lng, spotsTotal, price, equipmentRequired, equipmentNote, ...rest } = parsed.data;
   const [activity] = await db
     .insert(activities)
     .values({
@@ -44,6 +44,10 @@ export async function createActivity(formData: FormData): Promise<CreateActivity
       lng: Number(lng.toFixed(6)),
       spotsTotal,
       spotsAvailable: spotsTotal,
+      priceCents: price,
+      equipmentRequired,
+      // La précision n'a de sens que si du matériel est à apporter.
+      equipmentNote: equipmentRequired ? equipmentNote : null,
       status: "open",
     })
     .returning({ id: activities.id });

@@ -7,7 +7,10 @@ import { UserAvatar } from "@/components/applications/user-avatar";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { getSportLevelLabel } from "@/config/sport-levels";
+import { RatingSummaryBadge } from "@/components/reviews/rating-stars";
+import { ReviewList } from "@/components/reviews/review-list";
 import { requireUser } from "@/lib/auth/session";
+import { getRatingSummary, getUserReviews } from "@/lib/reviews/queries";
 
 export const metadata: Metadata = { title: "Profil" };
 
@@ -16,6 +19,7 @@ const memberSince = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "num
 /** Profil de l'utilisateur connecté. */
 export default async function ProfilePage() {
   const user = await requireUser();
+  const [rating, reviews] = await Promise.all([getRatingSummary(user.id), getUserReviews(user.id)]);
 
   return (
     <>
@@ -38,6 +42,7 @@ export default async function ProfilePage() {
                   {getSportLevelLabel(user.sportLevel)}
                 </span>
               </div>
+              <RatingSummaryBadge rating={rating} />
               <ul className="space-y-1 text-sm">
                 <li className="flex items-center justify-center gap-2 sm:justify-start">
                   <Mail className="size-4 text-gray-400" aria-hidden />
@@ -57,6 +62,18 @@ export default async function ProfilePage() {
               {user.bio || "Pas encore de bio. Présente-toi pour rassurer tes futurs partenaires !"}
             </p>
           </div>
+        </section>
+
+        {/* Réputation : avis laissés par les organisateurs des séances rejointes */}
+        <section aria-labelledby="reputation-title" className="rounded-card bg-card p-5 shadow-md">
+          <h2 id="reputation-title" className="sl-bar text-lg font-extrabold">
+            Ma réputation
+          </h2>
+          <p className="mt-4 mb-4 text-sm">
+            Après chaque séance, l&apos;organisateur peut te laisser une note. Elle aide les autres à t&apos;accepter
+            dans leurs activités.
+          </p>
+          <ReviewList reviews={reviews} emptyMessage="Pas encore d'avis : participe à une séance pour en recevoir." />
         </section>
 
         <Link

@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { getSport } from "@/config/sports";
 import { getMyOrganizedActivities } from "@/lib/activities/queries";
 import { getReceivedApplications, getSentApplications } from "@/lib/applications/queries";
+import { getActivitiesToReview } from "@/lib/reviews/queries";
+import { ReviewForm } from "@/components/reviews/review-form";
 import { requireUser } from "@/lib/auth/session";
 import { formatDay, formatTime, pluralize } from "@/lib/format";
 
@@ -17,11 +19,16 @@ export const metadata: Metadata = { title: "Mes activités" };
 /** Tableau de bord : candidatures à traiter, activités organisées, candidatures envoyées. */
 export default async function ActivitiesPage() {
   const user = await requireUser();
-  const [organized, received, sent] = await Promise.all([
+  const [organized, received, sent, toReview] = await Promise.all([
     getMyOrganizedActivities(user.id),
     getReceivedApplications(user.id),
     getSentApplications(user.id),
+    getActivitiesToReview(user.id),
   ]);
+  const reviewsLeft = toReview.reduce(
+    (total, activity) => total + activity.participants.filter((participant) => !participant.review).length,
+    0,
+  );
 
   const pendingReceived = received.filter((application) => application.status === "pending");
 
@@ -35,6 +42,37 @@ export default async function ActivitiesPage() {
       />
 
       <div className="mx-auto w-full max-w-3xl space-y-10 px-4 py-8 md:px-6">
+        {toReview.length > 0 && (
+          <DashboardSection
+            id="to-review"
+            title="Séances terminées : note tes partenaires"
+            count={reviewsLeft}
+            isEmpty={false}
+            emptyMessage=""
+          >
+            <p className="-mt-1 text-sm">
+              Ton avis aide toute la communauté à choisir ses partenaires. Il reste visible sur leur profil.
+            </p>
+            <ul className="space-y-6">
+              {toReview.map((activity) => {
+                const sport = getSport(activity.sportType);
+                return (
+                  <li key={activity.id} className="space-y-2">
+                    <p className="font-display text-sm font-bold text-ink">
+                      {sport.label} · {formatDay(activity.startsAt)} à {formatTime(activity.startsAt)}
+                    </p>
+                    <div className="space-y-2">
+                      {activity.participants.map((participant) => (
+                        <ReviewForm key={participant.user.id} activityId={activity.id} participant={participant} />
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </DashboardSection>
+        )}
+
         <DashboardSection
           id="pending-applications"
           title="Candidatures à traiter"

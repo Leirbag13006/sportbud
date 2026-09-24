@@ -33,6 +33,10 @@ const FIELD_ERROR_KEYS: Record<keyof ActivityFormValues, string> = {
   duration: "durationMinutes",
   spots: "spotsTotal",
   level: "requiredLevel",
+  pricing: "price",
+  price: "price",
+  equipment: "equipmentRequired",
+  equipmentNote: "equipmentNote",
   address: "address",
   locationName: "locationName",
   description: "description",
@@ -52,6 +56,12 @@ export interface ActivityFormValues {
   duration: string;
   spots: number;
   level: string;
+  /** Séance gratuite ou payante (prix par personne en euros, saisi librement). */
+  pricing: "free" | "paid";
+  price: string;
+  /** Matériel fourni par l'organisateur (ou rien à apporter) / à apporter par chacun. */
+  equipment: "provided" | "bring";
+  equipmentNote: string;
   /** Adresse exacte : remplie automatiquement quand l'épingle est placée, modifiable. */
   address: string;
   locationName: string;
@@ -69,6 +79,10 @@ export function createDefaultFormValues(): ActivityFormValues {
     duration: "60",
     spots: 1,
     level: "any",
+    pricing: "free",
+    price: "",
+    equipment: "provided",
+    equipmentNote: "",
     address: "",
     locationName: "",
     description: "",
@@ -91,7 +105,8 @@ export function CreateActivityForm({
   onEditLocation,
   onCreated,
 }: CreateActivityFormProps) {
-  const { sportType, date, time, duration, spots, level, address, locationName, description } = values;
+  const { sportType, date, time, duration, spots, level, pricing, price, equipment, equipmentNote, address, locationName, description } =
+    values;
   const [errors, setErrors] = useState<Record<string, string[] | undefined>>({});
   const [formError, setFormError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -114,6 +129,9 @@ export function CreateActivityForm({
     formData.set("durationMinutes", duration);
     formData.set("spotsTotal", String(spots));
     formData.set("requiredLevel", level);
+    formData.set("price", pricing === "paid" ? price : "0");
+    formData.set("equipmentRequired", equipment === "bring" ? "yes" : "no");
+    formData.set("equipmentNote", equipment === "bring" ? equipmentNote : "");
     formData.set("address", address);
     formData.set("locationName", locationName);
     formData.set("description", description);
@@ -260,6 +278,72 @@ export function CreateActivityForm({
           </div>
         </fieldset>
 
+        {/* Prix par personne : gratuit, ou montant réglé directement à l'organisateur */}
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium">Prix par personne</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {(
+              [
+                ["free", "Gratuit"],
+                ["paid", "Payant"],
+              ] as const
+            ).map(([value, label]) => (
+              <ChoiceCard key={value} name="pricing" checked={pricing === value} onChange={() => update("pricing", value)}>
+                {label}
+              </ChoiceCard>
+            ))}
+          </div>
+          {pricing === "paid" && (
+            <FormField id="price" label="Montant par personne" errors={errors.price} hint="Terrain, location de court… à régler sur place.">
+              <div className="relative">
+                <Input
+                  id="price"
+                  inputMode="decimal"
+                  placeholder="8"
+                  value={price}
+                  onChange={(event) => update("price", event.target.value.replace(/[^\d.,]/g, ""))}
+                  aria-invalid={Boolean(errors.price)}
+                  aria-describedby="price-message"
+                  className="h-10 pr-10"
+                />
+                <span aria-hidden className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-400">
+                  €
+                </span>
+              </div>
+            </FormField>
+          )}
+        </fieldset>
+
+        {/* Matériel */}
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium">Matériel</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {(
+              [
+                ["provided", "Fourni / rien à apporter"],
+                ["bring", "À apporter"],
+              ] as const
+            ).map(([value, label]) => (
+              <ChoiceCard key={value} name="equipment" checked={equipment === value} onChange={() => update("equipment", value)}>
+                {label}
+              </ChoiceCard>
+            ))}
+          </div>
+          {equipment === "bring" && (
+            <FormField id="equipmentNote" label="Quoi apporter ? (facultatif)" errors={errors.equipmentNote}>
+              <Input
+                id="equipmentNote"
+                value={equipmentNote}
+                onChange={(event) => update("equipmentNote", event.target.value)}
+                maxLength={120}
+                placeholder="Ex. raquette et chaussures de salle"
+                aria-describedby="equipmentNote-message"
+                className="h-10"
+              />
+            </FormField>
+          )}
+        </fieldset>
+
         <FormField
           id="locationName"
           label="Nom du lieu (facultatif)"
@@ -344,5 +428,27 @@ function SpotsStepper({ value, onChange }: SpotsStepperProps) {
         <Plus />
       </Button>
     </div>
+  );
+}
+
+interface ChoiceCardProps {
+  name: string;
+  checked: boolean;
+  onChange: () => void;
+  children: React.ReactNode;
+}
+
+/** Choix exclusif en carte (bouton radio natif stylé, accessible au clavier). */
+function ChoiceCard({ name, checked, onChange, children }: ChoiceCardProps) {
+  return (
+    <label
+      className={cn(
+        "flex min-h-11 cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-center text-sm transition-colors hover:bg-muted has-focus-visible:ring-3 has-focus-visible:ring-ring",
+        checked && "border-mint-500 bg-mint-100 font-semibold text-mint-700 hover:bg-mint-100",
+      )}
+    >
+      <input type="radio" name={name} checked={checked} onChange={onChange} className="sr-only" />
+      {children}
+    </label>
   );
 }

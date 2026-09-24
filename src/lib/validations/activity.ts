@@ -7,6 +7,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export const MAX_DAYS_AHEAD = 60;
 /** Nombre maximum de partenaires recherchés pour une activité. */
 export const MAX_SPOTS = 20;
+/** Prix maximum par personne, en euros. */
+export const MAX_PRICE_EUROS = 200;
 
 /** Texte facultatif : chaîne vide → null. */
 const optionalText = (max: number, message: string) =>
@@ -44,6 +46,20 @@ export const createActivitySchema = z.object({
   locationName: optionalText(120, "120 caractères maximum."),
   address: optionalText(200, "200 caractères maximum."),
   description: optionalText(500, "500 caractères maximum."),
+  // Prix par personne saisi en euros (« 7,50 ») ; vide ou 0 = gratuit. Converti en centimes.
+  price: z
+    .string()
+    .trim()
+    .transform((value) => (value === "" ? 0 : Number(value.replace(",", "."))))
+    .pipe(
+      z
+        .number({ error: "Indique un prix valide." })
+        .min(0, "Le prix ne peut pas être négatif.")
+        .max(MAX_PRICE_EUROS, `${MAX_PRICE_EUROS} € maximum.`),
+    )
+    .transform((euros) => Math.round(euros * 100)),
+  equipmentRequired: z.enum(["yes", "no"]).transform((value) => value === "yes"),
+  equipmentNote: optionalText(120, "120 caractères maximum."),
   lat: z.coerce.number({ error: "Place le lieu sur la carte." }).min(-90).max(90),
   lng: z.coerce.number({ error: "Place le lieu sur la carte." }).min(-180).max(180),
 });
