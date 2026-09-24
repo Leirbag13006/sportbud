@@ -48,7 +48,6 @@ export function Scribble({ kind, className, stroke = 5, delay = 0 }: ScribblePro
         <path
           key={index}
           d={path}
-          pathLength={1}
           stroke="currentColor"
           strokeWidth={stroke}
           strokeLinecap="round"
