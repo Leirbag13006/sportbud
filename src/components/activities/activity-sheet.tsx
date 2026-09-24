@@ -155,7 +155,7 @@ function ActivityDetails({
           alt=""
           fill
           sizes="(min-width: 768px) 384px, 100vw"
-          className={cn("object-cover", !isOpen && "grayscale")}
+          className={cn("sl-photo object-cover", !isOpen && "opacity-60")}
         />
         <div aria-hidden className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
         <span className="absolute bottom-3 left-4 flex items-center gap-1.5 rounded-full bg-night-950/80 px-3 py-1 font-display text-sm font-bold text-white backdrop-blur-sm">

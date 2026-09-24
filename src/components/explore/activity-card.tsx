@@ -70,7 +70,7 @@ export function ActivityCard({
           fill
           sizes="112px"
           priority={priority}
-          className={cn("object-cover transition-transform duration-300 group-hover:scale-105", isFull && "grayscale")}
+          className={cn("sl-photo object-cover transition-transform duration-300 group-hover:scale-105", isFull && "opacity-50")}
         />
         {/* Prix par personne, lisible d'un coup d'œil */}
         <span

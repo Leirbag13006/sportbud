@@ -172,6 +172,20 @@
     color: #fff;
   }
 
+  /* Photos : noir et blanc contrasté partout (la couleur vient de l'interface : menthe, rose, bleu). */
+  /* Utilitaires de filtre Tailwind (et non « filter: … ») : ils se combinent avec blur-*, sans l'écraser. */
+  .sl-photo {
+    @apply brightness-[0.96] contrast-[1.12] grayscale;
+  }
+
+  /* Grain photo discret, posé par-dessus un fond (voir components/brand/photo-backdrop). */
+  .sl-grain {
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity: 0.09;
+  }
+
   /* Bloc clair posé dans une section sombre (carte de formulaire…) : couleurs du fond clair. */
   .sl-light {
     color: var(--color-gray-600);

@@ -12,6 +12,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AUDIENCE_BORDER_CLASSES, AudienceBadge } from "@/components/activities/audience-badge";
+import { PhotoBackdrop } from "@/components/brand/photo-backdrop";
 import { Emoji, getEmojiSrc, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
@@ -111,8 +112,9 @@ const STEPS = [
 
 export function StepsSection() {
   return (
-    <section id="fonctionnement" className="scroll-mt-20 bg-sand-50 pb-20 md:pb-28">
-      <Container>
+    <section id="fonctionnement" className="relative scroll-mt-20 overflow-hidden bg-sand-50 pt-16 pb-20 md:pt-20 md:pb-28">
+      <PhotoBackdrop src="/sports/running.jpg" tone="light" position="center 60%" />
+      <Container className="relative">
         <Reveal>
           <SectionTitle eyebrow="Comment ça marche" title="Du canapé au terrain" accent="en 3 étapes." center />
         </Reveal>
@@ -172,8 +174,9 @@ function MapMarker({ sport, spots, className }: { sport: SportType; spots: numbe
 
 export function FeaturesSection() {
   return (
-    <section id="fonctionnalites" className="sl-dark scroll-mt-20 py-20 md:py-28">
-      <Container>
+    <section id="fonctionnalites" className="sl-dark relative scroll-mt-20 overflow-hidden py-20 md:py-28">
+      <PhotoBackdrop src="/images/team-huddle.jpg" blur="md" veil="full" />
+      <Container className="relative">
         <Reveal>
           <SectionTitle
             eyebrow="Fonctionnalités"
@@ -368,9 +371,11 @@ export function SportsSection() {
                   alt=""
                   fill
                   sizes="(min-width: 1024px) 190px, (min-width: 640px) 33vw, 50vw"
-                  className="object-cover transition-transform duration-500 ease-brand group-hover:scale-105 motion-reduce:transition-none"
+                  className="sl-photo object-cover transition-transform duration-500 ease-brand group-hover:scale-105 motion-reduce:transition-none"
                 />
                 <div aria-hidden className="absolute inset-0 bg-linear-to-t from-night-950/90 via-night-950/10 to-transparent" />
+                <div aria-hidden className="absolute inset-0 bg-linear-to-t from-mint-500/35 to-transparent to-60% opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div aria-hidden className="sl-grain absolute inset-0" />
                 <div className="absolute inset-x-3 bottom-3 flex items-center gap-2">
                   <span className="flex size-9 items-center justify-center rounded-full bg-night-950/60 backdrop-blur-sm">
                     <SportIcon sport={sport.value} className="size-6" />
@@ -394,8 +399,9 @@ export function StorySection() {
   return (
     <section aria-labelledby="story-title" className="relative overflow-hidden bg-night-950">
       <div aria-hidden className="absolute inset-0 md:left-[25%] md:[mask-image:linear-gradient(to_right,transparent,rgb(0_0_0/0.6)_35%,black_65%)]">
-        <Image src="/images/friends-laughing.jpg" alt="" fill sizes="(min-width: 768px) 65vw, 100vw" className="object-cover" />
+        <Image src="/images/friends-laughing.jpg" alt="" fill sizes="(min-width: 768px) 65vw, 100vw" className="sl-photo object-cover" />
         <div className="absolute inset-0 bg-night-950/55 md:bg-night-950/30" />
+        <div className="sl-grain absolute inset-0" />
       </div>
       <Container className="relative py-24 md:py-36">
         <Reveal className="max-w-xl text-white/85">
@@ -417,9 +423,9 @@ export function StorySection() {
 }
 
 const TESTIMONIALS = [
-  { name: "Camille, 24 ans", city: "Aix-en-Provence", text: "J'ai rejoint un footing sans connaître personne. En deux séances, j'avais déjà trouvé mon petit groupe du dimanche.", sport: "Running" },
-  { name: "Hugo, 29 ans", city: "Aix-en-Provence", text: "Le format est simple : je propose, les gens répondent, et on se retrouve sur le terrain. C'est exactement ce qu'il manquait.", sport: "Padel" },
-  { name: "Inès, 26 ans", city: "Aix-en-Provence", text: "J'apprécie de pouvoir choisir une séance entre femmes quand j'en ai envie, sans que ce soit imposé dans tout le reste de l'app.", sport: "Volley" },
+  { name: "Camille, 24 ans", avatar: "/avatars/camille.run.webp", city: "Aix-en-Provence", text: "J'ai rejoint un footing sans connaître personne. En deux séances, j'avais déjà trouvé mon petit groupe du dimanche.", sport: "Running" },
+  { name: "Hugo, 29 ans", avatar: "/avatars/hugo.padel.webp", city: "Aix-en-Provence", text: "Le format est simple : je propose, les gens répondent, et on se retrouve sur le terrain. C'est exactement ce qu'il manquait.", sport: "Padel" },
+  { name: "Inès, 26 ans", avatar: "/avatars/ines.volley.webp", city: "Aix-en-Provence", text: "J'apprécie de pouvoir choisir une séance entre femmes quand j'en ai envie, sans que ce soit imposé dans tout le reste de l'app.", sport: "Volley" },
 ];
 
 export function TestimonialsSection() {
@@ -439,7 +445,14 @@ export function TestimonialsSection() {
           {TESTIMONIALS.map((testimonial, index) => (
             <Reveal as="li" key={testimonial.name} delay={index * 100} className="rounded-card bg-card p-6 shadow-md">
               <div className="flex items-center justify-between gap-3">
-                <div>
+                <Image
+                  src={testimonial.avatar}
+                  alt=""
+                  width={52}
+                  height={52}
+                  className="sl-photo size-13 shrink-0 rounded-full object-cover ring-2 ring-mint-500 ring-offset-2 ring-offset-card"
+                />
+                <div className="min-w-0 flex-1">
                   <p className="font-display font-bold text-ink">{testimonial.name}</p>
                   <p className="text-sm text-gray-400">{testimonial.city} · {testimonial.sport}</p>
                 </div>
@@ -492,8 +505,9 @@ const FAQ = [
 
 export function FaqSection() {
   return (
-    <section id="faq" className="scroll-mt-20 bg-sand-50 py-20 md:py-28">
-      <Container className="grid gap-12 lg:grid-cols-[1fr_1.4fr]">
+    <section id="faq" className="relative scroll-mt-20 overflow-hidden bg-sand-50 py-20 md:py-28">
+      <PhotoBackdrop src="/sports/tennis.jpg" tone="light" position="center 30%" />
+      <Container className="relative grid gap-12 lg:grid-cols-[1fr_1.4fr]">
         <Reveal>
           <SectionTitle
             eyebrow="Questions fréquentes"
@@ -532,6 +546,7 @@ export function FinalCtaSection() {
       <Container>
         <Reveal>
           <div className="sl-dark relative overflow-hidden rounded-block px-6 py-14 text-center md:px-12 md:py-20">
+            <PhotoBackdrop src="/images/friends-celebrate.jpg" blur="sm" veil="full" sizes="(min-width: 1200px) 1200px, 100vw" />
             <div aria-hidden className="absolute top-1/2 -left-[10%] h-[3px] w-[70%] -rotate-6 bg-swoosh opacity-60" />
             <h2 className="relative text-3xl leading-tight font-black text-balance md:text-5xl">
               Ta prochaine séance <span className="text-mint-500">t&apos;attend.</span>

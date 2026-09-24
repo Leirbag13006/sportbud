@@ -54,9 +54,10 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
               fill
               priority
               sizes="(min-width: 1024px) 62vw, 100vw"
-              className="object-cover object-[60%_center]"
+              className="sl-photo object-cover object-[60%_center]"
             />
             <div className="absolute inset-0 bg-night-950/65 lg:bg-night-950/25" />
+            <div className="sl-grain absolute inset-0" />
             <div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-night-950 to-transparent" />
           </div>
           <div aria-hidden className="absolute top-[72%] -left-[10%] h-[3px] w-[60%] -rotate-6 bg-swoosh opacity-60" />

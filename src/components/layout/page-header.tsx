@@ -8,7 +8,7 @@ interface PageHeaderProps {
   description?: string;
   /** Action optionnelle alignée à droite (bouton, menu…). */
   action?: ReactNode;
-  /** Photo d'ambiance à droite, fondue dans la nuit (design system : jamais de bord dur). */
+  /** Photo d'ambiance à droite (noir et blanc), fondue dans la nuit (design system : jamais de bord dur). */
   image?: string;
 }
 
@@ -25,10 +25,11 @@ export function PageHeader({ title, accent, description, action, image }: PageHe
           aria-hidden
           className="absolute inset-y-0 right-0 w-full [mask-image:linear-gradient(to_right,transparent,black_55%)] md:w-3/5"
         >
-          <Image src={image} alt="" fill sizes="(min-width: 768px) 60vw, 100vw" className="object-cover" priority />
+          <Image src={image} alt="" fill sizes="(min-width: 768px) 60vw, 100vw" className="sl-photo object-cover" priority />
           <div className="absolute inset-0 bg-night-950/45" />
         </div>
       )}
+      <div aria-hidden className="sl-grain absolute inset-0" />
       <div className="relative mx-auto flex w-full max-w-3xl items-end justify-between gap-4 px-4 pt-6 pb-7 md:px-6 md:pt-12 md:pb-12">
         <div>
           <h1 className="sl-bar text-2xl leading-tight font-extrabold md:text-4xl">

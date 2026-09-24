@@ -9,7 +9,7 @@ export default function MessagesPage() {
     <div className="flex flex-1 items-center justify-center p-8">
       <div className="max-w-sm text-center">
         <div className="relative mx-auto aspect-[4/3] w-64 overflow-hidden rounded-block shadow-md">
-          <Image src="/images/friends-celebrate.jpg" alt="" fill sizes="256px" className="object-cover" />
+          <Image src="/images/friends-celebrate.jpg" alt="" fill sizes="256px" className="sl-photo object-cover" />
         </div>
         <h2 className="sl-bar mt-6 text-xl font-extrabold [&::after]:mx-auto">
           Tes <span className="text-brand-text">conversations.</span>

@@ -17,6 +17,7 @@ import { reverseGeocodeCity } from "@/lib/geocoding";
 import { completeOnboarding, skipOnboarding } from "@/lib/onboarding/actions";
 import { cn } from "@/lib/utils";
 import { MAX_FAVORITE_SPORTS } from "@/lib/validations/profile";
+import { PhotoBackdrop } from "@/components/brand/photo-backdrop";
 
 type City = { name: string; lat: number; lng: number };
 
@@ -79,8 +80,9 @@ export function OnboardingWizard({ firstName, initial }: OnboardingWizardProps) 
 
   return (
     <div className="flex min-h-dvh flex-col bg-sand-50">
-      <header className="sl-dark">
-        <div className="mx-auto w-full max-w-2xl px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-8 md:px-6">
+      <header className="sl-dark relative overflow-hidden">
+        <PhotoBackdrop src="/images/hero-friends-sunset.jpg" blur="sm" veil="left" position="center 40%" priority />
+        <div className="relative mx-auto w-full max-w-2xl px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-8 md:px-6">
           <div className="flex items-center justify-between gap-4">
             <Logo variant="dark" size="sm" href={null} />
             <Button variant="ghost" size="sm" className="text-white/75 hover:text-white" onClick={skip} disabled={isPending}>

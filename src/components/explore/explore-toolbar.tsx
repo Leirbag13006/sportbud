@@ -3,9 +3,10 @@
 import { List, Loader2, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { PhotoBackdrop } from "@/components/brand/photo-backdrop";
 import { Emoji, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
-import { SPORTS } from "@/config/sports";
+import { getSport, SPORTS } from "@/config/sports";
 import type { SportType } from "@/db/schema";
 import { cn } from "@/lib/utils";
 
@@ -45,8 +46,18 @@ export function ExploreToolbar({
   onRequestLocation,
 }: ExploreToolbarProps) {
   return (
-    <div className="sl-dark shrink-0 pt-[max(0.75rem,env(safe-area-inset-top))] pb-4">
-      <div className="mx-auto w-full max-w-5xl space-y-4">
+    <div className="sl-dark relative shrink-0 overflow-hidden pt-[max(0.75rem,env(safe-area-inset-top))] pb-4">
+      {/* Photo N&B du sport sélectionné (fondu à chaque changement), groupe d'amis pour « Tous ». */}
+      <PhotoBackdrop
+        key={sport ?? "all"}
+        src={sport ? getSport(sport).image : "/images/silhouettes-sunset.jpg"}
+        blur="sm"
+        veil="left"
+        position="center 40%"
+        priority
+        className="animate-in duration-700 fade-in motion-reduce:animate-none"
+      />
+      <div className="relative mx-auto w-full max-w-5xl space-y-4">
         {/* Logo sur mobile (sur desktop, il est dans l'en-tête du site). */}
         <div className="flex items-center justify-between px-4 md:hidden">
           <Logo variant="dark" size="sm" />
