@@ -10,22 +10,11 @@
  */
 import { hashSync } from "bcryptjs";
 import { createClient } from "@libsql/client";
-import { inArray, like, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
-import {
-  activities,
-  applications,
-  blocks,
-  messages,
-  passwordResetTokens,
-  reports,
-  reviews,
-  sessions,
-  userAchievements,
-  users,
-} from "../src/db/schema";
+import { activities, applications, messages, reviews, users } from "../src/db/schema";
 import type { Audience, Gender, SportLevel, SportType } from "../src/db/schema";
 import * as schema from "../src/db/schema";
+import { DEMO_EMAIL_DOMAIN, removeDemoData } from "./lib/demo-data";
 
 const db = drizzle({
   client: createClient({
@@ -36,7 +25,6 @@ const db = drizzle({
 });
 
 const DEMO_PASSWORD = "SportMates2026";
-const DEMO_EMAIL_DOMAIN = "@demo.sportmates.local";
 const AIX = { lat: 43.5297, lng: 5.4474 };
 const now = new Date();
 const DAY_MS = 24 * 3600 * 1000;
@@ -205,50 +193,7 @@ async function main() {
 
   await db.transaction(async (tx) => {
     // --- Suppression des données démo existantes (les vrais comptes ne sont pas touchés) ---
-    const demoUserIds = (
-      await tx.select({ id: users.id }).from(users).where(like(users.email, `%${DEMO_EMAIL_DOMAIN}`))
-    ).map((row) => row.id);
-
-    if (demoUserIds.length > 0) {
-      const demoActivityIds = (
-        await tx.select({ id: activities.id }).from(activities).where(inArray(activities.creatorId, demoUserIds))
-      ).map((row) => row.id);
-      const demoApplicationIds = (
-        await tx
-          .select({ id: applications.id })
-          .from(applications)
-          .where(
-            or(
-              inArray(applications.applicantId, demoUserIds),
-              demoActivityIds.length > 0 ? inArray(applications.activityId, demoActivityIds) : undefined,
-            ),
-          )
-      ).map((row) => row.id);
-
-      if (demoApplicationIds.length > 0) {
-        await tx.delete(messages).where(inArray(messages.applicationId, demoApplicationIds));
-      }
-      await tx.delete(messages).where(inArray(messages.senderId, demoUserIds));
-      await tx
-        .delete(reviews)
-        .where(
-          or(
-            inArray(reviews.reviewerId, demoUserIds),
-            inArray(reviews.revieweeId, demoUserIds),
-            demoActivityIds.length > 0 ? inArray(reviews.activityId, demoActivityIds) : undefined,
-          ),
-        );
-      await tx.delete(reports).where(or(inArray(reports.reporterId, demoUserIds), inArray(reports.reportedId, demoUserIds)));
-      await tx.delete(blocks).where(or(inArray(blocks.blockerId, demoUserIds), inArray(blocks.blockedId, demoUserIds)));
-      await tx.delete(userAchievements).where(inArray(userAchievements.userId, demoUserIds));
-      await tx.delete(passwordResetTokens).where(inArray(passwordResetTokens.userId, demoUserIds));
-      await tx.delete(sessions).where(inArray(sessions.userId, demoUserIds));
-      if (demoApplicationIds.length > 0) {
-        await tx.delete(applications).where(inArray(applications.id, demoApplicationIds));
-      }
-      await tx.delete(activities).where(inArray(activities.creatorId, demoUserIds));
-      await tx.delete(users).where(inArray(users.id, demoUserIds));
-    }
+    const replaced = await removeDemoData(tx);
 
     // --- Membres ---
     const createdUsers = await tx
@@ -391,7 +336,7 @@ async function main() {
 
     console.log(
       `Seed démo terminé : ${people.length} comptes, ${upcoming.length} séances à venir, ${past.length} passées, ` +
-        `${reviewRows.length} avis, ${chatRows.length} messages (${demoUserIds.length} anciens comptes démo remplacés).`,
+        `${reviewRows.length} avis, ${chatRows.length} messages (${replaced} anciens comptes démo remplacés).`,
     );
   });
 
