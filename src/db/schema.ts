@@ -14,7 +14,8 @@ import { check, index, integer, primaryKey, real, sqliteTable, text, uniqueIndex
 export const SPORT_LEVEL_VALUES = ["beginner", "intermediate", "pro"] as const;
 export const SPORT_TYPE_VALUES = [
   "football", "basketball", "tennis", "padel", "badminton", "volleyball",
-  "running", "cycling", "swimming", "climbing", "fitness", "other",
+  "running", "cycling", "swimming", "climbing", "fitness",
+  "petanque", "hiking", "table_tennis", "handball", "rugby", "yoga", "other",
 ] as const;
 export const ACTIVITY_STATUS_VALUES = ["open", "full", "cancelled"] as const;
 export const APPLICATION_STATUS_VALUES = ["pending", "accepted", "rejected"] as const;

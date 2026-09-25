@@ -360,7 +360,7 @@ export function SportsSection() {
       <Container>
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <Reveal>
-            <SectionTitle eyebrow="12 sports" title="Ton sport," accent="ton rythme." mark="circle" />
+            <SectionTitle eyebrow={`${SPORTS.length} sports`} title="Ton sport," accent="ton rythme." mark="circle" />
           </Reveal>
           <Reveal delay={100}>
             <Button variant="outline" nativeButton={false} render={<Link href="/register#acces" />}>

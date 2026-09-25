@@ -78,6 +78,48 @@ export const PHOTO_CREDITS = [
     "url": "https://stocksnap.io/photo/man-workout-KZROPA98J8"
   },
   {
+    "file": "/sports/petanque.jpg",
+    "title": "Petanque Julien (1)",
+    "author": "uscfusic",
+    "source": "flickr",
+    "url": "https://www.flickr.com/photos/164280250@N04/51606758795"
+  },
+  {
+    "file": "/sports/hiking.jpg",
+    "title": "Hiking Hikers",
+    "author": "Austin Ban",
+    "source": "stocksnap",
+    "url": "https://stocksnap.io/photo/hiking-hikers-A150E71AFE"
+  },
+  {
+    "file": "/sports/table_tennis.jpg",
+    "title": "Professional table tennis player game",
+    "author": "inconnu",
+    "source": "rawpixel",
+    "url": "https://www.rawpixel.com/image/6112983/photo-image-public-domain-person-table"
+  },
+  {
+    "file": "/sports/handball.jpg",
+    "title": "HANDBALL (38)",
+    "author": "uscfusic",
+    "source": "flickr",
+    "url": "https://www.flickr.com/photos/164280250@N04/52409272525"
+  },
+  {
+    "file": "/sports/rugby.jpg",
+    "title": "Rugby players wearing Nike boots",
+    "author": "inconnu",
+    "source": "rawpixel",
+    "url": "https://www.rawpixel.com/image/6113254/photo-image-public-domain-people-free"
+  },
+  {
+    "file": "/sports/yoga.jpg",
+    "title": "yoga pose",
+    "author": "sashameel",
+    "source": "flickr",
+    "url": "https://www.flickr.com/photos/75221149@N00/29662641301"
+  },
+  {
     "file": "/sports/other.jpg",
     "title": "Athlete People",
     "author": "Keit Trysh",

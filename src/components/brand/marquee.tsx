@@ -3,7 +3,7 @@ import type { SportType } from "@/db/schema";
 import { cn } from "@/lib/utils";
 
 const WORDS = ["Bouge.", "Rencontre.", "Partage."];
-const SPORTS: SportType[] = ["football", "tennis", "running", "basketball", "padel", "volleyball", "climbing", "cycling", "swimming"];
+const SPORTS: SportType[] = ["football", "tennis", "running", "petanque", "basketball", "padel", "hiking", "volleyball", "climbing", "cycling", "swimming"];
 
 /**
  * Bandeau défilant de la signature, ponctué d'émojis de sport, légèrement incliné.

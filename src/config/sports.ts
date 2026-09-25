@@ -20,11 +20,17 @@ export const SPORTS: SportOption[] = [
   { value: "padel", label: "Padel", image: "/sports/padel.jpg", kind: "racket" },
   { value: "badminton", label: "Badminton", image: "/sports/badminton.jpg", kind: "racket" },
   { value: "volleyball", label: "Volley", image: "/sports/volleyball.jpg", kind: "team" },
+  { value: "handball", label: "Handball", image: "/sports/handball.jpg", kind: "team" },
+  { value: "rugby", label: "Rugby", image: "/sports/rugby.jpg", kind: "team" },
+  { value: "table_tennis", label: "Ping-pong", image: "/sports/table_tennis.jpg", kind: "racket" },
+  { value: "petanque", label: "Pétanque", image: "/sports/petanque.jpg", kind: "team" },
   { value: "running", label: "Running", image: "/sports/running.jpg", kind: "solo" },
   { value: "cycling", label: "Vélo", image: "/sports/cycling.jpg", kind: "solo" },
   { value: "swimming", label: "Natation", image: "/sports/swimming.jpg", kind: "solo" },
   { value: "climbing", label: "Escalade", image: "/sports/climbing.jpg", kind: "solo" },
+  { value: "hiking", label: "Randonnée", image: "/sports/hiking.jpg", kind: "solo" },
   { value: "fitness", label: "Fitness", image: "/sports/fitness.jpg", kind: "solo" },
+  { value: "yoga", label: "Yoga", image: "/sports/yoga.jpg", kind: "solo" },
   { value: "other", label: "Autre", image: "/sports/other.jpg", kind: "solo" },
 ];
 
@@ -47,7 +53,7 @@ export function getActivityTitle(sportType: SportType, spots: number) {
       return spots === 1 ? `Partenaire de ${sport.label.toLowerCase()}` : `${sport.label} : recherche ${spots} joueurs`;
     default:
       if (sportType === "other") return spots === 1 ? "Recherche un partenaire" : `Recherche ${spots} partenaires`;
-      if (sportType === "fitness") return "Séance de fitness";
+      if (sportType === "fitness" || sportType === "yoga") return `Séance de ${sport.label.toLowerCase()}`;
       return `Sortie ${sport.label.toLowerCase()}`;
   }
 }

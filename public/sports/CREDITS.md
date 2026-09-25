@@ -16,8 +16,14 @@ trouvées via [Openverse](https://openverse.org). Recadrées en 800×600.
 | swimming | Free person swimming race image | inconnu | [rawpixel](https://www.rawpixel.com/image/5924083/photo-image-public-domain-blue-person) |
 | climbing | Rock Climbing | Tommy Lisbin | [stocksnap](https://stocksnap.io/photo/rock-climbing-E6D29J6TG3) |
 | fitness | Man Workout | Bruce Mars | [stocksnap](https://stocksnap.io/photo/man-workout-KZROPA98J8) |
+| petanque | Petanque Julien (1) | uscfusic | [flickr](https://www.flickr.com/photos/164280250@N04/51606758795) |
+| hiking | Hiking Hikers | Austin Ban | [stocksnap](https://stocksnap.io/photo/hiking-hikers-A150E71AFE) |
+| table_tennis | Professional table tennis player game | inconnu | [rawpixel](https://www.rawpixel.com/image/6112983/photo-image-public-domain-person-table) |
+| handball | HANDBALL (38) | uscfusic | [flickr](https://www.flickr.com/photos/164280250@N04/52409272525) |
+| rugby | Rugby players wearing Nike boots | inconnu | [rawpixel](https://www.rawpixel.com/image/6113254/photo-image-public-domain-people-free) |
+| yoga | yoga pose | sashameel | [flickr](https://www.flickr.com/photos/75221149@N00/29662641301) |
 | other | Athlete People | Keit Trysh | [stocksnap](https://stocksnap.io/photo/athlete-people-QD7UVUNUEK) |
 
 ## Pictogrammes 3D
 
-Les pictogrammes de `public/emoji/` sont les [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) de Microsoft (licence MIT), redimensionnés en WebP 160 px.
+Les pictogrammes de `public/emoji/` sont les [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) de Microsoft (licence MIT), redimensionnés en WebP 160 px. Seule exception : `petanque.webp` (boules et cochonnet), dessiné pour le site dans le même style, faute d'emoji pétanque.
