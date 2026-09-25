@@ -26,4 +26,4 @@ trouvées via [Openverse](https://openverse.org). Recadrées en 800×600.
 
 ## Pictogrammes 3D
 
-Les pictogrammes de `public/emoji/` sont les [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) de Microsoft (licence MIT), redimensionnés en WebP 160 px. Seule exception : `petanque.webp` (boules et cochonnet), dessiné pour le site dans le même style, faute d'emoji pétanque.
+Les pictogrammes de `public/emoji/` sont les [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) de Microsoft (licence MIT), redimensionnés en WebP 160 px. Exceptions, dessinées pour le site dans le même style faute d'emoji dédié : `petanque.webp` (boules et cochonnet) et `padel.webp` (raquette pleine perforée et balle ; l'emoji ping-pong reste au tennis de table).
