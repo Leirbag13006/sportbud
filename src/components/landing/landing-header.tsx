@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const ANCHORS = [
+  { href: "/seances", label: "Séances" },
   { href: "#fonctionnement", label: "Comment ça marche" },
   { href: "#fonctionnalites", label: "Fonctionnalités" },
   { href: "#sports", label: "Sports" },
@@ -33,7 +34,7 @@ export function LandingHeader() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-3 px-[clamp(16px,4vw,40px)] sm:gap-6 md:h-20">
-        <Logo variant="dark" size="sm" href="/register" />
+        <Logo variant="dark" size="sm" href="/" />
 
         <nav aria-label="Sections de la page" className="hidden lg:block">
           <ul className="flex items-center gap-1">

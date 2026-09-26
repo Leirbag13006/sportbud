@@ -24,6 +24,7 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { ApplicationStatusBadge } from "@/components/applications/application-status-badge";
+import { ShareActivityButton } from "@/components/activities/share-activity-button";
 import { ReceivedApplicationRow } from "@/components/applications/received-application-row";
 import { UserAvatar } from "@/components/applications/user-avatar";
 import { UserSafetyMenu } from "@/components/safety/user-safety-menu";
@@ -177,6 +178,10 @@ function ActivityDetails({
         <Badge variant={isOpen ? "default" : "secondary"} className="shrink-0">
           {activity.status === "cancelled" ? "Annulée" : isOpen ? "Ouvert" : "Complet"}
         </Badge>
+        <ShareActivityButton
+          activityId={activity.id}
+          text={`${getActivityTitle(activity.sportType, isOpen ? activity.spotsAvailable : activity.spotsTotal)} (${sport.label}), ${formatDay(activity.startsAt).toLowerCase()} à ${formatTimeRange(activity.startsAt, activity.durationMinutes).split("-")[0]} :`}
+        />
         <DrawerClose
           render={
             <Button variant="ghost" size="icon-sm" aria-label="Fermer" className="-mt-1 -mr-2 hidden md:inline-flex" />

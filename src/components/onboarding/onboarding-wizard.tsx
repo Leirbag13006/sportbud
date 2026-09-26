@@ -29,11 +29,13 @@ const STEPS = [
 
 interface OnboardingWizardProps {
   firstName: string;
+  /** Page ouverte à la fin du parcours (l'Explorer, ou la séance partagée qui a amené le membre). */
+  redirectTo: string;
   initial: { favoriteSports: SportType[]; sportLevel: SportLevel };
 }
 
 /** Parcours d'accueil en 3 étapes, affiché une seule fois après l'inscription. */
-export function OnboardingWizard({ firstName, initial }: OnboardingWizardProps) {
+export function OnboardingWizard({ firstName, redirectTo, initial }: OnboardingWizardProps) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [sports, setSports] = useState<SportType[]>(initial.favoriteSports);
@@ -65,7 +67,7 @@ export function OnboardingWizard({ firstName, initial }: OnboardingWizardProps) 
       });
       if (result.ok) {
         toast.success(`Bienvenue dans la communauté, ${firstName} !`);
-        router.replace("/");
+        router.replace(redirectTo);
       } else {
         toast.error(result.error ?? Object.values(result.fieldErrors ?? {}).flat()[0] ?? "Une erreur est survenue.");
       }
@@ -74,7 +76,7 @@ export function OnboardingWizard({ firstName, initial }: OnboardingWizardProps) 
   const skip = () =>
     startTransition(async () => {
       const result = await skipOnboarding();
-      if (result.ok) router.replace("/");
+      if (result.ok) router.replace(redirectTo);
       else toast.error(result.error ?? "Une erreur est survenue.");
     });
 

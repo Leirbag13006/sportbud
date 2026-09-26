@@ -91,3 +91,34 @@ export function formatDaySeparator(date: Date, now = new Date()) {
 }
 
 export { isSameDay };
+
+/*
+ * Rendu côté serveur (pages publiques, images de partage) : le serveur tourne en UTC, les dates
+ * sont donc formatées explicitement à l'heure de Paris (le service est en France).
+ */
+const PARIS = "Europe/Paris";
+const parisDayKey = new Intl.DateTimeFormat("fr-CA", { timeZone: PARIS, year: "numeric", month: "2-digit", day: "2-digit" });
+const parisDay = new Intl.DateTimeFormat("fr-FR", { timeZone: PARIS, weekday: "long", day: "numeric", month: "long" });
+const parisTime = new Intl.DateTimeFormat("fr-FR", { timeZone: PARIS, hour: "2-digit", minute: "2-digit" });
+
+/**
+ * formatDay à l'heure de Paris : « Aujourd'hui », « Demain » ou « Samedi 27 septembre ».
+ * relative = false : toujours la date complète (aperçus de liens, gardés en cache par les messageries).
+ */
+export function formatDayInParis(date: Date, { relative = true, now = new Date() } = {}) {
+  const key = parisDayKey.format(date);
+  if (!relative) return capitalize(parisDay.format(date));
+  if (key === parisDayKey.format(now)) return "Aujourd'hui";
+  if (key === parisDayKey.format(new Date(now.getTime() + 24 * 60 * 60 * 1000))) return "Demain";
+  return capitalize(parisDay.format(date));
+}
+
+function capitalize(label: string) {
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+/** formatTimeRange à l'heure de Paris : « 17:00-18:30 ». */
+export function formatTimeRangeInParis(start: Date, durationMinutes: number) {
+  const end = new Date(start.getTime() + durationMinutes * 60_000);
+  return `${parisTime.format(start)}-${parisTime.format(end)}`;
+}

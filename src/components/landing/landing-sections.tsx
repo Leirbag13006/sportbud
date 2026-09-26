@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 
 import { AUDIENCE_BORDER_CLASSES, AudienceBadge } from "@/components/activities/audience-badge";
@@ -20,6 +21,8 @@ import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { LEGAL_PAGES } from "@/config/legal";
 import { SPORT_COUNT, SPORTS } from "@/config/sports";
+import { PublicActivityCard } from "@/components/public/public-activity-card";
+import { getPublicActivities } from "@/lib/activities/public";
 import { ProductPreview } from "./product-preview";
 import { Reveal } from "./reveal";
 
@@ -87,6 +90,39 @@ export function ShowcaseSection() {
               <p className="font-display text-3xl font-black text-ink md:text-4xl">{value}</p>
               <p className="mt-1 text-sm">{label}</p>
             </Reveal>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  );
+}
+
+/* -----------------------------------------------------------------------------
+   Prochaines séances (vraies données, visibles sans compte)
+   -------------------------------------------------------------------------- */
+
+/** Les 6 prochaines séances ; section masquée s'il n'y en a aucune. */
+export async function UpcomingSection() {
+  // Données du moment, jamais figées au build (la landing sert aussi des pages statiques).
+  await connection();
+  const activities = await getPublicActivities({ limit: 6 });
+  if (activities.length === 0) return null;
+
+  return (
+    <section id="seances" aria-labelledby="upcoming-title" className="scroll-mt-20 bg-sand-50 pb-20 md:pb-28">
+      <Container>
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <SectionTitle eyebrow="En ce moment" title="Les prochaines" accent="séances." />
+          <Button variant="outline" nativeButton={false} render={<Link href="/seances" />}>
+            Voir toutes les séances
+            <ArrowRight aria-hidden />
+          </Button>
+        </div>
+        <ul className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {activities.map((activity) => (
+            <li key={activity.id} className="min-w-0">
+              <PublicActivityCard activity={activity} />
+            </li>
           ))}
         </ul>
       </Container>

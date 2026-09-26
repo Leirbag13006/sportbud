@@ -146,6 +146,12 @@ export const LEGAL_PAGES: LegalPage[] = [
         ],
       },
       {
+        heading: "Ce qui est visible sans compte",
+        paragraphs: [
+          "Pour pouvoir être partagées (WhatsApp, réseaux), les séances à venir ont une page publique : sport, date, durée, niveau, prix, nombre de places, ville, ainsi que le pseudo, la photo et la note de l'organisateur. L'adresse et le lieu exacts, la description, l'identité des participants et les messages restent réservés aux membres.",
+        ],
+      },
+      {
         heading: "Finalités et base légale",
         paragraphs: [
           "Ces données servent uniquement à faire fonctionner le service que tu demandes en créant un compte (exécution des conditions d'utilisation) : afficher les séances, gérer les candidatures, la messagerie, les avis, et assurer la sécurité (blocage, signalement, protection contre les tentatives de connexion abusives).",

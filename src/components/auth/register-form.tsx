@@ -10,7 +10,8 @@ import { PasswordInput } from "@/components/forms/password-input";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 
-export function RegisterForm() {
+/** next : page à ouvrir après le parcours d'accueil (ex. la séance partagée qui a amené le visiteur). */
+export function RegisterForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(register, {});
   const errors = state.fieldErrors;
 
@@ -24,6 +25,7 @@ export function RegisterForm() {
       key={JSON.stringify(state.values ?? {})}
     >
       <FormAlert message={state.error} />
+      {next && <input type="hidden" name="next" value={next} />}
 
       <FormField id="username" label="Pseudo" errors={errors?.username} hint="Visible par les autres membres.">
         <Input
@@ -81,7 +83,7 @@ export function RegisterForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         Déjà inscrit ?{" "}
-        <Link href="/login" className="font-medium text-brand-text underline-offset-4 hover:underline">
+        <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="font-medium text-brand-text underline-offset-4 hover:underline">
           Se connecter
         </Link>
       </p>

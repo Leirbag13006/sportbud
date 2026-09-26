@@ -12,6 +12,7 @@ import {
   ShowcaseSection,
   SportsSection,
   StepsSection,
+  UpcomingSection,
 } from "@/components/landing/landing-sections";
 import { MobileCtaBar } from "@/components/landing/mobile-cta-bar";
 import { Marquee } from "@/components/brand/marquee";
@@ -111,6 +112,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         </section>
 
         <ShowcaseSection />
+        <UpcomingSection />
         <StepsSection />
         <Marquee />
         <FeaturesSection />

@@ -19,3 +19,27 @@ export type ExploreActivity = ActivityWithCreator & {
   creatorRating: RatingSummary;
   creatorBadges: EarnedBadge[];
 };
+
+/** Séance telle qu'affichée sans compte (cf. lib/activities/public.ts) : ni adresse, ni participants nommés. */
+export type PublicActivity = Pick<
+  Activity,
+  | "id"
+  | "sportType"
+  | "startsAt"
+  | "durationMinutes"
+  | "requiredLevel"
+  | "spotsTotal"
+  | "spotsAvailable"
+  | "status"
+  | "priceCents"
+  | "equipmentRequired"
+  | "audience"
+> & {
+  /** Ville (lieu approximatif), si elle peut être déduite de l'adresse. */
+  area: string | null;
+  creator: Pick<PublicUser, "username" | "avatarUrl">;
+  creatorRating: RatingSummary;
+  participantCount: number;
+  /** Séance terminée (début + durée dépassés). */
+  ended: boolean;
+};

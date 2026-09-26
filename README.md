@@ -58,6 +58,14 @@ aux deux vues. Les distances sont calculées dans le navigateur à partir de la 
 
 Photos des sports : licence CC0 (domaine public), voir `public/sports/CREDITS.md`.
 
+## Pages publiques
+
+- **Accueil** `/` : pour un visiteur, la landing (inscription) avec les 6 prochaines séances.
+- **Séances** `/seances` (filtre `?sport=`) et **page d'une séance** `/seances/[id]`, partageable (WhatsApp,
+  bouton « Partager » de la fiche dans l'app) avec une image d'aperçu générée (`opengraph-image.tsx`).
+  Lieu approximatif uniquement (la ville) : adresse, description et participants restent réservés aux membres
+  (`src/lib/activities/public.ts`). « Rejoindre » mène à l'inscription puis rouvre la séance dans l'app (`?next=`).
+
 ## Authentification
 
 Mots de passe hachés avec bcrypt, sessions stockées en base (jeton aléatoire dans un cookie

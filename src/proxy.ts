@@ -25,8 +25,8 @@ export function proxy(request: NextRequest) {
   const isGuestOnly = GUEST_ONLY_PATHS.includes(pathname);
 
   if (!hasSession && isMemberPath(pathname)) {
-    // Visiteur sur l'accueil : landing orientée inscription.
-    if (pathname === "/") return NextResponse.redirect(new URL("/register", request.url));
+    // Visiteur sur l'accueil : la landing (page d'inscription) s'affiche à cette adresse.
+    if (pathname === "/") return NextResponse.rewrite(new URL(`/register${search}`, request.url));
     // Lien vers une page précise (session expirée, lien partagé) : connexion puis retour.
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", `${pathname}${search}`);

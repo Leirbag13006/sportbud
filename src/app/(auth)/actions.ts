@@ -108,7 +108,9 @@ export async function register(_prev: AuthFormState, formData: FormData): Promis
   }
 
   await createSession(user.id);
-  redirect("/");
+  // Parcours d'accueil, puis retour à la page d'origine (ex. une séance partagée).
+  const next = getSafeRedirectPath(formData.get("next"), "");
+  redirect(next ? `/welcome?next=${encodeURIComponent(next)}` : "/");
 }
 
 /**
