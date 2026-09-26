@@ -466,7 +466,8 @@ function ApplicantActions({
     );
   }
 
-  if (!myApplication) {
+  // Une séance quittée se rejoint comme une nouvelle.
+  if (!myApplication || myApplication.status === "withdrawn") {
     return (
       <Button
         className="h-11 w-full text-base"

@@ -27,6 +27,8 @@ export interface ConversationDTO {
   otherUser: ConversationUser;
   /** Rôle de l'utilisateur courant dans l'activité. */
   myRole: "creator" | "participant";
+  /** Le participant s'est désisté : la conversation reste lisible mais l'envoi est coupé. */
+  withdrawn: boolean;
   /** Blocage entre les deux membres : la conversation reste lisible mais l'envoi est coupé. */
   blockStatus: BlockStatus;
 }

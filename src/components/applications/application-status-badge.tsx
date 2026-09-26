@@ -1,4 +1,4 @@
-import { Check, Clock, X } from "lucide-react";
+import { Check, Clock, LogOut, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import type { Application } from "@/db/schema";
@@ -8,6 +8,7 @@ const STATUS_CONFIG = {
   pending: { label: "En attente", icon: Clock, className: "bg-sunset-300/45 text-ink" },
   accepted: { label: "Acceptée", icon: Check, className: "bg-brand-soft text-brand-text" },
   rejected: { label: "Refusée", icon: X, className: "bg-muted text-muted-foreground" },
+  withdrawn: { label: "A quitté la séance", icon: LogOut, className: "bg-muted text-muted-foreground" },
 } as const;
 
 /** Pastille de statut d'une candidature. */

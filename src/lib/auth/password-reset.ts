@@ -4,6 +4,7 @@ import { and, count, eq, gt, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
 import { passwordResetTokens, sessions, users } from "@/db/schema";
+import { clearLoginFailures } from "./login-throttle";
 import { hashPassword } from "./password";
 import { generateToken, hashToken } from "./tokens";
 
@@ -49,8 +50,9 @@ export async function findValidResetToken(token: string) {
 }
 
 /**
- * Change le mot de passe avec un lien valable, puis invalide ce lien (et les autres liens du compte)
- * et ferme toutes les sessions ouvertes. Renvoie false si le lien n'est plus valable.
+ * Change le mot de passe avec un lien valable, puis invalide ce lien (et les autres liens du compte),
+ * ferme toutes les sessions ouvertes et lève le blocage des tentatives de connexion.
+ * Renvoie false si le lien n'est plus valable.
  */
 export async function resetPasswordWithToken(token: string, newPassword: string) {
   const userId = await findValidResetToken(token);
@@ -65,5 +67,8 @@ export async function resetPasswordWithToken(token: string, newPassword: string)
       .where(and(eq(passwordResetTokens.userId, userId), isNull(passwordResetTokens.usedAt)));
     await tx.delete(sessions).where(eq(sessions.userId, userId));
   });
+  // Le blocage après trop d'échecs de connexion est levé : le membre a prouvé l'accès à son email.
+  const user = await db.query.users.findFirst({ columns: { email: true }, where: eq(users.id, userId) });
+  if (user) await clearLoginFailures(user.email);
   return true;
 }

@@ -22,12 +22,12 @@ const MESSAGES_LIMIT = 300;
 const userColumns = { id: true, username: true, avatarUrl: true, sportLevel: true } as const;
 
 /**
- * Condition : candidature acceptée dont l'utilisateur est le participant ou le créateur de l'activité.
- * C'est la règle d'accès unique à une conversation.
+ * Condition : candidature acceptée (ou participant désisté, conversation en lecture seule) dont
+ * l'utilisateur est le participant ou le créateur de l'activité. C'est la règle d'accès unique à une conversation.
  */
 function conversationAccess(userId: string) {
   return and(
-    eq(applications.status, "accepted"),
+    inArray(applications.status, ["accepted", "withdrawn"]),
     or(
       eq(applications.applicantId, userId),
       inArray(
@@ -42,7 +42,7 @@ type ApplicationRow = Awaited<ReturnType<typeof findConversationRows>>[number];
 
 function findConversationRows(userId: string, applicationId?: string) {
   return db.query.applications.findMany({
-    columns: { id: true, applicantId: true, updatedAt: true },
+    columns: { id: true, applicantId: true, status: true, updatedAt: true },
     with: {
       applicant: { columns: userColumns },
       activity: {
@@ -76,6 +76,7 @@ function toConversationDTO(
     },
     otherUser,
     myRole: isCreator ? "creator" : "participant",
+    withdrawn: row.status === "withdrawn",
     blockStatus: statusWith(otherUser.id),
   };
 }

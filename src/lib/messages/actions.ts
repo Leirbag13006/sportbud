@@ -28,6 +28,7 @@ export async function sendMessage(conversationId: string, content: string): Prom
   const conversation = await getConversation(user.id, conversationId);
   if (!conversation) return { ok: false, error: "Cette conversation n'est plus disponible." };
   if (conversation.blockStatus) return { ok: false, error: "Tu ne peux plus écrire à ce membre." };
+  if (conversation.withdrawn) return { ok: false, error: "Cette conversation est close : le participant a quitté la séance." };
 
   const [message] = await db
     .insert(messages)

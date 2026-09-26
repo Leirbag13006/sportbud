@@ -18,7 +18,8 @@ export const SPORT_TYPE_VALUES = [
   "petanque", "hiking", "table_tennis", "handball", "rugby", "yoga", "other",
 ] as const;
 export const ACTIVITY_STATUS_VALUES = ["open", "full", "cancelled"] as const;
-export const APPLICATION_STATUS_VALUES = ["pending", "accepted", "rejected"] as const;
+/** withdrawn = participant accepté qui s'est désisté : la conversation reste lisible, sans nouvel envoi. */
+export const APPLICATION_STATUS_VALUES = ["pending", "accepted", "rejected", "withdrawn"] as const;
 /** text = message écrit par un membre ; system = notification automatique (ex. candidature acceptée). */
 export const MESSAGE_KIND_VALUES = ["text", "system"] as const;
 /** Genre déclaré (facultatif) : sert uniquement aux séances « entre femmes » / « entre hommes ». */
@@ -309,6 +310,21 @@ export const passwordResetTokens = sqliteTable(
     createdAt: createdAt(),
   },
   (t) => [index("password_reset_tokens_user_id_idx").on(t.userId)],
+);
+
+/**
+ * Échecs de connexion récents, pour limiter les essais de mots de passe (par compte et par adresse IP).
+ * Seules des empreintes SHA-256 sont stockées ; les lignes de plus de 24 h sont purgées.
+ */
+export const loginAttempts = sqliteTable(
+  "login_attempts",
+  {
+    id: id(),
+    /** Empreinte de « email:<adresse> » ou « ip:<adresse> ». */
+    keyHash: text("key_hash").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("login_attempts_key_hash_created_at_idx").on(t.keyHash, t.createdAt)],
 );
 
 // -----------------------------------------------------------------------------

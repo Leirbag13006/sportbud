@@ -66,6 +66,8 @@ Mots de passe hachés avec bcrypt, sessions stockées en base (jeton aléatoire 
 - **Mot de passe oublié** : lien à usage unique valable 1 h (hash stocké, 3 demandes/h max), envoyé par
   SMTP (variables `SMTP_*` dans `.env.example`) ; sans SMTP, le lien est écrit dans les logs du serveur.
   La réinitialisation ferme toutes les sessions du compte.
+- **Limite de connexion** : 5 échecs par compte ou 20 par adresse IP en 15 min bloquent la connexion
+  (empreintes dans `login_attempts`, purgées après 24 h) ; une réinitialisation du mot de passe lève le blocage.
 - **Suppression du compte** (profil › Zone sensible), confirmée par le mot de passe : effacement en cascade.
 - **Parcours d'accueil** `/welcome` après l'inscription : sports favoris, niveau, ville (centre de l'exploration).
 

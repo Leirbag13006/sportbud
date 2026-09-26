@@ -33,12 +33,15 @@ function myActiveActivityIds(userId: string) {
     .where(and(eq(activities.creatorId, userId), ne(activities.status, "cancelled"), activityNotEnded()));
 }
 
-/** Candidatures de l'utilisateur, indexées par activité (état du bouton « Postuler »). */
+/**
+ * Candidatures de l'utilisateur, indexées par activité (état du bouton « Postuler »).
+ * Une séance quittée n'en fait pas partie : le membre peut la rejoindre à nouveau.
+ */
 export async function getMyApplicationSummaries(userId: string): Promise<Record<string, MyApplicationSummary>> {
   const rows = await db
     .select({ id: applications.id, status: applications.status, activityId: applications.activityId })
     .from(applications)
-    .where(eq(applications.applicantId, userId));
+    .where(and(eq(applications.applicantId, userId), ne(applications.status, "withdrawn")));
 
   return Object.fromEntries(rows.map(({ activityId, ...summary }) => [activityId, summary]));
 }
@@ -62,7 +65,7 @@ export async function getReceivedApplications(userId: string): Promise<ReceivedA
     getEarnedBadges(applicantIds),
   ]);
 
-  const order = { pending: 0, accepted: 1, rejected: 2 } as const;
+  const order = { pending: 0, accepted: 1, rejected: 2, withdrawn: 3 } as const;
   return rows
     .map((row) => ({
       ...row,
@@ -82,7 +85,7 @@ export async function countPendingReceivedApplications(userId: string) {
   return row?.value ?? 0;
 }
 
-/** Candidatures envoyées par l'utilisateur sur des activités non terminées. */
+/** Candidatures envoyées par l'utilisateur sur des activités non terminées (hors séances quittées). */
 export async function getSentApplications(userId: string): Promise<SentApplication[]> {
   const rows = await db.query.applications.findMany({
     columns: { id: true, activityId: true, status: true, createdAt: true },
@@ -94,6 +97,7 @@ export async function getSentApplications(userId: string): Promise<SentApplicati
     },
     where: and(
       eq(applications.applicantId, userId),
+      ne(applications.status, "withdrawn"),
       inArray(
         applications.activityId,
         db.select({ id: activities.id }).from(activities).where(activityNotEnded()),

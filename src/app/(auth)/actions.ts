@@ -8,6 +8,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from "@/lib/auth/password";
+import { clearLoginFailures, isLoginThrottled, recordLoginFailure } from "@/lib/auth/login-throttle";
 import { createPasswordResetToken, resetPasswordWithToken } from "@/lib/auth/password-reset";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { createSession, deleteSession, findUserByEmail, getCurrentUser, isUsernameTaken } from "@/lib/auth/session";
@@ -53,13 +54,22 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
     return { fieldErrors: z.flattenError(parsed.error).fieldErrors, values: { email: raw.email } };
   }
 
+  if (await isLoginThrottled(parsed.data.email)) {
+    return {
+      error: "Trop de tentatives de connexion. Patiente 15 minutes ou réinitialise ton mot de passe.",
+      values: { email: raw.email },
+    };
+  }
+
   const user = await findUserByEmail(parsed.data.email);
   // Toujours comparer un hash (même factice) : temps de réponse identique que l'email existe ou non.
   const passwordOk = await verifyPassword(parsed.data.password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
   if (!user || !passwordOk) {
+    await recordLoginFailure(parsed.data.email);
     return { error: "Email ou mot de passe incorrect.", values: { email: raw.email } };
   }
 
+  await clearLoginFailures(parsed.data.email);
   await createSession(user.id);
   redirect(getSafeRedirectPath(formData.get("next")));
 }

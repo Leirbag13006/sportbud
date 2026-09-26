@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Ban, Loader2, MapPin, RotateCcw, SendHorizontal } from "lucide-react";
+import { ArrowLeft, Ban, Loader2, LogOut, MapPin, RotateCcw, SendHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
@@ -103,6 +103,8 @@ export function ChatView({ initialData, currentUserId }: ChatViewProps) {
       <MessageList messages={messages} currentUserId={currentUserId} otherUser={data.conversation.otherUser} onRetry={send} />
       {data.conversation.blockStatus ? (
         <BlockedNotice status={data.conversation.blockStatus} />
+      ) : data.conversation.withdrawn ? (
+        <WithdrawnNotice myRole={data.conversation.myRole} />
       ) : (
         <Composer onSend={send} otherName={data.conversation.otherUser.username} />
       )}
@@ -118,6 +120,18 @@ function BlockedNotice({ status }: { status: "by-me" | "by-them" }) {
       {status === "by-me"
         ? "Tu as bloqué ce membre. Débloque-le depuis le menu ⋯ pour lui écrire à nouveau."
         : "Tu ne peux plus écrire à ce membre."}
+    </p>
+  );
+}
+
+/** Remplace la zone de saisie quand le participant s'est désisté. */
+function WithdrawnNotice({ myRole }: { myRole: "creator" | "participant" }) {
+  return (
+    <p className="flex shrink-0 items-center justify-center gap-2 border-t bg-muted/40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-center text-sm text-gray-600">
+      <LogOut className="size-4 shrink-0" aria-hidden />
+      {myRole === "creator"
+        ? "Ce participant a quitté la séance : la conversation est close."
+        : "Tu as quitté cette séance : la conversation est close."}
     </p>
   );
 }

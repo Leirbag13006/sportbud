@@ -38,10 +38,15 @@ export async function applyToActivity(activityId: string): Promise<ApplicationAc
     return { ok: false, error: "Tu ne peux pas rejoindre cette activité." };
   }
 
+  // Un participant qui s'était désisté peut candidater à nouveau : sa candidature repart « en attente ».
   const [created] = await db
     .insert(applications)
     .values({ activityId, applicantId: user.id })
-    .onConflictDoNothing({ target: [applications.activityId, applications.applicantId] })
+    .onConflictDoUpdate({
+      target: [applications.activityId, applications.applicantId],
+      set: { status: "pending" },
+      setWhere: eq(applications.status, "withdrawn"),
+    })
     .returning({ id: applications.id });
 
   if (!created) return { ok: false, error: "Tu as déjà postulé à cette activité." };
@@ -52,7 +57,9 @@ export async function applyToActivity(activityId: string): Promise<ApplicationAc
 
 /**
  * Le candidat retire sa candidature.
- * S'il avait été accepté (désistement), sa place est rendue et l'activité se rouvre si elle était complète.
+ * En attente : elle est simplement supprimée. Acceptée (désistement) : sa place est rendue, l'activité
+ * se rouvre si elle était complète, et la conversation est conservée (close) avec un message
+ * automatique qui prévient l'organisateur.
  */
 export async function withdrawApplication(applicationId: string): Promise<ApplicationActionResult> {
   const user = await getCurrentUser();
@@ -65,6 +72,7 @@ export async function withdrawApplication(applicationId: string): Promise<Applic
     });
     if (!application) return { ok: false, error: "Candidature introuvable." };
     if (application.status === "rejected") return { ok: false, error: "Cette candidature a déjà été refusée." };
+    if (application.status === "withdrawn") return { ok: false, error: "Tu as déjà quitté cette séance." };
 
     if (application.status === "accepted") {
       if (application.activity.startsAt.getTime() <= Date.now()) {
@@ -78,6 +86,14 @@ export async function withdrawApplication(applicationId: string): Promise<Applic
           status: sql`case when ${activities.status} = 'cancelled' then 'cancelled' else 'open' end`,
         })
         .where(eq(activities.id, application.activityId));
+      await tx.update(applications).set({ status: "withdrawn" }).where(eq(applications.id, applicationId));
+      await tx.insert(messages).values({
+        applicationId,
+        senderId: user.id,
+        kind: "system",
+        content: `${user.username} a quitté la séance : sa place est de nouveau disponible.`,
+      });
+      return { ok: true };
     }
 
     await tx.delete(applications).where(eq(applications.id, applicationId));
