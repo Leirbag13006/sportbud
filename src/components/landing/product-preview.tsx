@@ -1,13 +1,17 @@
 "use client";
 
-import { Lock } from "lucide-react";
+import { Lock, Plus } from "lucide-react";
+import Image from "next/image";
 
-import { ActivityCard } from "@/components/explore/activity-card";
+import { ActivityList } from "@/components/explore/activity-list";
 import { ExploreToolbar } from "@/components/explore/explore-toolbar";
+import { Logo } from "@/components/layout/logo";
+import { NAV_ITEMS } from "@/config/navigation";
 import type { Audience, SportLevel, SportType } from "@/db/schema";
 import { toEarnedBadge, type EarnedBadge } from "@/lib/achievements/definitions";
 import type { ExploreActivity } from "@/lib/activities/types";
 import type { RatingSummary } from "@/lib/reviews/types";
+import { cn } from "@/lib/utils";
 
 const badge = (id: string, tier: number) => toEarnedBadge(id, tier)!;
 
@@ -27,7 +31,9 @@ type DemoSeed = {
   hour: number;
   distanceKm: number;
   organizer: string;
+  /** Participants : pseudo et photo (portraits CC0 de public/avatars). */
   participants: string[];
+  place: string;
   priceCents: number;
   equipmentRequired: boolean;
   audience?: Audience;
@@ -37,14 +43,13 @@ type DemoSeed = {
 
 /** Annonces d'exemple (illustration de l'interface, pas des données réelles). */
 const SEEDS: DemoSeed[] = [
-  { sportType: "football", spots: 2, level: "intermediate", day: 0, hour: 19, distanceKm: 1.2, organizer: "karim_five", participants: ["lea.m", "hugo13"], priceCents: 800, equipmentRequired: false, rating: { average: 4.8, count: 12 }, badges: [badge("organisateur", 3), badge("fiable", 2)] },
-  { sportType: "tennis", spots: 1, level: "beginner", day: 1, hour: 18, distanceKm: 2.8, organizer: "juju.tennis", participants: [], priceCents: 0, equipmentRequired: true, audience: "women", rating: { average: 4.6, count: 5 }, badges: [badge("joueur", 2)] },
-  { sportType: "running", spots: 4, level: null, day: 3, hour: 9, distanceKm: 3.5, organizer: "thomas_run", participants: ["ines.f", "nora_k", "samdu13", "lou.p"], priceCents: 0, equipmentRequired: false, rating: { average: 5, count: 21 }, badges: [badge("sociable", 3), badge("en-feu", 2)] },
-  { sportType: "padel", spots: 2, level: "intermediate", day: 2, hour: 20, distanceKm: 4.1, organizer: "lucas.padel", participants: ["emma_t"], priceCents: 1000, equipmentRequired: false, rating: { average: null, count: 0 }, badges: [badge("organisateur", 1)] },
+  { sportType: "football", spots: 2, level: "intermediate", day: 0, hour: 19, distanceKm: 1.2, place: "City stade du Jas", organizer: "thomas.five", participants: ["lina.foot", "antoine.football", "jules.run"], priceCents: 800, equipmentRequired: false, rating: { average: 4.8, count: 12 }, badges: [badge("organisateur", 3), badge("fiable", 2)] },
+  { sportType: "tennis", spots: 1, level: "beginner", day: 1, hour: 18, distanceKm: 2.8, place: "Tennis des Milles", organizer: "manon.tennis", participants: ["emma.padel"], priceCents: 0, equipmentRequired: true, audience: "women", rating: { average: 4.6, count: 5 }, badges: [badge("joueur", 2)] },
+  { sportType: "running", spots: 4, level: null, day: 3, hour: 9, distanceKm: 3.5, place: "Bords de l'Arc", organizer: "jules.run", participants: ["camille.run", "nora.fitness", "zoe.cycling", "baptiste.cycling"], priceCents: 0, equipmentRequired: false, rating: { average: 5, count: 21 }, badges: [badge("sociable", 3), badge("en-feu", 2)] },
 ];
 
 function toActivity(seed: DemoSeed, index: number): ExploreActivity {
-  const person = (username: string, i: number) => ({ id: `demo-${index}-${i}`, username, avatarUrl: null });
+  const person = (username: string, i: number) => ({ id: `demo-${index}-${i}`, username, avatarUrl: `/avatars/${username}.webp` });
   return {
     id: `demo-${index}`,
     creatorId: `demo-${index}-0`,
@@ -54,7 +59,7 @@ function toActivity(seed: DemoSeed, index: number): ExploreActivity {
     creatorBadges: seed.badges,
     sportType: seed.sportType,
     description: null,
-    locationName: null,
+    locationName: seed.place,
     address: null,
     priceCents: seed.priceCents,
     equipmentRequired: seed.equipmentRequired,
@@ -72,16 +77,18 @@ function toActivity(seed: DemoSeed, index: number): ExploreActivity {
 }
 
 const noop = () => {};
+const ITEMS = SEEDS.map((seed, index) => ({ activity: toActivity(seed, index), distanceKm: seed.distanceKm }));
 
 /**
- * Aperçu fidèle de l'écran Explorer : ce sont les vrais composants de l'app, affichés avec des
- * annonces d'exemple dans un cadre de navigateur. `inert` : non interactif et ignoré au clavier.
+ * Aperçu fidèle de l'écran Explorer (grand écran : en-tête, liste « Pour toi » et carte côte à côte) :
+ * ce sont les vrais composants de l'app, affichés avec des annonces d'exemple, et une capture de la
+ * vraie carte. `inert` : non interactif et ignoré au clavier.
  */
 export function ProductPreview() {
   return (
     <div
       role="img"
-      aria-label="Aperçu de SportMates : liste d'activités près de chez toi avec photo, niveau, horaire, distance et bouton Rejoindre"
+      aria-label="Aperçu de SportMates : séances près de chez toi en liste et sur la carte, avec niveau, horaire, distance et bouton Rejoindre"
       className="overflow-hidden rounded-block bg-night-950 shadow-lg ring-1 ring-white/10"
     >
       {/* Barre de navigateur */}
@@ -99,33 +106,66 @@ export function ProductPreview() {
       </div>
 
       <div inert aria-hidden className="pointer-events-none select-none">
+        {/* En-tête du site (reproduit : le vrai dépend de la route et de la session). */}
+        <div className="hidden h-14 items-center justify-between gap-6 border-b border-night-700 px-6 md:flex">
+          <Logo variant="dark" size="sm" href={null} />
+          <div className="flex items-center gap-1">
+            {NAV_ITEMS.map(({ href, label, icon: Icon }, index) => (
+              <span
+                key={href}
+                className={cn(
+                  "flex h-9 items-center gap-2 rounded-lg px-3 font-display text-sm font-semibold",
+                  index === 0 ? "bg-night-800 text-mint-500" : "text-white/70",
+                )}
+              >
+                <Icon className="size-4" />
+                {label}
+              </span>
+            ))}
+            <span className="ml-2 flex h-9 items-center gap-1.5 rounded-lg bg-mint-500 px-3.5 font-display text-sm font-bold text-night-950">
+              <Plus className="size-4" />
+              Créer une activité
+            </span>
+          </div>
+        </div>
+
         <ExploreToolbar
           view="list"
           onViewChange={noop}
+          showViewToggle={false}
           sport={null}
           onSportChange={noop}
           activeFilterCount={0}
           onOpenFilters={noop}
-          city="Autour de toi"
+          city="Aix-en-Provence"
           hasPosition
           isLocating={false}
           onRequestLocation={noop}
         />
-        <div className="bg-sand-50 px-4 py-5 md:px-6">
-          <ul className="grid gap-3 lg:grid-cols-2">
-            {SEEDS.map((seed, index) => (
-              <li key={index} className="min-w-0">
-                <ActivityCard
-                  activity={toActivity(seed, index)}
-                  distanceKm={seed.distanceKm}
-                  isOwn={false}
-                  myApplication={index === 1 ? { id: "demo", status: "accepted" } : null}
-                  pendingCount={0}
-                  onOpen={noop}
-                />
-              </li>
-            ))}
-          </ul>
+        <div className="flex h-[460px] bg-sand-50 md:h-[520px]">
+          <div className="w-full shrink-0 overflow-hidden lg:w-[420px] lg:border-r">
+            <ActivityList
+              items={ITEMS}
+              recommended={ITEMS}
+              totalCount={ITEMS.length}
+              currentUserId=""
+              myApplications={{ "demo-1": { id: "demo", status: "accepted" } }}
+              receivedApplications={[]}
+              onOpen={noop}
+              onResetFilters={noop}
+              onCreate={noop}
+              layout="column"
+            />
+          </div>
+          <div className="relative hidden flex-1 lg:block">
+            <Image
+              src="/images/app-map.webp"
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 560px, 0px"
+              className="object-cover object-[35%_center]"
+            />
+          </div>
         </div>
       </div>
     </div>

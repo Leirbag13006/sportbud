@@ -12,7 +12,6 @@ import {
   ShowcaseSection,
   SportsSection,
   StepsSection,
-  StorySection,
 } from "@/components/landing/landing-sections";
 import { MobileCtaBar } from "@/components/landing/mobile-cta-bar";
 import { Marquee } from "@/components/brand/marquee";
@@ -35,7 +34,7 @@ const PROMISES = ["Inscription gratuite", "Tous niveaux", "Prêt en 1 minute"];
 /**
  * Landing publique (pages /register et /login), pensée pour convertir :
  * promesse claire + formulaire dans le hero, aperçu réel du produit, étapes, fonctionnalités,
- * sports, histoire de marque, FAQ et appel final.
+ * sports, FAQ et appel final.
  */
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
@@ -116,7 +115,6 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         <Marquee />
         <FeaturesSection />
         <SportsSection />
-        <StorySection />
         <FaqSection />
         <FinalCtaSection />
       </main>

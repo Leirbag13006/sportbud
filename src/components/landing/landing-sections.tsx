@@ -15,12 +15,11 @@ import { AUDIENCE_BORDER_CLASSES, AudienceBadge } from "@/components/activities/
 import { PhotoBackdrop } from "@/components/brand/photo-backdrop";
 import { Marked, Scribble } from "@/components/brand/scribble";
 import { Stamp } from "@/components/brand/stamp";
-import { Emoji, getEmojiSrc, SportIcon } from "@/components/brand/sport-icon";
+import { Emoji, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { LEGAL_PAGES } from "@/config/legal";
 import { SPORT_COUNT, SPORTS } from "@/config/sports";
-import type { SportType } from "@/db/schema";
 import { ProductPreview } from "./product-preview";
 import { Reveal } from "./reveal";
 
@@ -164,21 +163,6 @@ function BentoCard({ title, text, children, className = "" }: { title: string; t
   );
 }
 
-/** Marqueur d'activité identique à ceux de la carte de l'app (styles .map-marker-*). */
-function MapMarker({ sport, spots, className }: { sport: SportType; spots: number; className: string }) {
-  return (
-    <div className={`absolute ${className}`}>
-      <div className="map-marker-activity">
-        <span className="map-marker-activity__icon">
-          {/* eslint-disable-next-line @next/next/no-img-element -- identique au marqueur HTML de Leaflet */}
-          <img src={getEmojiSrc(sport)} alt="" width={26} height={26} />
-        </span>
-        <span className="map-marker-activity__badge">{spots}</span>
-      </div>
-    </div>
-  );
-}
-
 export function FeaturesSection() {
   return (
     <section id="fonctionnalites" className="sl-dark relative scroll-mt-20 overflow-hidden py-20 md:py-28">
@@ -202,23 +186,14 @@ export function FeaturesSection() {
               title="Les séances autour de toi"
               text="Bascule entre liste et carte, vois la distance de chaque séance et repère en un coup d'œil celles qui ont encore de la place."
             >
-              {/* Mini-carte stylisée avec les vrais marqueurs de l'app */}
-              <div className="absolute inset-0 bg-night-900">
-                <svg viewBox="0 0 600 260" preserveAspectRatio="xMidYMid slice" className="size-full text-white/[0.07]" fill="none" stroke="currentColor">
-                  <path d="M0 190 C 120 170 180 120 300 130 S 480 60 600 70" strokeWidth="14" />
-                  <path d="M60 0 C 90 90 150 160 170 260" strokeWidth="9" />
-                  <path d="M420 0 C 400 80 430 170 520 260" strokeWidth="9" />
-                  <path d="M0 60 L 600 110" strokeWidth="5" />
-                  <path d="M250 0 L 330 260" strokeWidth="5" />
-                </svg>
-              </div>
-              <MapMarker sport="football" spots={3} className="top-[18%] left-[18%]" />
-              <MapMarker sport="tennis" spots={1} className="top-[48%] left-[44%]" />
-              <MapMarker sport="running" spots={4} className="top-[14%] left-[66%]" />
-              <MapMarker sport="basketball" spots={2} className="top-[52%] left-[80%]" />
-              <div className="absolute bottom-[14%] left-[28%] flex size-10 items-center justify-center rounded-full border-[3px] border-info bg-mint-100 font-display text-xs font-extrabold text-mint-700 shadow-md">
-                Toi
-              </div>
+              {/* Capture de la vraie carte de l'app */}
+              <Image
+                src="/images/app-map.webp"
+                alt=""
+                fill
+                sizes="(min-width: 768px) 700px, 100vw"
+                className="object-cover object-[40%_45%]"
+              />
             </BentoCard>
           </Reveal>
 
@@ -284,16 +259,22 @@ export function FeaturesSection() {
             <BentoCard className="h-full" title="Tu choisis avec qui tu joues" text="Tu consultes chaque profil avant d'accepter. Personne ne débarque sans ton accord.">
               <div className="sl-light w-full max-w-xs space-y-2">
                 {[
-                  { initials: "LM", name: "Léa M.", level: "Intermédiaire" },
-                  { initials: "HR", name: "Hugo R.", level: "Débutant" },
+                  { username: "lina.foot", level: "Intermédiaire", rating: "4,9" },
+                  { username: "antoine.football", level: "Débutant", rating: "4,7" },
                 ].map((person, index) => (
-                  <div key={person.name} className="flex items-center gap-2.5 rounded-card bg-card p-2.5 shadow-md">
-                    <span className="flex size-9 items-center justify-center rounded-full bg-mint-100 text-xs font-bold text-mint-700">
-                      {person.initials}
-                    </span>
+                  <div key={person.username} className="flex items-center gap-2.5 rounded-card bg-card p-2.5 shadow-md">
+                    <Image
+                      src={`/avatars/${person.username}.webp`}
+                      alt=""
+                      width={36}
+                      height={36}
+                      className="size-9 shrink-0 rounded-full object-cover"
+                    />
                     <span className="min-w-0 flex-1">
-                      <span className="block font-display text-sm font-bold text-ink">{person.name}</span>
-                      <span className="block text-xs text-gray-400">{person.level}</span>
+                      <span className="block truncate font-display text-sm font-bold text-ink">{person.username}</span>
+                      <span className="block text-xs text-gray-400">
+                        {person.level} · <span className="text-sunset-500">★</span> {person.rating}
+                      </span>
                     </span>
                     {index === 0 ? (
                       <span className="flex items-center gap-1 rounded-full bg-mint-100 px-2 py-0.5 text-xs font-semibold text-mint-700">
@@ -394,38 +375,6 @@ export function SportsSection() {
             </Reveal>
           ))}
         </ul>
-      </Container>
-    </section>
-  );
-}
-
-/* -----------------------------------------------------------------------------
-   Histoire de marque (photo plein cadre, valeurs suggérées par le texte)
-   -------------------------------------------------------------------------- */
-
-export function StorySection() {
-  return (
-    <section aria-labelledby="story-title" className="relative overflow-hidden bg-night-950">
-      <div aria-hidden className="absolute inset-0 md:left-[25%] md:[mask-image:linear-gradient(to_right,transparent,rgb(0_0_0/0.6)_35%,black_65%)]">
-        <Image src="/images/friends-laughing.jpg" alt="" fill sizes="(min-width: 768px) 65vw, 100vw" className="sl-photo object-cover" />
-        <div className="absolute inset-0 bg-night-950/55 md:bg-night-950/30" />
-        <div className="sl-grain absolute inset-0" />
-      </div>
-      <Container className="relative py-24 md:py-36">
-        <Reveal className="max-w-xl text-white/85">
-          <h2 id="story-title" className="relative text-4xl leading-[1.05] font-black text-white md:text-6xl">
-            Le sport, c&apos;est mieux <span className="text-mint-500">à plusieurs.</span>
-            <Scribble kind="spark" stroke={3} delay={300} className="absolute -top-8 -left-10 size-10 md:-left-14 md:size-12" />
-          </h2>
-          <p className="sl-bar mt-6 text-lg text-pretty">
-            Derrière chaque séance, il y a des gens qui avaient juste envie de bouger. Un five qui devient un rendez-vous
-            du jeudi, un footing qui finit en terrasse, un partenaire de tennis qui devient un ami.
-          </p>
-          <p className="mt-8 -rotate-3 font-script text-3xl text-white md:text-4xl">
-            Mêmes passions. Nouvelles rencontres.
-            <span aria-hidden className="mt-1 block h-1 w-64 rounded-full bg-swoosh" />
-          </p>
-        </Reveal>
       </Container>
     </section>
   );
