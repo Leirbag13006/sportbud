@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Caveat, Inter, Montserrat } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
+import { SITE_URL } from "@/config/site";
 import "./globals.css";
 
 /* Typographies du design system : Montserrat (titres, logo), Inter (texte), Caveat (accroche). */
@@ -23,13 +24,8 @@ const caveat = Caveat({
   weight: ["700"],
 });
 
-/** Adresse publique du site (Vercel la fournit en production), utilisée pour les aperçus de liens. */
-const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : "http://localhost:3000";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "SportMates · Bouge. Rencontre. Partage.",
     template: "%s · SportMates",

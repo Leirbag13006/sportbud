@@ -4,11 +4,15 @@ import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 
 /** Pages accessibles uniquement aux visiteurs non connectés. */
 const GUEST_ONLY_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
-/** Pages publiques (accessibles connecté ou non). */
-const PUBLIC_PATHS = ["/credits"];
-const PUBLIC_PREFIXES = ["/legal/"];
-/** Routes techniques d'authentification, accessibles dans tous les cas. */
-const AUTH_ROUTES_PREFIX = "/auth/";
+/**
+ * Espace membre : accueil (exploration) et pages connectées. Tout le reste est public
+ * (landing, légal, crédits, robots.txt, sitemap, manifest) ou renvoie la page 404.
+ */
+const MEMBER_PREFIXES = ["/activities", "/messages", "/profile", "/welcome"];
+
+function isMemberPath(pathname: string) {
+  return pathname === "/" || MEMBER_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
 
 /**
  * Vérification rapide, avant le rendu, basée sur la présence du cookie de session.
@@ -17,20 +21,10 @@ const AUTH_ROUTES_PREFIX = "/auth/";
  */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  if (pathname.startsWith(AUTH_ROUTES_PREFIX)) return NextResponse.next();
-
   const hasSession = request.cookies.has(SESSION_COOKIE_NAME);
-
-  // API : pas de redirection HTML, les routes répondent elles-mêmes 401 si besoin.
-  if (pathname.startsWith("/api/")) return NextResponse.next();
-
-  // Pages publiques, accessibles connecté ou non.
-  if (PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-    return NextResponse.next();
-  }
   const isGuestOnly = GUEST_ONLY_PATHS.includes(pathname);
 
-  if (!hasSession && !isGuestOnly) {
+  if (!hasSession && isMemberPath(pathname)) {
     // Visiteur sur l'accueil : landing orientée inscription.
     if (pathname === "/") return NextResponse.redirect(new URL("/register", request.url));
     // Lien vers une page précise (session expirée, lien partagé) : connexion puis retour.
