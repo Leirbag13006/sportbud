@@ -290,7 +290,8 @@ async function main() {
             senderId: creatorByActivity.get(application.activityId)!,
             kind: "system" as const,
             content: `${usernameOf.get(application.applicantId)} a rejoint la séance. Bienvenue !`,
-            createdAt: new Date(application.createdAt.getTime() + 2 * 3600 * 1000),
+            // Jamais dans le futur : le message resterait « non lu » jusqu'à sa date.
+            createdAt: new Date(Math.min(now.getTime() - 60_000, application.createdAt.getTime() + 2 * 3600 * 1000)),
           })),
         );
       }

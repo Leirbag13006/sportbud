@@ -28,6 +28,8 @@ export const GENDER_VALUES = ["female", "male", "other"] as const;
 export const AUDIENCE_VALUES = ["all", "women", "men"] as const;
 /** Motifs de signalement d'un membre. */
 export const REPORT_REASON_VALUES = ["no_show", "inappropriate", "harassment", "fake_profile", "unsafe", "other"] as const;
+/** Issue d'un signalement traité : classé sans suite, ou membre suspendu. */
+export const REPORT_RESOLUTION_VALUES = ["dismissed", "suspended"] as const;
 
 /** Liste SQL pour les contraintes CHECK : ('a', 'b', …). */
 const sqlList = (values: readonly string[]) => sql.raw(`(${values.map((v) => `'${v}'`).join(", ")})`);
@@ -72,6 +74,8 @@ export const users = sqliteTable(
     homeLng: real("home_lng"),
     /** null = parcours d'accueil (sports, niveau, ville) pas encore terminé. */
     onboardedAt: integer("onboarded_at", { mode: "timestamp_ms" }),
+    /** Compte suspendu par la modération (connexion impossible) ; null = actif. */
+    suspendedAt: integer("suspended_at", { mode: "timestamp_ms" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -265,6 +269,9 @@ export const reports = sqliteTable(
       .references(() => users.id, { onDelete: "cascade" }),
     reason: text("reason", { enum: REPORT_REASON_VALUES }).notNull(),
     details: text("details"),
+    /** Traitement par la modération (écran /admin) ; null = à traiter. Valeurs validées côté serveur. */
+    resolution: text("resolution", { enum: REPORT_RESOLUTION_VALUES }),
+    resolvedAt: integer("resolved_at", { mode: "timestamp_ms" }),
     createdAt: createdAt(),
   },
   (t) => [
@@ -405,6 +412,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   reviewsWritten: many(reviews, { relationName: "reviewer" }),
   blocksMade: many(blocks, { relationName: "blocker" }),
   blocksReceived: many(blocks, { relationName: "blocked" }),
+  reportsMade: many(reports, { relationName: "reporter" }),
+  reportsReceived: many(reports, { relationName: "reported" }),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -427,6 +436,11 @@ export const applicationsRelations = relations(applications, ({ one, many }) => 
   activity: one(activities, { fields: [applications.activityId], references: [activities.id] }),
   applicant: one(users, { fields: [applications.applicantId], references: [users.id] }),
   messages: many(messages),
+}));
+
+export const reportsRelations = relations(reports, ({ one }) => ({
+  reporter: one(users, { fields: [reports.reporterId], references: [users.id], relationName: "reporter" }),
+  reported: one(users, { fields: [reports.reportedId], references: [users.id], relationName: "reported" }),
 }));
 
 export const blocksRelations = relations(blocks, ({ one }) => ({
@@ -457,6 +471,7 @@ export type Message = typeof messages.$inferSelect;
 export type GroupMessage = typeof groupMessages.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type ReportReason = (typeof REPORT_REASON_VALUES)[number];
+export type ReportResolution = (typeof REPORT_RESOLUTION_VALUES)[number];
 export type Gender = (typeof GENDER_VALUES)[number];
 export type Audience = (typeof AUDIENCE_VALUES)[number];
 

@@ -59,7 +59,8 @@ export const getCurrentUser = cache(async (): Promise<PublicUser | null> => {
   if (!session) return null;
 
   const now = Date.now();
-  if (session.expiresAt.getTime() <= now) {
+  // Session expirée, ou compte suspendu par la modération depuis la connexion.
+  if (session.expiresAt.getTime() <= now || session.user.suspendedAt) {
     await db.delete(sessions).where(eq(sessions.id, sessionId));
     return null;
   }

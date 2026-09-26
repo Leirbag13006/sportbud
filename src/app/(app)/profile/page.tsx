@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarCheck, CalendarDays, ChevronRight, LogOut, Mail, Pencil, UserRound } from "lucide-react";
+import { CalendarCheck, CalendarDays, ChevronRight, LogOut, Mail, Pencil, ShieldCheck, UserRound } from "lucide-react";
 import Link from "next/link";
 
 import { logout } from "@/app/(auth)/actions";
@@ -19,6 +19,8 @@ import { BlockedUsersList } from "@/components/safety/blocked-users-list";
 import { getBlockedUsers } from "@/lib/safety/queries";
 import { DeleteAccountDialog } from "@/components/profile/delete-account-dialog";
 import { LEGAL_PAGES } from "@/config/legal";
+import { isAdmin } from "@/lib/admin/auth";
+import { countOpenReports } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Profil" };
 
@@ -27,6 +29,7 @@ const memberSince = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "num
 /** Profil de l'utilisateur connecté. */
 export default async function ProfilePage() {
   const user = await requireUser();
+  const openReports = isAdmin(user) ? await countOpenReports() : null;
   const [rating, reviews, achievements, blockedUsers] = await Promise.all([
     getRatingSummary(user.id),
     getUserReviews(user.id),
@@ -142,6 +145,25 @@ export default async function ProfilePage() {
           </span>
           <ChevronRight className="size-5 text-gray-400" aria-hidden />
         </Link>
+
+        {/* Modération (adresses ADMIN_EMAILS uniquement) */}
+        {openReports !== null && (
+          <Link
+            href="/admin"
+            className="flex items-center gap-4 rounded-card bg-card p-4 shadow-md transition-all duration-150 ease-brand outline-none hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-3 focus-visible:ring-ring"
+          >
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-mint-100 text-mint-700">
+              <ShieldCheck className="size-6" aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display font-bold text-ink">Modération</span>
+              <span className="block text-sm">
+                {openReports > 0 ? `${openReports} signalement${openReports > 1 ? "s" : ""} à traiter` : "Aucun signalement à traiter"}
+              </span>
+            </span>
+            <ChevronRight className="size-5 text-gray-400" aria-hidden />
+          </Link>
+        )}
 
         {/* Sécurité : membres bloqués */}
         <section aria-labelledby="blocked-title" className="rounded-card bg-card p-5 shadow-md">

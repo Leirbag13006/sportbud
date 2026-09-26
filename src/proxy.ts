@@ -8,7 +8,7 @@ const GUEST_ONLY_PATHS = ["/login", "/register", "/forgot-password", "/reset-pas
  * Espace membre : accueil (exploration) et pages connectées. Tout le reste est public
  * (landing, légal, crédits, robots.txt, sitemap, manifest) ou renvoie la page 404.
  */
-const MEMBER_PREFIXES = ["/activities", "/messages", "/profile", "/welcome"];
+const MEMBER_PREFIXES = ["/activities", "/messages", "/profile", "/welcome", "/admin"];
 
 function isMemberPath(pathname: string) {
   return pathname === "/" || MEMBER_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));

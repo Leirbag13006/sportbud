@@ -85,6 +85,13 @@ Mots de passe hachés avec bcrypt, sessions stockées en base (jeton aléatoire 
 - Menu « ⋯ » sur un membre : **signaler** (motif + précisions, enregistré dans `reports`) ou **bloquer**
   (activités masquées dans les deux sens, candidatures en attente refusées, messagerie coupée).
 
+## Modération
+
+Écran `/admin` (lien « Modération » dans le profil), réservé aux comptes dont l'e-mail figure dans la
+variable d'environnement `ADMIN_EMAILS` (séparés par des virgules, à régler dans Vercel ; 404 pour les autres).
+Pour chaque signalement : **classer sans suite**, ou **suspendre** le membre (sessions fermées, connexion refusée,
+séances à venir annulées avec message au groupe, signalements en cours traités) ; la suspension peut être levée.
+
 ## Messagerie et notifications « temps réel »
 
 - **Groupe de la séance** (`/messages/g-<id de la séance>`, tables `group_messages` et `group_chat_reads`) :

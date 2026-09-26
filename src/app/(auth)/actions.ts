@@ -71,6 +71,13 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
   }
 
   await clearLoginFailures(parsed.data.email);
+  // Vérifié après le mot de passe : on ne révèle pas la suspension à un tiers.
+  if (user.suspendedAt) {
+    return {
+      error: "Ce compte a été suspendu par la modération à la suite de signalements.",
+      values: { email: raw.email },
+    };
+  }
   await createSession(user.id);
   redirect(getSafeRedirectPath(formData.get("next")));
 }
