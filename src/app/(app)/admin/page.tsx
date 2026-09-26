@@ -8,17 +8,16 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { requireAdmin } from "@/lib/admin/auth";
 import { countOpenReports, getReports } from "@/lib/admin/queries";
-import { formatDayInParis, pluralize } from "@/lib/format";
+import { formatDay, formatFullDay, formatTime, pluralize } from "@/lib/format";
 import { REPORT_REASONS } from "@/lib/safety/types";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Modération", robots: { index: false } };
 
 const reasonLabel = new Map(REPORT_REASONS.map(({ value, label }) => [value, label]));
-const timeInParis = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" });
 
 function formatDate(date: Date) {
-  return `${formatDayInParis(date)} à ${timeInParis.format(date)}`;
+  return `${formatDay(date)} à ${formatTime(date)}`;
 }
 
 /** Écran de modération (réservé aux adresses ADMIN_EMAILS) : traiter les signalements des membres. */
@@ -72,7 +71,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
                     <div className="min-w-0">
                       <p className="truncate font-display text-lg font-extrabold text-ink">{report.reported.username}</p>
                       <p className="truncate text-xs text-gray-400">
-                        {report.reported.email} · inscrit {formatDayInParis(report.reported.createdAt, { relative: false }).toLowerCase()}
+                        {report.reported.email} · inscrit {formatFullDay(report.reported.createdAt).toLowerCase()}
                       </p>
                     </div>
                   </div>

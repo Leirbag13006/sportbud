@@ -7,7 +7,7 @@ import { UserAvatar } from "@/components/applications/user-avatar";
 import { getSportLevelLabel } from "@/config/sport-levels";
 import { getActivityTitle, getSport } from "@/config/sports";
 import type { PublicActivity } from "@/lib/activities/types";
-import { formatDayInParis, formatPrice, formatTimeRangeInParis, pluralize } from "@/lib/format";
+import { formatDay, formatPrice, formatTimeRange, pluralize } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 /**
@@ -65,7 +65,7 @@ export function PublicActivityCard({ activity, priority }: { activity: PublicAct
         </p>
         <p className="flex items-center gap-1 truncate text-xs text-gray-400">
           <CalendarDays className="size-3.5 shrink-0" aria-hidden />
-          {formatDayInParis(activity.startsAt)} • {formatTimeRangeInParis(activity.startsAt, activity.durationMinutes)}
+          {formatDay(activity.startsAt)} • {formatTimeRange(activity.startsAt, activity.durationMinutes)}
         </p>
         {activity.area && (
           <p className="flex items-center gap-1 truncate text-xs text-gray-400">

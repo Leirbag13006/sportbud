@@ -24,7 +24,7 @@ import { countOpenReports } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Profil" };
 
-const memberSince = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
+const memberSince = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", month: "long", year: "numeric" });
 
 /** Profil de l'utilisateur connecté. */
 export default async function ProfilePage() {

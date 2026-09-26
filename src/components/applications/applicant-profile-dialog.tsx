@@ -24,7 +24,7 @@ import type { RatingSummary, ReviewItem } from "@/lib/reviews/types";
 import { UserAvatar } from "./user-avatar";
 import { UserSafetyMenu } from "@/components/safety/user-safety-menu";
 
-const memberSince = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
+const memberSince = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", month: "long", year: "numeric" });
 
 interface ApplicantProfileDialogProps {
   applicant: ApplicantProfile | null;

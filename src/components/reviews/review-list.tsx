@@ -3,7 +3,7 @@ import { getSport } from "@/config/sports";
 import type { ReviewItem } from "@/lib/reviews/types";
 import { RatingStars } from "./rating-stars";
 
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+const dateFormatter = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long", year: "numeric" });
 
 /** Liste d'avis reçus (auteur, note, sport, date, commentaire). */
 export function ReviewList({ reviews, emptyMessage }: { reviews: ReviewItem[]; emptyMessage?: string }) {

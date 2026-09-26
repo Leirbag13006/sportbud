@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { unblockUser } from "@/lib/safety/actions";
 import type { BlockedUser } from "@/lib/safety/types";
 
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+const dateFormatter = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long", year: "numeric" });
 
 /** Membres bloqués, avec un bouton pour les débloquer. */
 export function BlockedUsersList({ users }: { users: BlockedUser[] }) {

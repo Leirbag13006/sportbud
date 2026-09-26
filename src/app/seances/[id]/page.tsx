@@ -19,7 +19,7 @@ import { SITE_URL } from "@/config/site";
 import { getPublicActivities, getPublicActivity } from "@/lib/activities/public";
 import type { PublicActivity } from "@/lib/activities/types";
 import { getCurrentUser } from "@/lib/auth/session";
-import { formatDayInParis, formatDuration, formatPrice, formatTimeRangeInParis, pluralize } from "@/lib/format";
+import { formatDay, formatDuration, formatFullDay, formatPrice, formatTimeRange, pluralize } from "@/lib/format";
 
 /** Libellés de la séance ; relative = false pour les aperçus de liens (« Demain » y deviendrait faux). */
 function describe(activity: PublicActivity, relative = true) {
@@ -28,7 +28,7 @@ function describe(activity: PublicActivity, relative = true) {
   return {
     sport,
     title: getActivityTitle(activity.sportType, isFull ? activity.spotsTotal : activity.spotsAvailable),
-    when: `${formatDayInParis(activity.startsAt, { relative })} · ${formatTimeRangeInParis(activity.startsAt, activity.durationMinutes)}`,
+    when: `${relative ? formatDay(activity.startsAt) : formatFullDay(activity.startsAt)} · ${formatTimeRange(activity.startsAt, activity.durationMinutes)}`,
     level: activity.requiredLevel ? `Niveau ${getSportLevelLabel(activity.requiredLevel).toLowerCase()}` : "Tous niveaux",
   };
 }

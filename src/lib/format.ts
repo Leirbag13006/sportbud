@@ -1,25 +1,39 @@
 /** Utilitaires de formatage (dates, durées, noms) en français. */
 
-const dayFormatter = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" });
-const timeFormatter = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
+/*
+ * Toutes les dates sont affichées à l'heure de Paris (le service est en France), que le rendu ait
+ * lieu dans le navigateur ou sur le serveur (qui tourne en UTC sur Vercel).
+ */
+const TIME_ZONE = "Europe/Paris";
+const dayFormatter = new Intl.DateTimeFormat("fr-FR", { timeZone: TIME_ZONE, weekday: "long", day: "numeric", month: "long" });
+const timeFormatter = new Intl.DateTimeFormat("fr-FR", { timeZone: TIME_ZONE, hour: "2-digit", minute: "2-digit" });
+const dayKeyFormatter = new Intl.DateTimeFormat("fr-CA", { timeZone: TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" });
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Nom pour s'adresser au membre : son prénom s'il l'a renseigné, sinon son pseudo. */
 export function getFirstName(user: { fullName: string | null; username: string }) {
   return user.fullName?.split(" ")[0] || user.username;
 }
 
+/** Même jour calendaire à Paris. */
 function isSameDay(a: Date, b: Date) {
-  return a.toDateString() === b.toDateString();
+  return dayKeyFormatter.format(a) === dayKeyFormatter.format(b);
 }
 
-/** « Aujourd'hui », « Demain » ou « samedi 27 septembre ». */
+function capitalize(label: string) {
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+/** Date complète : « Samedi 27 septembre » (aperçus de liens, où « Demain » deviendrait faux). */
+export function formatFullDay(date: Date) {
+  return capitalize(dayFormatter.format(date));
+}
+
+/** « Aujourd'hui », « Demain » ou « Samedi 27 septembre ». */
 export function formatDay(date: Date, now = new Date()) {
   if (isSameDay(date, now)) return "Aujourd'hui";
-  const tomorrow = new Date(now);
-  tomorrow.setDate(now.getDate() + 1);
-  if (isSameDay(date, tomorrow)) return "Demain";
-  const label = dayFormatter.format(date);
-  return label.charAt(0).toUpperCase() + label.slice(1);
+  if (isSameDay(date, new Date(now.getTime() + DAY_MS))) return "Demain";
+  return formatFullDay(date);
 }
 
 /** « 18:00 ». */
@@ -35,8 +49,8 @@ export function formatTimeRange(start: Date, durationMinutes: number) {
 
 /** Heure courte à la française : « 19h », « 19h30 ». */
 export function formatHour(date: Date) {
-  const minutes = date.getMinutes();
-  return `${date.getHours()}h${minutes ? String(minutes).padStart(2, "0") : ""}`;
+  const [hours, minutes] = formatTime(date).split(":");
+  return `${Number(hours)}h${minutes === "00" ? "" : minutes}`;
 }
 
 /** « 45 min », « 1 h », « 1 h 30 ». */
@@ -71,54 +85,19 @@ export function pluralize(count: number, singular: string, plural = `${singular}
   return `${count} ${count > 1 ? plural : singular}`;
 }
 
-const shortDateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
+const shortDateFormatter = new Intl.DateTimeFormat("fr-FR", { timeZone: TIME_ZONE, day: "numeric", month: "short" });
 
 /** Horodatage compact d'une liste : « 14:32 » aujourd'hui, « Hier », sinon « 12 sept. ». */
 export function formatRelativeShort(date: Date, now = new Date()) {
   if (isSameDay(date, now)) return formatTime(date);
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  if (isSameDay(date, yesterday)) return "Hier";
+  if (isSameDay(date, new Date(now.getTime() - DAY_MS))) return "Hier";
   return shortDateFormatter.format(date);
 }
 
 /** Libellé de séparateur de jour dans une conversation : « Aujourd'hui », « Hier », « Samedi 26 septembre ». */
 export function formatDaySeparator(date: Date, now = new Date()) {
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  if (isSameDay(date, yesterday)) return "Hier";
+  if (isSameDay(date, new Date(now.getTime() - DAY_MS))) return "Hier";
   return formatDay(date, now);
 }
 
 export { isSameDay };
-
-/*
- * Rendu côté serveur (pages publiques, images de partage) : le serveur tourne en UTC, les dates
- * sont donc formatées explicitement à l'heure de Paris (le service est en France).
- */
-const PARIS = "Europe/Paris";
-const parisDayKey = new Intl.DateTimeFormat("fr-CA", { timeZone: PARIS, year: "numeric", month: "2-digit", day: "2-digit" });
-const parisDay = new Intl.DateTimeFormat("fr-FR", { timeZone: PARIS, weekday: "long", day: "numeric", month: "long" });
-const parisTime = new Intl.DateTimeFormat("fr-FR", { timeZone: PARIS, hour: "2-digit", minute: "2-digit" });
-
-/**
- * formatDay à l'heure de Paris : « Aujourd'hui », « Demain » ou « Samedi 27 septembre ».
- * relative = false : toujours la date complète (aperçus de liens, gardés en cache par les messageries).
- */
-export function formatDayInParis(date: Date, { relative = true, now = new Date() } = {}) {
-  const key = parisDayKey.format(date);
-  if (!relative) return capitalize(parisDay.format(date));
-  if (key === parisDayKey.format(now)) return "Aujourd'hui";
-  if (key === parisDayKey.format(new Date(now.getTime() + 24 * 60 * 60 * 1000))) return "Demain";
-  return capitalize(parisDay.format(date));
-}
-
-function capitalize(label: string) {
-  return label.charAt(0).toUpperCase() + label.slice(1);
-}
-
-/** formatTimeRange à l'heure de Paris : « 17:00-18:30 ». */
-export function formatTimeRangeInParis(start: Date, durationMinutes: number) {
-  const end = new Date(start.getTime() + durationMinutes * 60_000);
-  return `${parisTime.format(start)}-${parisTime.format(end)}`;
-}

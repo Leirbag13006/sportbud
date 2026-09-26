@@ -7,7 +7,7 @@ import sharp from "sharp";
 import { getActivityTitle, getSport } from "@/config/sports";
 import { getSportLevelLabel } from "@/config/sport-levels";
 import { getPublicActivity } from "@/lib/activities/public";
-import { formatDayInParis, formatPrice, formatTimeRangeInParis, pluralize } from "@/lib/format";
+import { formatFullDay, formatPrice, formatTimeRange, pluralize } from "@/lib/format";
 
 /** Image d'aperçu du lien (WhatsApp, réseaux) : photo N&B du sport, titre, date et places. */
 export const alt = "Séance SportMates";
@@ -70,7 +70,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
               </span>
               <span style={{ fontSize: 76, fontWeight: 800, color: "white", lineHeight: 1.05, marginTop: 12, maxWidth: 980 }}>{title}</span>
               <span style={{ fontSize: 36, fontWeight: 600, color: "rgba(255,255,255,0.88)", marginTop: 24 }}>
-                {formatDayInParis(activity.startsAt, { relative: false })} · {formatTimeRangeInParis(activity.startsAt, activity.durationMinutes)}
+                {formatFullDay(activity.startsAt)} · {formatTimeRange(activity.startsAt, activity.durationMinutes)}
                 {activity.area ? ` · ${activity.area}` : ""}
               </span>
             </div>
