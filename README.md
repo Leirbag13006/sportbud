@@ -87,7 +87,12 @@ Mots de passe hachés avec bcrypt, sessions stockées en base (jeton aléatoire 
 
 ## Messagerie et notifications « temps réel »
 
-Une conversation s'ouvre automatiquement quand une candidature est acceptée (message système).
+- **Groupe de la séance** (`/messages/g-<id de la séance>`, tables `group_messages` et `group_chat_reads`) :
+  l'organisateur et tous les participants acceptés. Il s'ouvre au premier participant accepté ; arrivées, départs,
+  modifications et annulation y sont annoncés par un message automatique.
+- **Conversation privée** organisateur ↔ participant (`/messages/<id de la candidature>`, table `messages`),
+  accessible depuis la liste des membres du groupe ; elle n'apparaît dans la liste qu'une fois un message écrit.
+
 Le temps réel repose sur un rafraîchissement périodique (SWR) de routes API JSON :
 
 | Donnée | Route | Fréquence |

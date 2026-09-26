@@ -4,9 +4,9 @@ import { and, eq, isNull, ne } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { messages } from "@/db/schema";
+import { groupMessages, messages } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getConversation, toMessageDTO } from "./queries";
+import { getConversation, markGroupRead, toMessageDTO } from "./queries";
 import type { MessageDTO } from "./types";
 
 const contentSchema = z
@@ -17,7 +17,7 @@ const contentSchema = z
 
 export type SendMessageResult = { ok: true; message: MessageDTO } | { ok: false; error: string };
 
-/** Envoie un message dans une conversation dont l'utilisateur est participant. */
+/** Envoie un message dans une conversation (privée ou de groupe) dont l'utilisateur est membre. */
 export async function sendMessage(conversationId: string, content: string): Promise<SendMessageResult> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Ta session a expiré, reconnecte-toi." };
@@ -27,6 +27,24 @@ export async function sendMessage(conversationId: string, content: string): Prom
 
   const conversation = await getConversation(user.id, conversationId);
   if (!conversation) return { ok: false, error: "Cette conversation n'est plus disponible." };
+
+  if (conversation.kind === "group") {
+    if (conversation.activity.cancelled) return { ok: false, error: "Cette séance a été annulée : la discussion est close." };
+    const [message] = await db
+      .insert(groupMessages)
+      .values({ activityId: conversation.activity.id, senderId: user.id, content: parsed.data })
+      .returning();
+    // Écrire dans le groupe vaut lecture de ce qui précède.
+    await markGroupRead(conversation.activity.id, user.id);
+    return {
+      ok: true,
+      message: {
+        ...toMessageDTO({ ...message!, readAt: null }),
+        sender: { id: user.id, username: user.username, avatarUrl: user.avatarUrl },
+      },
+    };
+  }
+
   if (conversation.blockStatus) return { ok: false, error: "Tu ne peux plus écrire à ce membre." };
   if (conversation.withdrawn) return { ok: false, error: "Cette conversation est close : le participant a quitté la séance." };
 
@@ -41,7 +59,14 @@ export async function sendMessage(conversationId: string, content: string): Prom
 /** Marque comme lus les messages reçus dans une conversation. */
 export async function markConversationRead(conversationId: string): Promise<void> {
   const user = await getCurrentUser();
-  if (!user || !(await getConversation(user.id, conversationId))) return;
+  if (!user) return;
+  const conversation = await getConversation(user.id, conversationId);
+  if (!conversation) return;
+
+  if (conversation.kind === "group") {
+    await markGroupRead(conversation.activity.id, user.id);
+    return;
+  }
 
   await db
     .update(messages)

@@ -143,7 +143,7 @@ const STEPS = [
   {
     icon: "handshake" as const,
     title: "Rejoins en un clic",
-    text: "L'organisateur valide ta demande. Dès que c'est bon, une discussion s'ouvre entre vous.",
+    text: "L'organisateur valide ta demande. Dès que c'est bon, tu rejoins la discussion du groupe.",
   },
   {
     icon: "speech" as const,
@@ -333,12 +333,12 @@ export function FeaturesSection() {
           </Reveal>
 
           <Reveal delay={150} className="md:col-span-3">
-            <BentoCard className="h-full" title="La discussion s'ouvre toute seule" text="Candidature acceptée ? Une conversation privée démarre pour caler l'heure et le lieu.">
+            <BentoCard className="h-full" title="Un groupe par séance" text="Candidature acceptée ? Tu rejoins la discussion de la séance, avec l'organisateur et tous les participants.">
               <div className="flex w-full max-w-xs flex-col gap-1.5 text-sm">
-                <span className="self-center rounded-lg bg-mint-500/15 px-3 py-1 text-xs text-mint-500">Candidature acceptée !</span>
-                <span className="max-w-[80%] self-start rounded-2xl rounded-bl-md bg-white px-3 py-2 text-ink">Salut ! On se retrouve à l&apos;entrée ?</span>
-                <span className="max-w-[80%] self-end rounded-2xl rounded-br-md bg-mint-500 px-3 py-2 text-night-950">Parfait, j&apos;amène les balles 🎾</span>
-                <span className="self-end text-[11px] text-white/50">Lu</span>
+                <span className="self-center rounded-lg bg-mint-500/15 px-3 py-1 text-xs text-mint-500">🎉 lina.foot a rejoint la séance</span>
+                <span className="mt-1 self-start px-1 text-[11px] font-medium text-white/60">thomas.five</span>
+                <span className="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-white px-3 py-2 text-ink">RDV 18h45 à l&apos;entrée du city ?</span>
+                <span className="max-w-[80%] self-end rounded-2xl rounded-br-md bg-mint-500 px-3 py-2 text-night-950">Parfait, j&apos;amène le ballon ⚽</span>
               </div>
             </BentoCard>
           </Reveal>

@@ -61,6 +61,7 @@ import {
 } from "@/components/ui/dialog";
 import type { MyApplicationSummary, ReceivedApplication } from "@/lib/applications/types";
 import { formatDay, formatPrice, formatTimeRange, pluralize } from "@/lib/format";
+import { groupConversationId } from "@/lib/messages/types";
 import { cn } from "@/lib/utils";
 
 interface ActivitySheetProps {
@@ -302,7 +303,9 @@ function ActivityDetails({
           </div>
         )}
 
-        {isOwn && <ReceivedApplicationsSection applications={receivedApplications} isFull={!isOpen} />}
+        {isOwn && (
+          <ReceivedApplicationsSection activityId={activity.id} applications={receivedApplications} isFull={!isOpen} />
+        )}
       </div>
 
       <DrawerFooter className="border-t pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -318,13 +321,16 @@ function ActivityDetails({
 
 /** Liste des candidatures reçues, visible uniquement par le créateur. */
 function ReceivedApplicationsSection({
+  activityId,
   applications,
   isFull,
 }: {
+  activityId: string;
   applications: ReceivedApplication[];
   isFull: boolean;
 }) {
   const pendingCount = applications.filter((application) => application.status === "pending").length;
+  const hasParticipants = applications.some((application) => application.status === "accepted");
 
   return (
     <section aria-labelledby="applications-title" className="space-y-3">
@@ -347,6 +353,13 @@ function ReceivedApplicationsSection({
             <ReceivedApplicationRow key={application.id} application={application} isFull={isFull} />
           ))}
         </ul>
+      )}
+
+      {hasParticipants && (
+        <Button variant="outline" className="w-full" nativeButton={false} render={<Link href={`/messages/${groupConversationId(activityId)}`} />}>
+          <MessageCircle aria-hidden />
+          Discussion du groupe
+        </Button>
       )}
     </section>
   );
@@ -516,9 +529,13 @@ function ApplicantActions({
         <p className="text-sm">{status.text}</p>
       </div>
       {myApplication.status === "accepted" && (
-        <Button className="h-11 w-full text-base" nativeButton={false} render={<Link href={`/messages/${myApplication.id}`} />}>
+        <Button
+          className="h-11 w-full text-base"
+          nativeButton={false}
+          render={<Link href={`/messages/${groupConversationId(activity.id)}`} />}
+        >
           <MessageCircle aria-hidden />
-          Discuter avec l&apos;organisateur
+          Discussion du groupe
         </Button>
       )}
       {status.action && (

@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getConversation, getMessages } from "@/lib/messages/queries";
 import type { ConversationWithMessagesDTO } from "@/lib/messages/types";
 
-/** Conversation et ses messages, réservés à ses deux participants. */
+/** Conversation et ses messages, réservés à ses membres. */
 export async function GET(_request: NextRequest, ctx: RouteContext<"/api/conversations/[id]/messages">) {
   const user = await getCurrentUser();
   if (!user) return unauthorized();
@@ -15,5 +15,5 @@ export async function GET(_request: NextRequest, ctx: RouteContext<"/api/convers
   // 404 (et non 403) : ne pas révéler l'existence d'une conversation à un tiers.
   if (!conversation) return notFound();
 
-  return json<ConversationWithMessagesDTO>({ conversation, messages: await getMessages(id) });
+  return json<ConversationWithMessagesDTO>({ conversation, messages: await getMessages(user.id, conversation) });
 }

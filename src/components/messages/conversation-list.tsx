@@ -35,8 +35,8 @@ export function ConversationList({ initialConversations, selectedId, currentUser
   if (conversations.length === 0) {
     return (
       <p className="px-6 py-12 text-center text-sm text-muted-foreground">
-        Aucune conversation pour l&apos;instant. Quand une candidature est acceptée, une discussion s&apos;ouvre ici
-        entre l&apos;organisateur et le participant.
+        Aucune conversation pour l&apos;instant. Dès qu&apos;une candidature est acceptée, la discussion de groupe de
+        la séance s&apos;ouvre ici, avec l&apos;organisateur et tous les participants.
       </p>
     );
   }
@@ -51,11 +51,17 @@ export function ConversationList({ initialConversations, selectedId, currentUser
         const sport = getSport(conversation.activity.sportType);
         const { lastMessage, unreadCount } = conversation;
         const isSelected = conversation.id === selectedId;
-        // Seul le message automatique d'acceptation : on invite à lancer la discussion.
-        const isNew = !lastMessage || lastMessage.kind === "system";
+        const isGroup = conversation.kind === "group";
+        // Pas encore de message écrit (seulement l'automatique) : on invite à lancer la discussion.
+        const isNew = !lastMessage || (!isGroup && lastMessage.kind === "system");
+        const author = lastMessage?.senderId === currentUserId ? "Toi" : lastMessage?.senderName;
         const preview = isNew
           ? "Nouvelle discussion : dis bonjour 👋"
-          : `${lastMessage.senderId === currentUserId ? "Toi : " : ""}${lastMessage.content}`;
+          : lastMessage.kind === "system"
+            ? lastMessage.content
+            : isGroup || lastMessage.senderId === currentUserId
+              ? `${author} : ${lastMessage.content}`
+              : lastMessage.content;
 
         return (
           <li key={conversation.id}>
@@ -67,26 +73,35 @@ export function ConversationList({ initialConversations, selectedId, currentUser
                 isSelected && "bg-brand-soft/70 hover:bg-brand-soft",
               )}
             >
-              <div className="relative">
-                <UserAvatar user={conversation.otherUser} className="size-12" />
-                <span
-                  aria-hidden
-                  className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full bg-card shadow-sm ring-2 ring-background"
-                >
-                  <SportIcon sport={conversation.activity.sportType} className="size-4" />
+              {conversation.kind === "group" ? (
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-soft">
+                  <SportIcon sport={conversation.activity.sportType} className="size-7" />
                 </span>
-              </div>
+              ) : (
+                <div className="relative">
+                  <UserAvatar user={conversation.otherUser} className="size-12" />
+                  <span
+                    aria-hidden
+                    className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full bg-card shadow-sm ring-2 ring-background"
+                  >
+                    <SportIcon sport={conversation.activity.sportType} className="size-4" />
+                  </span>
+                </div>
+              )}
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className={cn("truncate", unreadCount > 0 ? "font-semibold" : "font-medium")}>
-                    {conversation.otherUser.username}
+                    {conversation.kind === "group" ? conversation.activity.title : conversation.otherUser.username}
                   </p>
                   <time dateTime={conversation.updatedAt} className="shrink-0 text-xs text-muted-foreground">
                     {formatRelativeShort(new Date(conversation.updatedAt))}
                   </time>
                 </div>
                 <p className="truncate text-xs text-muted-foreground">
+                  {conversation.kind === "group"
+                    ? `Groupe · ${conversation.members.length} membres · `
+                    : "Privé · "}
                   {sport.label} · {formatDay(new Date(conversation.activity.startsAt))}
                 </p>
                 <div className="flex items-center justify-between gap-2">

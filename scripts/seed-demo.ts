@@ -11,7 +11,7 @@
 import { hashSync } from "bcryptjs";
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
-import { activities, applications, messages, reviews, users } from "../src/db/schema";
+import { activities, applications, groupChatReads, groupMessages, reviews, users } from "../src/db/schema";
 import type { Audience, Gender, SportLevel, SportType } from "../src/db/schema";
 import * as schema from "../src/db/schema";
 import { DEMO_EMAIL_DOMAIN, removeDemoData } from "./lib/demo-data";
@@ -279,17 +279,17 @@ async function main() {
               .returning({ id: applications.id, activityId: applications.activityId, applicantId: applications.applicantId, status: applications.status, createdAt: applications.createdAt })
           : [];
 
-      // Comme dans l'application : chaque acceptation ouvre la conversation par un message système.
+      // Comme dans l'application : chaque acceptation est annoncée dans le groupe de la séance.
       const creatorByActivity = new Map(seeds.map((seed, index) => [rows[index]!.id, idOf(seed.creator)]));
+      const usernameOf = new Map([...userId].map(([username, id]) => [id, username]));
       const accepted = insertedApplications.filter((application) => application.status === "accepted");
       if (accepted.length > 0) {
-        await tx.insert(messages).values(
+        await tx.insert(groupMessages).values(
           accepted.map((application) => ({
-            applicationId: application.id,
+            activityId: application.activityId,
             senderId: creatorByActivity.get(application.activityId)!,
             kind: "system" as const,
-            content: "Candidature acceptée ! Vous pouvez maintenant discuter pour vous organiser.",
-            readAt: new Date(application.createdAt.getTime() + 3 * 3600 * 1000),
+            content: `${usernameOf.get(application.applicantId)} a rejoint la séance. Bienvenue !`,
             createdAt: new Date(application.createdAt.getTime() + 2 * 3600 * 1000),
           })),
         );
@@ -311,7 +311,7 @@ async function main() {
     });
     await tx.insert(reviews).values(reviewRows);
 
-    // --- Conversations ---
+    // --- Discussions de groupe (échanges organisateur ↔ participant, dans le groupe de la séance) ---
     const allSeeds = [...upcoming, ...past];
     const allRows = [...upcomingResult.rows, ...pastResult.rows];
     const allApplications = [...upcomingResult.applications, ...pastResult.applications];
@@ -323,16 +323,20 @@ async function main() {
       return chat.lines.map(([from, content], position) => {
         const createdAt = new Date(Math.min(now.getTime() - 60_000, start + position * 20 * 60 * 1000));
         return {
-          applicationId: application.id,
+          activityId: application.activityId,
           senderId: from === "creator" ? idOf(chat.creator) : idOf(chat.applicant),
           kind: "text" as const,
           content,
-          readAt: createdAt,
           createdAt,
         };
       });
     });
-    await tx.insert(messages).values(chatRows);
+    await tx.insert(groupMessages).values(chatRows);
+    // Tout est déjà lu par les membres démo : pas de badge « non lu » parasite.
+    const readRows = allSeeds.flatMap((seed, index) =>
+      [seed.creator, ...seed.accepted].map((username) => ({ activityId: allRows[index]!.id, userId: idOf(username), readAt: now })),
+    );
+    await tx.insert(groupChatReads).values(readRows).onConflictDoNothing();
 
     console.log(
       `Seed démo terminé : ${people.length} comptes, ${upcoming.length} séances à venir, ${past.length} passées, ` +

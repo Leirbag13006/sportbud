@@ -16,6 +16,7 @@ import type { ExploreActivity } from "@/lib/activities/types";
 import { applyToActivity } from "@/lib/applications/actions";
 import type { MyApplicationSummary } from "@/lib/applications/types";
 import { formatDay, formatPrice, formatTimeRange } from "@/lib/format";
+import { groupConversationId } from "@/lib/messages/types";
 import { formatDistance } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 
@@ -173,10 +174,10 @@ function CardAction({
         size="sm"
         className={buttonClass}
         nativeButton={false}
-        render={<Link href={`/messages/${myApplication.id}`} />}
+        render={<Link href={`/messages/${groupConversationId(activity.id)}`} />}
       >
         <MessageCircle aria-hidden />
-        Contacter
+        Discuter
       </Button>
     );
   }

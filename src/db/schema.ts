@@ -354,6 +354,46 @@ export const messages = sqliteTable(
 );
 
 // -----------------------------------------------------------------------------
+// Discussion de groupe d'une séance : l'organisateur et les participants acceptés.
+// (Les conversations privées organisateur ↔ participant restent dans `messages`.)
+// -----------------------------------------------------------------------------
+
+export const groupMessages = sqliteTable(
+  "group_messages",
+  {
+    id: id(),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activities.id, { onDelete: "cascade" }),
+    senderId: text("sender_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    kind: text("kind", { enum: MESSAGE_KIND_VALUES }).notNull().default("text"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("group_messages_activity_id_created_at_idx").on(t.activityId, t.createdAt),
+    check("group_messages_content_length", sql`length(trim(${t.content})) between 1 and 2000`),
+  ],
+);
+
+/** Dernière lecture du groupe par chaque membre (messages non lus = plus récents que readAt). */
+export const groupChatReads = sqliteTable(
+  "group_chat_reads",
+  {
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activities.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    readAt: integer("read_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.activityId, t.userId] })],
+);
+
+// -----------------------------------------------------------------------------
 // Relations (pour les requêtes imbriquées : db.query.activities.findMany({ with: … }))
 // -----------------------------------------------------------------------------
 
@@ -394,6 +434,11 @@ export const blocksRelations = relations(blocks, ({ one }) => ({
   blocked: one(users, { fields: [blocks.blockedId], references: [users.id], relationName: "blocked" }),
 }));
 
+export const groupMessagesRelations = relations(groupMessages, ({ one }) => ({
+  activity: one(activities, { fields: [groupMessages.activityId], references: [activities.id] }),
+  sender: one(users, { fields: [groupMessages.senderId], references: [users.id] }),
+}));
+
 export const messagesRelations = relations(messages, ({ one }) => ({
   application: one(applications, { fields: [messages.applicationId], references: [applications.id] }),
   sender: one(users, { fields: [messages.senderId], references: [users.id] }),
@@ -409,6 +454,7 @@ export type PublicUser = Omit<User, "passwordHash">;
 export type Activity = typeof activities.$inferSelect;
 export type Application = typeof applications.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type GroupMessage = typeof groupMessages.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type ReportReason = (typeof REPORT_REASON_VALUES)[number];
 export type Gender = (typeof GENDER_VALUES)[number];

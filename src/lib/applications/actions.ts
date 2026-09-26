@@ -4,9 +4,10 @@ import { and, eq, gt, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { activities, applications, messages } from "@/db/schema";
+import { activities, applications } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { canJoinAudience } from "@/config/audience";
+import { postGroupSystemMessage } from "@/lib/messages/system";
 import { isBlockedBetween } from "@/lib/safety/queries";
 
 export type ApplicationActionResult = { ok: true } | { ok: false; error: string };
@@ -58,8 +59,8 @@ export async function applyToActivity(activityId: string): Promise<ApplicationAc
 /**
  * Le candidat retire sa candidature.
  * En attente : elle est simplement supprimée. Acceptée (désistement) : sa place est rendue, l'activité
- * se rouvre si elle était complète, et la conversation est conservée (close) avec un message
- * automatique qui prévient l'organisateur.
+ * se rouvre si elle était complète, le groupe de la séance est prévenu par un message automatique,
+ * et l'éventuelle conversation privée avec l'organisateur est conservée (close).
  */
 export async function withdrawApplication(applicationId: string): Promise<ApplicationActionResult> {
   const user = await getCurrentUser();
@@ -87,12 +88,12 @@ export async function withdrawApplication(applicationId: string): Promise<Applic
         })
         .where(eq(activities.id, application.activityId));
       await tx.update(applications).set({ status: "withdrawn" }).where(eq(applications.id, applicationId));
-      await tx.insert(messages).values({
-        applicationId,
-        senderId: user.id,
-        kind: "system",
-        content: `${user.username} a quitté la séance : sa place est de nouveau disponible.`,
-      });
+      await postGroupSystemMessage(
+        tx,
+        application.activityId,
+        user.id,
+        `${user.username} a quitté la séance : sa place est de nouveau disponible.`,
+      );
       return { ok: true };
     }
 
@@ -119,7 +120,7 @@ export async function respondToApplication(
   const result = await db.transaction(async (tx): Promise<ApplicationActionResult> => {
     const application = await tx.query.applications.findFirst({
       where: eq(applications.id, applicationId),
-      with: { activity: true },
+      with: { activity: true, applicant: { columns: { username: true } } },
     });
     // Même message si la candidature n'existe pas ou ne concerne pas une activité de l'utilisateur.
     if (!application || application.activity.creatorId !== user.id) {
@@ -155,14 +156,15 @@ export async function respondToApplication(
       .set({ status: decision })
       .where(and(eq(applications.id, applicationId), eq(applications.status, "pending")));
 
-    // Acceptation : la conversation s'ouvre avec un message automatique, qui notifie le participant.
+    // Acceptation : le participant rejoint la discussion de groupe de la séance ; le message
+    // automatique le notifie et présente le nouveau venu aux autres.
     if (decision === "accepted") {
-      await tx.insert(messages).values({
-        applicationId,
-        senderId: user.id,
-        kind: "system",
-        content: "Candidature acceptée ! Vous pouvez maintenant discuter pour vous organiser.",
-      });
+      await postGroupSystemMessage(
+        tx,
+        application.activityId,
+        user.id,
+        `${application.applicant.username} a rejoint la séance. Bienvenue !`,
+      );
     }
     return { ok: true };
   });

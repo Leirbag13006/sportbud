@@ -5,10 +5,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { activities, applications, messages } from "@/db/schema";
+import { activities, applications } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { canJoinAudience } from "@/config/audience";
 import { createActivitySchema } from "@/lib/validations/activity";
+import { postGroupSystemMessage } from "@/lib/messages/system";
 import { countUpcomingActivitiesByCreator } from "./queries";
 
 const AUDIENCE_GENDER_ERROR =
@@ -87,17 +88,16 @@ function acceptedApplications(activityId: string) {
     .where(and(eq(applications.activityId, activityId), eq(applications.status, "accepted")));
 }
 
-/** Prévient chaque participant accepté par un message automatique dans sa conversation. */
+/** Prévient les participants acceptés par un message automatique dans le groupe de la séance. */
 async function notifyParticipants(
   tx: Pick<typeof db, "insert">,
-  conversations: { id: string }[],
+  activityId: string,
+  accepted: { id: string }[],
   senderId: string,
   content: string,
 ) {
-  if (conversations.length === 0) return;
-  await tx
-    .insert(messages)
-    .values(conversations.map(({ id }) => ({ applicationId: id, senderId, kind: "system" as const, content })));
+  if (accepted.length === 0) return;
+  await postGroupSystemMessage(tx, activityId, senderId, content);
 }
 
 /**
@@ -169,6 +169,7 @@ export async function updateActivity(activityId: string, formData: FormData): Pr
     if (changes.length > 0) {
       await notifyParticipants(
         tx,
+        activityId,
         accepted,
         user.id,
         `L'organisateur a modifié la séance (${changes.join(", ")}). Vérifie les détails avant d'y aller !`,
@@ -198,7 +199,7 @@ export async function cancelActivity(activityId: string): Promise<ActivityAction
       .update(applications)
       .set({ status: "rejected" })
       .where(and(eq(applications.activityId, activityId), eq(applications.status, "pending")));
-    await notifyParticipants(tx, accepted, user.id, "Séance annulée par l'organisateur. Désolé pour le contretemps !");
+    await notifyParticipants(tx, activityId, accepted, user.id, "Séance annulée par l'organisateur. Désolé pour le contretemps !");
   });
 
   revalidatePath("/", "layout");
