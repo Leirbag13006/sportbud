@@ -19,7 +19,7 @@ import { Emoji, getEmojiSrc, SportIcon } from "@/components/brand/sport-icon";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { LEGAL_PAGES } from "@/config/legal";
-import { SPORTS } from "@/config/sports";
+import { SPORT_COUNT, SPORTS } from "@/config/sports";
 import type { SportType } from "@/db/schema";
 import { ProductPreview } from "./product-preview";
 import { Reveal } from "./reveal";
@@ -79,7 +79,7 @@ export function ShowcaseSection() {
         </Reveal>
         <ul className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-6 text-center md:grid-cols-4">
           {[
-            { value: "12", label: "sports, du foot à l'escalade" },
+            { value: String(SPORT_COUNT), label: "sports, du foot au yoga" },
             { value: "3", label: "niveaux, du débutant au confirmé" },
             { value: "0 €", label: "d'inscription, sans abonnement" },
             { value: "1 clic", label: "pour rejoindre une séance" },
@@ -360,7 +360,7 @@ export function SportsSection() {
       <Container>
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <Reveal>
-            <SectionTitle eyebrow={`${SPORTS.length} sports`} title="Ton sport," accent="ton rythme." mark="circle" />
+            <SectionTitle eyebrow={`${SPORT_COUNT} sports`} title="Ton sport," accent="ton rythme." mark="circle" />
           </Reveal>
           <Reveal delay={100}>
             <Button variant="outline" nativeButton={false} render={<Link href="/register#acces" />}>
@@ -426,52 +426,6 @@ export function StorySection() {
             <span aria-hidden className="mt-1 block h-1 w-64 rounded-full bg-swoosh" />
           </p>
         </Reveal>
-      </Container>
-    </section>
-  );
-}
-
-const TESTIMONIALS = [
-  { name: "Camille, 24 ans", avatar: "/avatars/camille.run.webp", city: "Aix-en-Provence", text: "J'ai rejoint un footing sans connaître personne. En deux séances, j'avais déjà trouvé mon petit groupe du dimanche.", sport: "Running" },
-  { name: "Hugo, 29 ans", avatar: "/avatars/hugo.padel.webp", city: "Aix-en-Provence", text: "Le format est simple : je propose, les gens répondent, et on se retrouve sur le terrain. C'est exactement ce qu'il manquait.", sport: "Padel" },
-  { name: "Inès, 26 ans", avatar: "/avatars/ines.volley.webp", city: "Aix-en-Provence", text: "J'apprécie de pouvoir choisir une séance entre femmes quand j'en ai envie, sans que ce soit imposé dans tout le reste de l'app.", sport: "Volley" },
-];
-
-export function TestimonialsSection() {
-  return (
-    <section className="bg-sand-50 py-20 md:py-28">
-      <Container>
-        <Reveal>
-          <SectionTitle
-            eyebrow="Ils bougent avec nous"
-            title="Des rencontres qui restent"
-            accent="après le match."
-            mark="underline"
-            intro="Des séances locales, des profils authentiques et une communauté qui se retrouve vraiment."
-            center
-          />
-        </Reveal>
-        <ul className="mt-12 grid gap-4 md:grid-cols-3">
-          {TESTIMONIALS.map((testimonial, index) => (
-            <Reveal as="li" key={testimonial.name} delay={index * 100} className="rounded-card bg-card p-6 shadow-md">
-              <div className="flex items-center justify-between gap-3">
-                <Image
-                  src={testimonial.avatar}
-                  alt=""
-                  width={52}
-                  height={52}
-                  className="sl-photo size-13 shrink-0 rounded-full object-cover ring-2 ring-mint-500 ring-offset-2 ring-offset-card"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="font-display font-bold text-ink">{testimonial.name}</p>
-                  <p className="text-sm text-gray-400">{testimonial.city} · {testimonial.sport}</p>
-                </div>
-                <span className="text-sunset-500" aria-label="5 étoiles">★★★★★</span>
-              </div>
-              <p className="mt-5 text-pretty leading-relaxed">&ldquo;{testimonial.text}&rdquo;</p>
-            </Reveal>
-          ))}
-        </ul>
       </Container>
     </section>
   );

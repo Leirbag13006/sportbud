@@ -34,6 +34,9 @@ export const SPORTS: SportOption[] = [
   { value: "other", label: "Autre", image: "/sports/other.jpg", kind: "solo" },
 ];
 
+/** Nombre de sports proposés (hors « Autre »), affiché sur la landing. */
+export const SPORT_COUNT = SPORTS.filter((sport) => sport.value !== "other").length;
+
 const SPORTS_BY_VALUE = new Map(SPORTS.map((sport) => [sport.value, sport]));
 
 export function getSport(value: SportType): SportOption {

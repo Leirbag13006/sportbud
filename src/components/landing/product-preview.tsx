@@ -93,7 +93,7 @@ export function ProductPreview() {
         </span>
         <span className="mx-auto flex h-7 w-full max-w-xs items-center justify-center gap-1.5 rounded-md bg-night-800 text-xs text-white/60">
           <Lock className="size-3" />
-          sportmates.vercel.app
+          sport-mates.vercel.app
         </span>
         <span className="w-12" />
       </div>
