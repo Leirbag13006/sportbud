@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
 import { requireUser } from "@/lib/auth/session";
+import { getFirstName } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Bienvenue" };
 
@@ -13,7 +14,7 @@ export default async function WelcomePage() {
 
   return (
     <OnboardingWizard
-      firstName={user.fullName.split(" ")[0]!}
+      firstName={getFirstName(user)}
       initial={{ favoriteSports: user.favoriteSports, sportLevel: user.sportLevel }}
     />
   );

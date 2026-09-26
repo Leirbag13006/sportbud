@@ -14,6 +14,7 @@ import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { createSession, deleteSession, findUserByEmail, getCurrentUser, isUsernameTaken } from "@/lib/auth/session";
 import { sendEmail } from "@/lib/email";
 import { passwordResetEmail } from "@/lib/email/templates";
+import { getFirstName } from "@/lib/format";
 import {
   deleteAccountSchema,
   forgotPasswordSchema,
@@ -77,19 +78,17 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
 export async function register(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const raw = {
     username: String(formData.get("username") ?? ""),
-    fullName: String(formData.get("fullName") ?? ""),
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
-    sportLevel: String(formData.get("sportLevel") ?? ""),
   };
-  const values = { username: raw.username, fullName: raw.fullName, email: raw.email, sportLevel: raw.sportLevel };
+  const values = { username: raw.username, email: raw.email };
 
   const parsed = registerSchema.safeParse(raw);
   if (!parsed.success) {
     return { fieldErrors: z.flattenError(parsed.error).fieldErrors, values };
   }
 
-  const { username, fullName, email, password, sportLevel } = parsed.data;
+  const { username, email, password } = parsed.data;
   if (await findUserByEmail(email)) {
     return { fieldErrors: { email: ["Un compte existe déjà avec cet email."] }, values };
   }
@@ -99,7 +98,7 @@ export async function register(_prev: AuthFormState, formData: FormData): Promis
 
   const [user] = await db
     .insert(users)
-    .values({ username, fullName, email, sportLevel, passwordHash: await hashPassword(password) })
+    .values({ username, email, passwordHash: await hashPassword(password) })
     // Filet de sécurité si deux inscriptions simultanées utilisent le même email.
     .onConflictDoNothing({ target: users.email })
     .returning({ id: users.id });
@@ -127,7 +126,7 @@ export async function requestPasswordReset(_prev: AuthFormState, formData: FormD
     if (token) {
       const url = `${await getAppUrl()}/reset-password?token=${token}`;
       try {
-        await sendEmail({ to: user.email, ...passwordResetEmail({ firstName: user.fullName.split(" ")[0]!, url }) });
+        await sendEmail({ to: user.email, ...passwordResetEmail({ firstName: getFirstName(user), url }) });
       } catch (error) {
         console.error("[email] Échec de l'envoi du lien de réinitialisation", error);
         return { error: "L'e-mail n'a pas pu être envoyé. Réessaie dans quelques minutes.", values: raw };

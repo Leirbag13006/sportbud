@@ -42,7 +42,7 @@ export function ProfileForm({ user }: { user: EditableUser }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [username, setUsername] = useState(user.username);
-  const [fullName, setFullName] = useState(user.fullName);
+  const [fullName, setFullName] = useState(user.fullName ?? "");
   const [gender, setGender] = useState<Gender | "">(user.gender ?? "");
   const [bio, setBio] = useState(user.bio ?? "");
   const [favorites, setFavorites] = useState<SportType[]>(user.favoriteSports);
@@ -166,7 +166,7 @@ export function ProfileForm({ user }: { user: EditableUser }) {
               className="h-10"
             />
           </FormField>
-          <FormField id="fullName" label="Prénom" errors={errors.fullName} hint="Privé : pour s'adresser à toi.">
+          <FormField id="fullName" label="Prénom (facultatif)" errors={errors.fullName} hint="Privé : pour s'adresser à toi dans l'app et les e-mails.">
             <Input
               id="fullName"
               value={fullName}

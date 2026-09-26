@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { GENDER_VALUES, SPORT_LEVEL_VALUES } from "@/db/schema";
+import { GENDER_VALUES } from "@/db/schema";
 
 const email = z
   .string()
@@ -23,12 +23,13 @@ export const usernameSchema = z
   .regex(/^[a-zA-Z0-9._-]+$/, "Lettres sans accent, chiffres, « . », « _ » ou « - » uniquement.")
   .refine((value) => /[a-zA-Z]/.test(value), "Au moins une lettre.");
 
-/** Prénom (privé) : sert à s'adresser au membre. */
+/** Prénom (privé, facultatif) : sert à s'adresser au membre ; vide = non renseigné. */
 export const firstNameSchema = z
   .string()
   .trim()
-  .min(2, "Au moins 2 caractères.")
-  .max(80, "80 caractères maximum.");
+  .max(80, "80 caractères maximum.")
+  .refine((value) => value === "" || value.length >= 2, "Au moins 2 caractères.")
+  .transform((value) => value || null);
 
 /** Genre (facultatif) : vide = non renseigné. */
 export const genderSchema = z
@@ -43,12 +44,11 @@ const newPassword = z
   .regex(/[a-zA-Z]/, "Au moins une lettre.")
   .regex(/\d/, "Au moins un chiffre.");
 
+/** Inscription minimale : le niveau et les sports sont demandés juste après, dans le parcours d'accueil. */
 export const registerSchema = z.object({
   username: usernameSchema,
-  fullName: firstNameSchema,
   email,
   password: newPassword,
-  sportLevel: z.enum(SPORT_LEVEL_VALUES, "Choisis ton niveau."),
 });
 
 export const forgotPasswordSchema = z.object({ email });

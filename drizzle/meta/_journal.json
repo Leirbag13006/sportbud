@@ -71,6 +71,13 @@
       "when": 1790444141640,
       "tag": "0009_withdrawn_login_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1790444765768,
+      "tag": "0010_optional_first_name",
+      "breakpoints": true
     }
   ]
 }

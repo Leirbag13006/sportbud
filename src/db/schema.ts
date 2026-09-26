@@ -51,8 +51,8 @@ export const users = sqliteTable(
     id: id(),
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
-    /** Prénom (et nom) : privé, utilisé pour s'adresser au membre (accueil, e-mails). */
-    fullName: text("full_name").notNull(),
+    /** Prénom facultatif (privé) : pour s'adresser au membre (accueil, e-mails) ; à défaut, son pseudo. */
+    fullName: text("full_name"),
     /**
      * Pseudo public, unique (sans tenir compte de la casse) : seul nom affiché aux autres membres.
      * Format validé par Zod (3 à 20 caractères : lettres, chiffres, « . », « _ », « - »).
@@ -79,7 +79,7 @@ export const users = sqliteTable(
     uniqueIndex("users_email_unique").on(t.email),
     uniqueIndex("users_username_unique").on(sql`lower(${t.username})`),
     check("users_sport_level_check", sql`${t.sportLevel} in ${sqlList(SPORT_LEVEL_VALUES)}`),
-    check("users_full_name_length", sql`length(trim(${t.fullName})) between 2 and 80`),
+    check("users_full_name_length", sql`${t.fullName} is null or length(trim(${t.fullName})) between 2 and 80`),
     check("users_bio_length", sql`${t.bio} is null or length(${t.bio}) <= 500`),
   ],
 );

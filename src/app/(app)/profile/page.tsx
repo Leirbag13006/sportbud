@@ -65,10 +65,12 @@ export default async function ProfilePage() {
               </div>
               <RatingSummaryBadge rating={rating} />
               <ul className="space-y-1 text-sm">
-                <li className="flex items-center justify-center gap-2 sm:justify-start">
-                  <UserRound className="size-4 text-gray-400" aria-hidden />
-                  {user.fullName} <span className="text-xs text-gray-400">(privé)</span>
-                </li>
+                {user.fullName && (
+                  <li className="flex items-center justify-center gap-2 sm:justify-start">
+                    <UserRound className="size-4 text-gray-400" aria-hidden />
+                    {user.fullName} <span className="text-xs text-gray-400">(privé)</span>
+                  </li>
+                )}
                 <li className="flex items-center justify-center gap-2 sm:justify-start">
                   <Mail className="size-4 text-gray-400" aria-hidden />
                   {user.email} <span className="text-xs text-gray-400">(privé)</span>

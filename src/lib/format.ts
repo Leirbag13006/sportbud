@@ -3,6 +3,11 @@
 const dayFormatter = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 const timeFormatter = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
 
+/** Nom pour s'adresser au membre : son prénom s'il l'a renseigné, sinon son pseudo. */
+export function getFirstName(user: { fullName: string | null; username: string }) {
+  return user.fullName?.split(" ")[0] || user.username;
+}
+
 function isSameDay(a: Date, b: Date) {
   return a.toDateString() === b.toDateString();
 }
